@@ -20,7 +20,7 @@
 <body>
   <div class="container">
     <h1>Image → PDF Converter</h1>
-    <p>Select multiple images (PNG/JPG) and convert them into a single PDF directly in your browser.</p>
+    <p>Select multiple images (PNG/JPG) and convert them into a single PDF directly in your browser — fast, secure, and private.</p>
     <div class="drop" id="drop">
       <p>Drag & drop images here or</p>
       <button class="btn" id="pick">Select Images</button>
@@ -78,7 +78,7 @@
 
     generate.addEventListener('click', async () => {
       if(images.length === 0){
-        alert('Please select at least one image.');
+        alert('Please select at least one image before converting.');
         return;
       }
       const pdf = new jsPDF();
