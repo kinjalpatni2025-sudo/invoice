@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Text → PDF Converter — Smarttool Hub</title>
+  <style>
+    body{margin:0;font-family:Inter,system-ui,sans-serif;background:#0f1724;color:#fff;padding:20px}
+    h1{color:#0ea5a5;text-align:center}
+    .container{max-width:800px;margin:auto}
+    textarea{width:100%;height:300px;padding:10px;border-radius:6px;border:none;margin-top:10px;resize:vertical;font-size:16px}
+    .btn{margin-top:15px;background:linear-gradient(90deg,#0ea5a5,#60a5fa);padding:10px 15px;color:#022;font-weight:600;text-decoration:none;border:none;border-radius:8px;cursor:pointer;display:block;width:100%;max-width:200px;margin-left:auto;margin-right:auto}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Text → PDF Converter</h1>
+    <p style="text-align:center">Type or paste your text below and convert it into a PDF file instantly.</p>
+    <textarea id="textInput" placeholder="Enter your text here..."></textarea>
+    <button class="btn" id="generate">Convert to PDF</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const { jsPDF } = window.jspdf;
+    document.getElementById('generate').addEventListener('click', () => {
+      const text = document.getElementById('textInput').value;
+      if(!text.trim()){
+        alert('Please enter some text first.');
+        return;
+      }
+      const pdf = new jsPDF();
+      const splitText = pdf.splitTextToSize(text, 180);
+      pdf.text(splitText, 10, 10);
+      pdf.save('text.pdf');
+    });
+  </script>
+</body>
+</html>
