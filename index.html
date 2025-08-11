@@ -7,9 +7,16 @@
   <meta name="description" content="Smarttool Hub - All-in-one free online PDF tools like iLovePDF style. Convert, organize, edit, protect your PDFs." />
   <style>
     body{margin:0;font-family:Arial,sans-serif;background:#f9f9f9;color:#333}
-    header{background:#b91c1c;color:#fff;text-align:center;padding:40px 20px}
-    header h1{margin:0;font-size:2.5rem}
-    header p{margin:10px 0 0;font-size:1.1rem}
+    header{background:#fff;color:#000;display:flex;align-items:center;justify-content:space-between;padding:10px 20px;box-shadow:0 2px 6px rgba(0,0,0,0.1)}
+    header .logo{display:flex;align-items:center;gap:10px;font-size:1.5rem;font-weight:bold;color:#b91c1c}
+    nav{display:flex;gap:20px;align-items:center}
+    nav a{color:#000;text-decoration:none;font-weight:500}
+    nav a:hover{color:#b91c1c}
+    .dropdown{position:relative}
+    .dropdown-content{display:none;position:absolute;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.15);padding:10px;top:100%;left:0;z-index:100}
+    .dropdown:hover .dropdown-content{display:block}
+    .dropdown-content a{display:block;padding:5px 10px;color:#000;text-decoration:none;white-space:nowrap}
+    .dropdown-content a:hover{background:#f0f0f0}
     .category{margin:40px auto;max-width:1200px;padding:0 20px}
     .category h2{color:#b91c1c;margin-bottom:20px;font-size:1.8rem}
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px}
@@ -27,8 +34,36 @@
 </head>
 <body>
   <header>
-    <h1>Smarttool Hub</h1>
-    <p>All your essential PDF tools in one place — fast, free, and easy to use.</p>
+    <div class="logo">
+      <img src="https://img.icons8.com/color/48/like--v1.png" alt="Logo" style="height:32px;"> PDF
+    </div>
+    <nav>
+      <a href="#">MERGE PDF</a>
+      <a href="#">SPLIT PDF</a>
+      <a href="#">COMPRESS PDF</a>
+      <div class="dropdown">
+        <a href="#">CONVERT PDF ▾</a>
+        <div class="dropdown-content">
+          <a href="#">PDF to Word</a>
+          <a href="#">Word to PDF</a>
+          <a href="#">PDF to PowerPoint</a>
+          <a href="#">PowerPoint to PDF</a>
+          <a href="#">PDF to Excel</a>
+          <a href="#">Excel to PDF</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <a href="#">ALL PDF TOOLS ▾</a>
+        <div class="dropdown-content">
+          <a href="#">Edit PDF</a>
+          <a href="#">Unlock PDF</a>
+          <a href="#">Protect PDF</a>
+          <a href="#">Rotate PDF</a>
+        </div>
+      </div>
+      <a href="#">Login</a>
+      <a href="#" style="background:#b91c1c;color:#fff;padding:5px 10px;border-radius:4px;">Sign up</a>
+    </nav>
   </header>
 
   <main>
