@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Smarttool Hub — All Free Online Tools</title>
-<meta name="description" content="Use 30+ free online tools like PDF converters, image editors, QR tools, text utilities, and more — all working directly in your browser.">
+<meta name="description" content="Access 30+ free online tools including PDF converters, image editors, QR utilities, and text tools — all running in your browser.">
 <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/toolbox.png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
@@ -13,16 +13,18 @@ header{background:linear-gradient(90deg,#0ea5a5,#0b1220);padding:15px 20px;displ
 header .logo{display:flex;align-items:center;gap:10px}
 header .logo img{width:40px;height:40px;border-radius:8px}
 header h1{margin:0;font-size:1.6rem;color:#fff}
-header .tagline{color:#d1fae5;font-size:0.95rem;margin-top:2px}
-.search-box{flex:1;max-width:300px;display:flex;align-items:center;gap:8px;margin-top:8px}
-.search-box input{flex:1;padding:8px 10px;border-radius:20px;border:none;outline:none;font-size:14px}
-.search-box button{background:#0ea5a5;border:none;padding:8px 12px;border-radius:50%;color:#fff;cursor:pointer}
+header .tagline{color:#d1fae5;font-size:0.95rem;margin-top:2px;font-style:italic}
+.search-box{flex:1;max-width:320px;position:relative;margin-top:8px}
+.search-box input{width:100%;padding:8px 12px;border-radius:20px;border:none;outline:none;font-size:14px}
+.suggestions{position:absolute;top:38px;left:0;right:0;background:#162032;border-radius:8px;max-height:200px;overflow-y:auto;display:none;z-index:1001}
+.suggestions div{padding:8px 12px;cursor:pointer;color:#d1d5db}
+.suggestions div:hover{background:#0ea5a5;color:#fff}
 .container{max-width:1200px;margin:0 auto;padding:20px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:20px}
 .tool{background:#0b1220;padding:15px;border-radius:10px;text-align:center;transition:0.3s;cursor:pointer}
 .tool:hover{background:#162032;transform:translateY(-4px);box-shadow:0 4px 10px rgba(0,0,0,0.5)}
 .tool i{font-size:28px;color:#0ea5a5;margin-bottom:8px}
-.tool span{display:block;margin-top:6px;color:#ddd;font-size:14px}
+.tool span{display:block;margin-top:6px;color:#ddd;font-size:14px;font-weight:500}
 footer{background:linear-gradient(90deg,#0b1220,#0ea5a5);color:#94a3b8;text-align:center;padding:20px;margin-top:30px;font-size:13px;box-shadow:0 -2px 8px rgba(0,0,0,0.3)}
 footer a{color:#fff;text-decoration:none;font-weight:bold}
 </style>
@@ -33,55 +35,78 @@ footer a{color:#fff;text-decoration:none;font-weight:bold}
     <img src="https://img.icons8.com/fluency/48/toolbox.png" alt="Smarttool Hub Logo">
     <div>
       <h1>Smarttool Hub</h1>
-      <div class="tagline">All Free Tools in One Place</div>
+      <div class="tagline">Powerful, Free, and Instant Tools for Everyone</div>
     </div>
   </div>
   <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Search tools...">
-    <button onclick="searchTools()"><i class="fa fa-search"></i></button>
+    <input type="text" id="searchInput" placeholder="Search tools..." onkeyup="showSuggestions()">
+    <div class="suggestions" id="suggestions"></div>
   </div>
 </header>
 <div class="container">
 <div class="grid" id="toolGrid">
-<div class="tool"><i class="fa-solid fa-file-pdf"></i><span>Image to PDF</span></div>
-<div class="tool"><i class="fa-solid fa-file-pdf"></i><span>Merge PDF</span></div>
-<div class="tool"><i class="fa-solid fa-scissors"></i><span>Split PDF</span></div>
-<div class="tool"><i class="fa-solid fa-compress"></i><span>Compress PDF</span></div>
-<div class="tool"><i class="fa-solid fa-rotate"></i><span>Rotate PDF</span></div>
-<div class="tool"><i class="fa-solid fa-lock-open"></i><span>Unlock PDF</span></div>
-<div class="tool"><i class="fa-solid fa-lock"></i><span>Protect PDF</span></div>
-<div class="tool"><i class="fa-solid fa-pen"></i><span>Edit PDF</span></div>
-<div class="tool"><i class="fa-solid fa-image"></i><span>PDF to Image</span></div>
+<!-- Tools List -->
+<div class="tool"><i class="fa-solid fa-file-pdf"></i><span>Image to PDF Converter</span></div>
+<div class="tool"><i class="fa-solid fa-file-pdf"></i><span>Merge Multiple PDFs</span></div>
+<div class="tool"><i class="fa-solid fa-scissors"></i><span>Split PDF Pages</span></div>
+<div class="tool"><i class="fa-solid fa-compress"></i><span>Compress PDF Size</span></div>
+<div class="tool"><i class="fa-solid fa-rotate"></i><span>Rotate PDF Pages</span></div>
+<div class="tool"><i class="fa-solid fa-lock-open"></i><span>Unlock Protected PDF</span></div>
+<div class="tool"><i class="fa-solid fa-lock"></i><span>Password Protect PDF</span></div>
+<div class="tool"><i class="fa-solid fa-pen"></i><span>Edit PDF Online</span></div>
+<div class="tool"><i class="fa-solid fa-image"></i><span>Convert PDF to Image</span></div>
 <div class="tool"><i class="fa-solid fa-images"></i><span>Image to PNG/JPG</span></div>
-<div class="tool"><i class="fa-solid fa-image"></i><span>JPG to PNG</span></div>
-<div class="tool"><i class="fa-solid fa-image"></i><span>PNG to JPG</span></div>
-<div class="tool"><i class="fa-solid fa-expand"></i><span>Resize Image</span></div>
-<div class="tool"><i class="fa-solid fa-crop"></i><span>Crop Image</span></div>
-<div class="tool"><i class="fa-solid fa-repeat"></i><span>Flip/Rotate Image</span></div>
+<div class="tool"><i class="fa-solid fa-image"></i><span>JPG to PNG Converter</span></div>
+<div class="tool"><i class="fa-solid fa-image"></i><span>PNG to JPG Converter</span></div>
+<div class="tool"><i class="fa-solid fa-expand"></i><span>Resize Image Dimensions</span></div>
+<div class="tool"><i class="fa-solid fa-crop"></i><span>Crop Image Tool</span></div>
+<div class="tool"><i class="fa-solid fa-repeat"></i><span>Flip or Rotate Image</span></div>
 <div class="tool"><i class="fa-solid fa-water"></i><span>Add Watermark to Image</span></div>
 <div class="tool"><i class="fa-solid fa-water"></i><span>Add Watermark to PDF</span></div>
-<div class="tool"><i class="fa-solid fa-sort"></i><span>PDF Page Reorder</span></div>
-<div class="tool"><i class="fa-solid fa-trash"></i><span>PDF Page Delete</span></div>
-<div class="tool"><i class="fa-solid fa-code"></i><span>HTML to PDF</span></div>
-<div class="tool"><i class="fa-solid fa-file-lines"></i><span>Text to PDF</span></div>
-<div class="tool"><i class="fa-solid fa-eye-dropper"></i><span>Color Picker</span></div>
+<div class="tool"><i class="fa-solid fa-sort"></i><span>Reorder PDF Pages</span></div>
+<div class="tool"><i class="fa-solid fa-trash"></i><span>Delete PDF Pages</span></div>
+<div class="tool"><i class="fa-solid fa-code"></i><span>Convert HTML to PDF</span></div>
+<div class="tool"><i class="fa-solid fa-file-lines"></i><span>Text to PDF Converter</span></div>
+<div class="tool"><i class="fa-solid fa-eye-dropper"></i><span>Color Picker Tool</span></div>
 <div class="tool"><i class="fa-solid fa-qrcode"></i><span>QR Code Generator</span></div>
 <div class="tool"><i class="fa-solid fa-camera"></i><span>QR Code Scanner</span></div>
 <div class="tool"><i class="fa-solid fa-code"></i><span>Base64 Encode/Decode</span></div>
 <div class="tool"><i class="fa-solid fa-code"></i><span>URL Encode/Decode</span></div>
 <div class="tool"><i class="fa-solid fa-font"></i><span>Case Converter</span></div>
-<div class="tool"><i class="fa-solid fa-file-alt"></i><span>Word/Character Counter</span></div>
+<div class="tool"><i class="fa-solid fa-file-alt"></i><span>Word and Character Counter</span></div>
 <div class="tool"><i class="fa-solid fa-note-sticky"></i><span>Online Notepad</span></div>
-<div class="tool"><i class="fa-solid fa-code"></i><span>JSON Formatter</span></div>
-<div class="tool"><i class="fa-solid fa-table"></i><span>CSV to JSON</span></div>
-<div class="tool"><i class="fa-solid fa-table"></i><span>JSON to CSV</span></div>
-<div class="tool"><i class="fa-solid fa-wand-magic-sparkles"></i><span>Image Filter Tool</span></div>
+<div class="tool"><i class="fa-solid fa-code"></i><span>JSON Formatter and Validator</span></div>
+<div class="tool"><i class="fa-solid fa-table"></i><span>CSV to JSON Converter</span></div>
+<div class="tool"><i class="fa-solid fa-table"></i><span>JSON to CSV Converter</span></div>
+<div class="tool"><i class="fa-solid fa-wand-magic-sparkles"></i><span>Image Filter Effects</span></div>
 </div>
 </div>
 <footer>
-&copy; 2025 Smarttool Hub — All tools work in your browser. <a href="#">Privacy Policy</a> | <a href="#">Contact Us</a>
+&copy; 2025 Smarttool Hub — Your one-stop for all free online tools. <a href="#">Privacy Policy</a> | <a href="#">Contact Us</a>
 </footer>
 <script>
+const allTools = Array.from(document.querySelectorAll('#toolGrid .tool span')).map(t=>t.innerText);
+function showSuggestions(){
+  const input = document.getElementById('searchInput').value.toLowerCase();
+  const suggestionBox = document.getElementById('suggestions');
+  suggestionBox.innerHTML = '';
+  if(input){
+    const filtered = allTools.filter(tool=>tool.toLowerCase().includes(input));
+    filtered.forEach(tool=>{
+      const div = document.createElement('div');
+      div.innerText = tool;
+      div.onclick = ()=>{
+        document.getElementById('searchInput').value = tool;
+        searchTools();
+        suggestionBox.style.display = 'none';
+      };
+      suggestionBox.appendChild(div);
+    });
+    suggestionBox.style.display = filtered.length ? 'block' : 'none';
+  } else {
+    suggestionBox.style.display = 'none';
+  }
+}
 function searchTools(){
   const query = document.getElementById('searchInput').value.toLowerCase();
   const tools = document.querySelectorAll('#toolGrid .tool');
