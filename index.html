@@ -1,12 +1,13 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Smarttool Hub — All Free Online Tools</title>
-<meta name="description" content="Access 30+ free online tools including PDF converters, image editors, QR utilities, and text tools — all running in your browser.">
-<link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/toolbox.png">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<meta content="Access 30+ free online tools including PDF converters, image editors, QR utilities, and text tools — all running in your browser." name="description"/>
+<link href="https://img.icons8.com/fluency/48/toolbox.png" rel="icon" type="image/png"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
 <style>
 body{font-family:Arial, sans-serif;background:#121826;color:#fff;margin:0;padding:0}
 header{background:linear-gradient(90deg,#6366f1,#0ea5e9);padding:15px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:0 4px 12px rgba(0,0,0,0.4);position:sticky;top:0;z-index:1000}
@@ -32,58 +33,24 @@ footer a{color:#fff;text-decoration:none;font-weight:bold}
 </head>
 <body>
 <header>
-  <div class="logo">
-    <img src="https://img.icons8.com/fluency/48/toolbox.png" alt="Smarttool Hub Logo">
-    <div>
-      <h1>Smarttool Hub</h1>
-      <div class="tagline">Powerful, Free, and Instant Tools for Everyone</div>
-    </div>
-  </div>
-  <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Search tools..." onkeyup="showSuggestions()">
-    <button onclick="clearSearch()"><i class="fa fa-times"></i></button>
-    <div class="suggestions" id="suggestions"></div>
-  </div>
+<div class="logo">
+<img alt="Smarttool Hub Logo" src="https://img.icons8.com/fluency/48/toolbox.png"/>
+<div>
+<h1>Smarttool Hub</h1>
+<div class="tagline">Powerful, Free, and Instant Tools for Everyone</div>
+</div>
+</div>
+<div class="search-box">
+<input id="searchInput" onkeyup="showSuggestions()" placeholder="Search tools..." type="text"/>
+<button onclick="clearSearch()"><i class="fa fa-times"></i></button>
+<div class="suggestions" id="suggestions"></div>
+</div>
 </header>
 <div class="container">
-<div class="grid" id="toolGrid">
-<div class="tool"><i class="fa-solid fa-file-arrow-down"></i><span>Image to PDF Converter</span></div>
-<div class="tool"><i class="fa-solid fa-object-group"></i><span>Merge Multiple PDFs</span></div>
-<div class="tool"><i class="fa-solid fa-scissors"></i><span>Split PDF Pages</span></div>
-<div class="tool"><i class="fa-solid fa-file-zipper"></i><span>Compress PDF Size</span></div>
-<div class="tool"><i class="fa-solid fa-rotate"></i><span>Rotate PDF Pages</span></div>
-<div class="tool"><i class="fa-solid fa-lock-open"></i><span>Unlock Protected PDF</span></div>
-<div class="tool"><i class="fa-solid fa-lock"></i><span>Password Protect PDF</span></div>
-<div class="tool"><i class="fa-solid fa-pen-to-square"></i><span>Edit PDF Online</span></div>
-<div class="tool"><i class="fa-solid fa-image"></i><span>Convert PDF to Image</span></div>
-<div class="tool"><i class="fa-solid fa-images"></i><span>Image to PNG/JPG</span></div>
-<div class="tool"><i class="fa-solid fa-image"></i><span>JPG to PNG Converter</span></div>
-<div class="tool"><i class="fa-solid fa-image"></i><span>PNG to JPG Converter</span></div>
-<div class="tool"><i class="fa-solid fa-up-right-and-down-left-from-center"></i><span>Resize Image Dimensions</span></div>
-<div class="tool"><i class="fa-solid fa-crop"></i><span>Crop Image Tool</span></div>
-<div class="tool"><i class="fa-solid fa-repeat"></i><span>Flip or Rotate Image</span></div>
-<div class="tool"><i class="fa-solid fa-droplet"></i><span>Add Watermark to Image</span></div>
-<div class="tool"><i class="fa-solid fa-droplet"></i><span>Add Watermark to PDF</span></div>
-<div class="tool"><i class="fa-solid fa-sort"></i><span>Reorder PDF Pages</span></div>
-<div class="tool"><i class="fa-solid fa-trash-can"></i><span>Delete PDF Pages</span></div>
-<div class="tool"><i class="fa-solid fa-code"></i><span>Convert HTML to PDF</span></div>
-<div class="tool"><i class="fa-solid fa-file-lines"></i><span>Text to PDF Converter</span></div>
-<div class="tool"><i class="fa-solid fa-eye-dropper"></i><span>Color Picker Tool</span></div>
-<div class="tool"><i class="fa-solid fa-qrcode"></i><span>QR Code Generator</span></div>
-<div class="tool"><i class="fa-solid fa-camera"></i><span>QR Code Scanner</span></div>
-<div class="tool"><i class="fa-solid fa-code"></i><span>Base64 Encode/Decode</span></div>
-<div class="tool"><i class="fa-solid fa-code"></i><span>URL Encode/Decode</span></div>
-<div class="tool"><i class="fa-solid fa-font"></i><span>Case Converter</span></div>
-<div class="tool"><i class="fa-solid fa-file-alt"></i><span>Word and Character Counter</span></div>
-<div class="tool"><i class="fa-solid fa-note-sticky"></i><span>Online Notepad</span></div>
-<div class="tool"><i class="fa-solid fa-code"></i><span>JSON Formatter and Validator</span></div>
-<div class="tool"><i class="fa-solid fa-table"></i><span>CSV to JSON Converter</span></div>
-<div class="tool"><i class="fa-solid fa-table"></i><span>JSON to CSV Converter</span></div>
-<div class="tool"><i class="fa-solid fa-wand-magic-sparkles"></i><span>Image Filter Effects</span></div>
-</div>
+<div class="grid" id="toolGrid"><a class="tool" href="tools/image-to-pdf/index.html"><i class="fa-solid fa-file-arrow-down"></i><span>Image to PDF Converter</span></a><a class="tool" href="tools/pdf-merge/index.html"><i class="fa-solid fa-object-group"></i><span>Merge Multiple PDFs</span></a><a class="tool" href="tools/pdf-split/index.html"><i class="fa-solid fa-scissors"></i><span>Split PDF Pages</span></a><a class="tool" href="tools/pdf-compress/index.html"><i class="fa-solid fa-file-zipper"></i><span>Compress PDF Size</span></a><a class="tool" href="tools/pdf-rotate/index.html"><i class="fa-solid fa-rotate"></i><span>Rotate PDF Pages</span></a><a class="tool" href="tools/pdf-unlock/index.html"><i class="fa-solid fa-lock-open"></i><span>Unlock Protected PDF</span></a><a class="tool" href="tools/pdf-password/index.html"><i class="fa-solid fa-lock"></i><span>Password Protect PDF</span></a><a class="tool" href="tools/pdf-edit/index.html"><i class="fa-solid fa-pen-to-square"></i><span>Edit PDF Online</span></a><a class="tool" href="tools/pdf-to-image/index.html"><i class="fa-solid fa-image"></i><span>Convert PDF to Image</span></a><a class="tool" href="tools/image-to-png-jpg/index.html"><i class="fa-solid fa-images"></i><span>Image to PNG/JPG</span></a><a class="tool" href="tools/jpg-to-png/index.html"><i class="fa-solid fa-image"></i><span>JPG to PNG Converter</span></a><a class="tool" href="tools/png-to-jpg/index.html"><i class="fa-solid fa-image"></i><span>PNG to JPG Converter</span></a><a class="tool" href="tools/image-resize/index.html"><i class="fa-solid fa-up-right-and-down-left-from-center"></i><span>Resize Image Dimensions</span></a><a class="tool" href="tools/image-crop/index.html"><i class="fa-solid fa-crop"></i><span>Crop Image Tool</span></a><a class="tool" href="tools/image-flip-rotate/index.html"><i class="fa-solid fa-repeat"></i><span>Flip or Rotate Image</span></a><a class="tool" href="tools/image-watermark/index.html"><i class="fa-solid fa-droplet"></i><span>Add Watermark to Image</span></a><a class="tool" href="tools/pdf-watermark/index.html"><i class="fa-solid fa-droplet"></i><span>Add Watermark to PDF</span></a><a class="tool" href="tools/pdf-reorder/index.html"><i class="fa-solid fa-sort"></i><span>Reorder PDF Pages</span></a><a class="tool" href="tools/pdf-delete/index.html"><i class="fa-solid fa-trash-can"></i><span>Delete PDF Pages</span></a><a class="tool" href="tools/html-to-pdf/index.html"><i class="fa-solid fa-code"></i><span>Convert HTML to PDF</span></a><a class="tool" href="tools/text-to-pdf/index.html"><i class="fa-solid fa-file-lines"></i><span>Text to PDF Converter</span></a><a class="tool" href="tools/color-picker/index.html"><i class="fa-solid fa-eye-dropper"></i><span>Color Picker Tool</span></a><a class="tool" href="tools/qr-generator/index.html"><i class="fa-solid fa-qrcode"></i><span>QR Code Generator</span></a><a class="tool" href="tools/qr-scanner/index.html"><i class="fa-solid fa-camera"></i><span>QR Code Scanner</span></a><a class="tool" href="tools/base64/index.html"><i class="fa-solid fa-code"></i><span>Base64 Encode/Decode</span></a><a class="tool" href="tools/url-encode-decode/index.html"><i class="fa-solid fa-code"></i><span>URL Encode/Decode</span></a><a class="tool" href="tools/case-converter/index.html"><i class="fa-solid fa-font"></i><span>Case Converter</span></a><a class="tool" href="tools/word-char-counter/index.html"><i class="fa-solid fa-file-alt"></i><span>Word and Character Counter</span></a><a class="tool" href="tools/online-notepad/index.html"><i class="fa-solid fa-note-sticky"></i><span>Online Notepad</span></a><a class="tool" href="tools/json-formatter/index.html"><i class="fa-solid fa-code"></i><span>JSON Formatter and Validator</span></a><a class="tool" href="tools/csv-to-json/index.html"><i class="fa-solid fa-table"></i><span>CSV to JSON Converter</span></a><a class="tool" href="tools/json-to-csv/index.html"><i class="fa-solid fa-table"></i><span>JSON to CSV Converter</span></a><a class="tool" href="tools/image-effects/index.html"><i class="fa-solid fa-wand-magic-sparkles"></i><span>Image Filter Effects</span></a></div>
 </div>
 <footer>
-&copy; 2025 Smarttool Hub — Your one-stop for all free online tools. <a href="#">Privacy Policy</a> | <a href="#">Contact Us</a>
+© 2025 Smarttool Hub — Your one-stop for all free online tools. <a href="#">Privacy Policy</a> | <a href="#">Contact Us</a>
 </footer>
 <script>
 const allTools = Array.from(document.querySelectorAll('#toolGrid .tool span')).map(t=>t.innerText);
