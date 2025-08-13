@@ -1,1 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PDF to Word (Text Extract) — Smarttool Hub</title>
+  <meta name="description" content="Convert PDF to an editable Word document (DOC) — extract text from PDF and download a Word-friendly file. Client-side, private, and free." />
+  <meta name="keywords" content="pdf to word, pdf to doc, pdf text extract, convert pdf to word online, client-side pdf converter" />
+  <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/microsoft-word-2019.png" />
+  <style>
+    :root{ --bg:#0f1724; --card:#0b1220; --accent:#0ea5a5; --muted:#94a3b8; color-scheme: dark; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:#e6eef8;padding:18px;min-height:100vh;display:flex;align-items:center;justify-content:center}
+    .panel{width:100%;max-width:900px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:18px;border-radius:12px;box-shadow:0 10px 30px rgba(2,6,23,0.6)}
+    h1{margin:0;color:var(--accent);font-size:20px}
+    p.lead{color:var(--muted);margin:6px 0 14px}
+    .controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+    input[type=file]{display:none}
+    .btn{background:linear-gradient(90deg,var(--accent),#60a5fa);padding:10px 14px;border-radius:8px;border:0;color:#022;font-weight:700;cursor:pointer}
+    .secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);padding:8px;border-radius:8px}
+    .status{margin-left:auto;color:var(--muted);font-size:13px}
+    .preview{margin-top:14px;background:rgba(255,255,255,0.02);padding:12px;border-radius:8px;max-height:360px;overflow:auto;color:#e6eef8}
+    .preview pre{white-space:pre-wrap;word-break:break-word;font-family:inherit;font-size:14px;color:#e6eef8}
+    .hint{color:var(--muted);font-size:13px;margin-top:8px}
+    @media (max-width:700px){ .controls{flex-direction:column;align-items:stretch} .status{margin-left:0} }
+  </style>
+</head>
+<body>
+  <div class="panel" role="main">
+    <header>
+      <h1>PDF → Word (Editable)</h1>
+      <p class="lead">Extract text from PDF and download an editable Word-compatible <strong>.doc</strong> file. Processing happens in your browser — your files are never uploaded.</p>
+    </header>
+
+    <div class="controls" aria-label="Controls">
+      <label class="btn" for="pdfFile" title="Select PDF">
+        <input id="pdfFile" type="file" accept="application/pdf" />
+        <span style="pointer-events:none">Choose PDF</span>
+      </label>
+
+      <button id="extractBtn" class="btn secondary">Extract & Preview</button>
+      <button id="downloadBtn" class="btn" disabled>Download .doc</button>
+
+      <div class="status" id="status">No file chosen</div>
+    </div>
+
+    <div class="hint">Tip: For best results use text-based PDFs (not scanned images). If your PDF is scanned, use an OCR tool first.</div>
+
+    <section class="preview" id="preview" aria-live="polite">
+      <strong>Preview (extracted text will appear here)</strong>
+      <pre id="extractedText"></pre>
+    </section>
+  </div>
+
+  <!-- PDF.js (for extracting text). Using CDN. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+  <script>
+    // pdf.js worker
+    if(window['pdfjsLib']) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+    }
+
+    const pdfFileEl = document.getElementById('pdfFile');
+    const extractBtn = document.getElementById('extractBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const status = document.getElementById('status');
+    const extractedTextEl = document.getElementById('extractedText');
+
+    let lastExtractedHTML = '';
+    let lastFilename = '';
+
+    pdfFileEl.addEventListener('change', () => {
+      if(pdfFileEl.files && pdfFileEl.files.length){
+        status.textContent = pdfFileEl.files[0].name;
+        extractedTextEl.textContent = '';
+        downloadBtn.disabled = true;
+      } else {
+        status.textContent = 'No file chosen';
+      }
+    });
+
+    extractBtn.addEventListener('click', async () => {
+      const file = pdfFileEl.files && pdfFileEl.files[0];
+      if(!file){ alert('Please choose a PDF file first.'); return; }
+      status.textContent = 'Loading PDF…';
+      extractedTextEl.textContent = '';
+      downloadBtn.disabled = true;
+      lastExtractedHTML = '';
+      lastFilename = file.name.replace(/\.pdf$/i, '') || 'document';
+
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const maxPages = pdf.numPages;
+        status.textContent = `Extracting text — ${maxPages} page(s)`;
+        let fullText = '';
+        // iterate pages
+        for(let p=1; p<=maxPages; p++){
+          status.textContent = `Extracting page ${p} / ${maxPages}`;
+          const page = await pdf.getPage(p);
+          const textContent = await page.getTextContent();
+          const strings = textContent.items.map(item => item.str);
+          // join with spaces, keep line breaks between blocks
+          const pageText = strings.join(' ');
+          fullText += pageText + '\n\n';
+          // yield to UI
+          extractedTextEl.textContent = fullText;
+        }
+
+        // Basic cleanup: trim
+        fullText = fullText.trim();
+
+        // create simple HTML wrapper (Word will open HTML inside .doc)
+        const html = `
+          <!doctype html>
+          <html>
+          <head><meta charset="utf-8"><title>${escapeHtml(lastFilename)}</title></head>
+          <body>
+            <pre style="white-space:pre-wrap;font-family:Arial,Helvetica,sans-serif;font-size:12pt;line-height:1.4;">${escapeHtml(fullText)}</pre>
+          </body>
+          </html>
+        `;
+        lastExtractedHTML = html;
+        extractedTextEl.textContent = fullText || '(no text found on pages)';
+        status.textContent = 'Extraction complete';
+        downloadBtn.disabled = false;
+
+      } catch (err) {
+        console.error(err);
+        alert('Failed to extract text from PDF. The file may be scanned image PDF (no embedded text) or corrupted.');
+        status.textContent = 'Extraction failed';
+      }
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      if(!lastExtractedHTML){ alert('No extracted content to download. Click Extract & Preview first.'); return; }
+      // Create a blob of HTML and save as .doc (Word accepts HTML blobs)
+      const blob = new Blob([lastExtractedHTML], { type: 'application/msword' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${lastFilename}.doc`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      status.textContent = `Downloaded ${a.download}`;
+    });
+
+    function escapeHtml(s){
+      return (s+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // Optional: support paste or drag – basic UX
+    document.addEventListener('dragover', e => e.preventDefault());
+    document.addEventListener('drop', e => {
+      e.preventDefault();
+      const f = e.dataTransfer.files && e.dataTransfer.files[0];
+      if(f && f.type === 'application/pdf'){
+        pdfFileEl.files = e.dataTransfer.files;
+        pdfFileEl.dispatchEvent(new Event('change'));
+      }
+    });
+  </script>
+</body>
+</html>
 
