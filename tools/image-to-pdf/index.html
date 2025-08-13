@@ -1,64 +1,243 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Image to PDF Converter | Smarttool Hub</title>
-<meta name="description" content="Free online Image to PDF converter. Upload multiple images and convert them into a single PDF instantly.">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-body{font-family:Arial,sans-serif;background:#0f1724;color:#fff;text-align:center;padding:20px;}
-h1{color:#0ea5a5;}
-input,button{margin:10px;padding:10px;border-radius:6px;border:none;}
-button{background:#0ea5a5;color:#022;font-weight:bold;cursor:pointer;}
-button:hover{background:#14b8a6;color:#fff;}
-.preview img{max-width:150px;margin:5px;border:2px solid #0ea5a5;border-radius:4px;}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Image → PDF Converter — Smarttool Hub</title>
+  <meta name="description" content="Convert multiple PNG/JPG images into a single PDF — free, fast, secure. Add borders, colors, text, and custom margins to each page with live preview." />
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --accent:#0ea5a5; --muted:#94a3b8;
+      --glass:rgba(255,255,255,0.03)
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,'Noto Sans',sans-serif;background:var(--bg);color:#e6eef8;padding:18px}
+    h1{color:var(--accent);font-size:20px;margin:0 0 8px}
+    .container{max-width:980px;margin:0 auto}
+    .drop{border:2px dashed var(--glass);padding:18px;border-radius:10px;min-height:120px;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005))}
+    input[type=file]{display:none}
+    .btn{background:linear-gradient(90deg,var(--accent),#60a5fa);padding:10px 12px;border-radius:8px;border:0;color:#022;font-weight:600;cursor:pointer}
+    .small{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px;border-radius:8px;color:var(--muted);cursor:pointer}
+    .preview-list{display:flex;flex-wrap:wrap;gap:10px;padding-top:12px}
+    .thumb{width:120px;height:90px;border-radius:8px;overflow:hidden;background:#071428;display:flex;align-items:center;justify-content:center;position:relative}
+    .thumb img{max-width:100%;max-height:100%;object-fit:contain}
+    .thumb .meta{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,0.45);padding:3px 6px;border-radius:6px;font-size:11px}
+    .options{margin-top:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+    label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+    select,input[type=number],input[type=text],input[type=color]{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    footer.panel{margin-top:16px;display:flex;justify-content:space-between;gap:8px;align-items:center;color:var(--muted);font-size:13px}
+    @media (max-width:820px){.drop{min-height:140px}.thumb{width:90px;height:70px}}
+  </style>
 </head>
 <body>
-<h1><i class="fa-solid fa-file-pdf"></i> Image to PDF Converter</h1>
-<p>Select one or more images to convert into PDF</p>
-<input type="file" id="imageInput" accept="image/*" multiple>
-<br>
-<button id="convertBtn">Convert to PDF</button>
-<div class="preview" id="preview"></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script>
-const { jsPDF } = window.jspdf;
-const preview = document.getElementById('preview');
+  <div class="container">
+    <h1>Image → PDF Converter</h1>
+    <p style="color:var(--muted);margin:6px 0 12px">Select multiple PNG/JPG images, customize page borders, margins and text — preview live and download a single PDF. All processing happens locally in your browser.</p>
 
-imageInput.addEventListener('change', () => {
-  preview.innerHTML = '';
-  [...imageInput.files].forEach(file => {
-    const img = document.createElement('img');
-    img.src = URL.createObjectURL(file);
-    preview.appendChild(img);
-  });
-});
+    <div class="drop" id="drop">
+      <input type="file" id="files" accept="image/*" multiple />
+      <div style="text-align:center">
+        <strong>Drag & drop images here or</strong>
+        <div style="margin-top:8px;color:var(--muted)">PNG, JPG, JPEG — client-side conversion</div>
+        <div style="margin-top:12px"><button class="btn" id="pick">Select Images</button></div>
+      </div>
+    </div>
 
-convertBtn.addEventListener('click', () => {
-  if(!imageInput.files.length){alert('Please select at least one image');return;}
-  const pdf = new jsPDF();
-  let count = 0;
-  [...imageInput.files].forEach((file, i) => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      const img = new Image();
-      img.onload = () => {
-        const width = pdf.internal.pageSize.getWidth();
-        const height = (img.height * width) / img.width;
-        if(i>0) pdf.addPage();
-        pdf.addImage(img, 'JPEG', 0, 0, width, height);
-        count++;
-        if(count === imageInput.files.length){
-          pdf.save('converted.pdf');
+    <div class="preview-list" id="preview"></div>
+
+    <div class="options" aria-label="Options">
+      <div>
+        <label>Border color</label>
+        <input type="color" id="borderColor" value="#000000">
+      </div>
+      <div>
+        <label>Border thickness (px)</label>
+        <input type="number" id="borderThickness" value="2" min="0">
+      </div>
+      <div>
+        <label>Page background</label>
+        <input type="color" id="bgColor" value="#ffffff">
+      </div>
+      <div>
+        <label>Text (appears bottom)</label>
+        <input type="text" id="pageText" placeholder="Enter footer text">
+      </div>
+      <div>
+        <label>Text color</label>
+        <input type="color" id="textColor" value="#000000">
+      </div>
+      <div>
+        <label>Font size (pt)</label>
+        <input type="number" id="fontSize" value="14" min="6">
+      </div>
+      <div>
+        <label>Top margin (px)</label>
+        <input type="number" id="marginTop" value="10" min="0">
+      </div>
+      <div>
+        <label>Bottom margin (px)</label>
+        <input type="number" id="marginBottom" value="10" min="0">
+      </div>
+      <div>
+        <label>Left margin (px)</label>
+        <input type="number" id="marginLeft" value="10" min="0">
+      </div>
+      <div>
+        <label>Right margin (px)</label>
+        <input type="number" id="marginRight" value="10" min="0">
+      </div>
+    </div>
+
+    <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" id="generate">Convert to PDF</button>
+      <button class="small" id="clear">Clear</button>
+      <div style="flex:1"></div>
+      <div style="color:var(--muted);font-size:13px">Tip: Right-click thumbnail to remove. Drag to reorder on desktop.</div>
+    </div>
+
+    <footer class="panel">
+      <div>Made for GitHub Pages • Client-side • Free</div>
+      <div id="status"></div>
+    </footer>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const { jsPDF } = window.jspdf;
+    const filesEl = document.getElementById('files');
+    const pick = document.getElementById('pick');
+    const drop = document.getElementById('drop');
+    const preview = document.getElementById('preview');
+    const generate = document.getElementById('generate');
+    const clearBtn = document.getElementById('clear');
+    const status = document.getElementById('status');
+
+    const borderColor = document.getElementById('borderColor');
+    const borderThickness = document.getElementById('borderThickness');
+    const bgColor = document.getElementById('bgColor');
+    const pageText = document.getElementById('pageText');
+    const textColor = document.getElementById('textColor');
+    const fontSize = document.getElementById('fontSize');
+    const marginTop = document.getElementById('marginTop');
+    const marginBottom = document.getElementById('marginBottom');
+    const marginLeft = document.getElementById('marginLeft');
+    const marginRight = document.getElementById('marginRight');
+
+    let images = []; // { dataUrl, name }
+
+    // pick button
+    pick.addEventListener('click', () => filesEl.click());
+    filesEl.addEventListener('change', e => handleFilesList(Array.from(e.target.files || [])));
+
+    // drag & drop UI
+    ['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.style.borderColor = '#2b6a6a'; }));
+    ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.style.borderColor = 'transparent'; }));
+    drop.addEventListener('drop', e => {
+      e.preventDefault();
+      handleFilesList(Array.from(e.dataTransfer.files || []));
+    });
+
+    function handleFilesList(list){
+      const imgs = list.filter(f => f.type && f.type.startsWith('image/'));
+      imgs.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          images.push({ dataUrl: ev.target.result, name: file.name });
+          renderPreviews();
+        };
+        reader.readAsDataURL(file);
+      });
+      updateStatus();
+    }
+
+    function renderPreviews(){
+      preview.innerHTML = '';
+      images.forEach((imgObj, idx) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'thumb';
+        wrapper.draggable = true;
+        wrapper.dataset.index = idx;
+        wrapper.innerHTML = `<img src="${imgObj.dataUrl}" alt="${imgObj.name}"><div class="meta">${imgObj.name}</div>`;
+        // drag reorder (desktop)
+        wrapper.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', idx); });
+        wrapper.addEventListener('dragover', e => e.preventDefault());
+        wrapper.addEventListener('drop', e => {
+          const from = Number(e.dataTransfer.getData('text/plain'));
+          const to = Number(idx);
+          if(!isNaN(from)){
+            const moved = images.splice(from,1)[0];
+            images.splice(to,0,moved);
+            renderPreviews();
+          }
+        });
+        // right-click to remove
+        wrapper.addEventListener('contextmenu', e => { e.preventDefault(); images.splice(idx,1); renderPreviews(); updateStatus(); });
+        preview.appendChild(wrapper);
+      });
+    }
+
+    function updateStatus(){ status.textContent = `${images.length} image(s) selected`; }
+
+    // live preview adjustments: re-render previews when options change
+    [borderColor,borderThickness,bgColor,pageText,textColor,fontSize,marginTop,marginBottom,marginLeft,marginRight].forEach(el => {
+      el.addEventListener('input', renderPreviews);
+    });
+
+    clearBtn.addEventListener('click', () => { images = []; filesEl.value=''; renderPreviews(); updateStatus(); });
+
+    // Convert to PDF
+    generate.addEventListener('click', async () => {
+      if(images.length === 0){ alert('Please select at least one image.'); return; }
+      const pdf = new jsPDF({ unit: 'pt', format: 'a4' }); // using A4 pts by default
+      for(let i=0;i<images.length;i++){
+        const imgData = images[i].dataUrl;
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfW = pdf.internal.pageSize.getWidth();
+        const pdfH = pdf.internal.pageSize.getHeight();
+
+        // background
+        pdf.setFillColor(bgColor.value);
+        pdf.rect(0, 0, pdfW, pdfH, 'F');
+
+        // border
+        pdf.setDrawColor(borderColor.value);
+        pdf.setLineWidth(parseFloat(borderThickness.value) || 0);
+        pdf.rect(0, 0, pdfW, pdfH);
+
+        // compute image area based on margins
+        const left = parseFloat(marginLeft.value) || 0;
+        const right = parseFloat(marginRight.value) || 0;
+        const top = parseFloat(marginTop.value) || 0;
+        const bottom = parseFloat(marginBottom.value) || 0;
+        const availableW = pdfW - left - right;
+        const availableH = pdfH - top - bottom;
+
+        // fit image proportionally
+        const imgW = imgProps.width;
+        const imgH = imgProps.height;
+        const ratio = Math.min(availableW / imgW, availableH / imgH, 1);
+        const drawW = imgW * ratio;
+        const drawH = imgH * ratio;
+        const x = left + (availableW - drawW) / 2;
+        const y = top + (availableH - drawH) / 2;
+
+        pdf.addImage(imgData, imgProps.fileType === 'image/png' ? 'PNG' : 'JPEG', x, y, drawW, drawH);
+
+        // footer text
+        if(pageText.value.trim() !== ''){
+          pdf.setFontSize(parseInt(fontSize.value) || 12);
+          pdf.setTextColor(textColor.value);
+          pdf.text(pageText.value, pdfW / 2, pdfH - bottom / 2, { align: 'center' });
         }
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-});
-</script>
+
+        if(i < images.length - 1) pdf.addPage();
+      }
+
+      // save
+      const now = new Date();
+      const fname = `images-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.pdf`;
+      pdf.save(fname);
+    });
+  </script>
 </body>
 </html>
