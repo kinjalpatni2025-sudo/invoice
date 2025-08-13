@@ -4,20 +4,21 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Smarttool Hub — All PDF Tools</title>
+  <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/pdf.png">
   <meta name="description" content="Smarttool Hub - All-in-one free online PDF tools. Convert, organize, edit, protect your PDFs." />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body{margin:0;font-family:Arial,sans-serif;background:#0f1724;color:#fff;display:flex;flex-direction:column;min-height:100vh;}
-    header{background:#0ea5a5;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:10px 20px;}
-    header .logo{display:flex;align-items:center;gap:10px;font-size:1.5rem;font-weight:bold;color:#fff}
+    header{background:#fff;color:#000;display:flex;align-items:center;justify-content:space-between;padding:10px 20px;}
+    header .logo{display:flex;align-items:center;gap:10px;font-size:1.5rem;font-weight:bold;color:#000}
     nav{display:flex;gap:20px;align-items:center}
-    nav a{color:#fff;text-decoration:none;font-weight:500}
-    nav a:hover{color:#022}
+    nav a{color:#000;text-decoration:none;font-weight:500}
+    nav a:hover{color:#0ea5a5}
     .dropdown{position:relative}
-    .dropdown-content{display:none;position:absolute;background:#1e293b;box-shadow:0 2px 6px rgba(0,0,0,0.15);padding:10px;top:100%;left:0;z-index:100}
+    .dropdown-content{display:none;position:absolute;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.15);padding:10px;top:100%;left:0;z-index:100}
     .dropdown:hover .dropdown-content{display:block}
-    .dropdown-content a{display:block;padding:5px 10px;color:#fff;text-decoration:none;white-space:nowrap}
-    .dropdown-content a:hover{background:#0ea5a5;color:#022}
+    .dropdown-content a{display:block;padding:5px 10px;color:#000;text-decoration:none;white-space:nowrap}
+    .dropdown-content a:hover{background:#0ea5a5;color:#fff}
     .category{margin:40px auto;max-width:1200px;padding:0 20px}
     .category h2{color:#0ea5a5;margin-bottom:20px;font-size:1.8rem}
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px}
@@ -38,7 +39,7 @@
 </head>
 <body>
   <header>
-    <div class="logo"><i class="fa-solid fa-file-pdf"></i> Smarttool Hub</div>
+    <div class="logo"><img src="https://img.icons8.com/fluency/48/pdf.png" alt="logo"> Smarttool Hub</div>
     <nav>
       <a href="#">MERGE PDF</a>
       <a href="#">SPLIT PDF</a>
@@ -63,6 +64,8 @@
           <a href="#">Rotate PDF</a>
         </div>
       </div>
+      <a href="#">Login</a>
+      <a href="#" style="background:#e63946;color:#fff;padding:6px 12px;border-radius:4px;">Sign up</a>
     </nav>
   </header>
 
