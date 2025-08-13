@@ -8,24 +8,25 @@
 <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/toolbox.png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-body{font-family:Arial, sans-serif;background:#0f1724;color:#fff;margin:0;padding:0}
-header{background:linear-gradient(90deg,#0ea5a5,#0b1220);padding:15px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:0 4px 12px rgba(0,0,0,0.4);position:sticky;top:0;z-index:1000}
+body{font-family:Arial, sans-serif;background:#121826;color:#fff;margin:0;padding:0}
+header{background:linear-gradient(90deg,#6366f1,#0ea5e9);padding:15px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:0 4px 12px rgba(0,0,0,0.4);position:sticky;top:0;z-index:1000}
 header .logo{display:flex;align-items:center;gap:10px}
 header .logo img{width:40px;height:40px;border-radius:8px}
 header h1{margin:0;font-size:1.6rem;color:#fff}
-header .tagline{color:#d1fae5;font-size:0.95rem;margin-top:2px;font-style:italic}
-.search-box{flex:1;max-width:320px;position:relative;margin-top:8px}
+header .tagline{color:#e0f2fe;font-size:0.95rem;margin-top:2px;font-style:italic}
+.search-box{flex:1;max-width:350px;position:relative;margin-top:8px;display:flex;align-items:center;gap:5px}
 .search-box input{width:100%;padding:8px 12px;border-radius:20px;border:none;outline:none;font-size:14px}
-.suggestions{position:absolute;top:38px;left:0;right:0;background:#162032;border-radius:8px;max-height:200px;overflow-y:auto;display:none;z-index:1001}
+.search-box button{background:#ef4444;border:none;color:#fff;border-radius:50%;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.suggestions{position:absolute;top:38px;left:0;right:0;background:#1e293b;border-radius:8px;max-height:200px;overflow-y:auto;display:none;z-index:1001}
 .suggestions div{padding:8px 12px;cursor:pointer;color:#d1d5db}
 .suggestions div:hover{background:#0ea5a5;color:#fff}
 .container{max-width:1200px;margin:0 auto;padding:20px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:20px}
-.tool{background:#0b1220;padding:15px;border-radius:10px;text-align:center;transition:0.3s;cursor:pointer}
-.tool:hover{background:#162032;transform:translateY(-4px);box-shadow:0 4px 10px rgba(0,0,0,0.5)}
-.tool i{font-size:28px;color:#0ea5a5;margin-bottom:8px}
-.tool span{display:block;margin-top:6px;color:#ddd;font-size:14px;font-weight:500}
-footer{background:linear-gradient(90deg,#0b1220,#0ea5a5);color:#94a3b8;text-align:center;padding:20px;margin-top:30px;font-size:13px;box-shadow:0 -2px 8px rgba(0,0,0,0.3)}
+.tool{background:#1e293b;padding:15px;border-radius:10px;text-align:center;transition:0.3s;cursor:pointer}
+.tool:hover{background:#334155;transform:translateY(-4px);box-shadow:0 4px 10px rgba(0,0,0,0.5)}
+.tool i{font-size:28px;color:#0ea5e9;margin-bottom:8px}
+.tool span{display:block;margin-top:6px;color:#f1f5f9;font-size:14px;font-weight:500}
+footer{background:linear-gradient(90deg,#0f172a,#0ea5e9);color:#94a3b8;text-align:center;padding:20px;margin-top:30px;font-size:13px;box-shadow:0 -2px 8px rgba(0,0,0,0.3)}
 footer a{color:#fff;text-decoration:none;font-weight:bold}
 </style>
 </head>
@@ -40,31 +41,31 @@ footer a{color:#fff;text-decoration:none;font-weight:bold}
   </div>
   <div class="search-box">
     <input type="text" id="searchInput" placeholder="Search tools..." onkeyup="showSuggestions()">
+    <button onclick="clearSearch()"><i class="fa fa-times"></i></button>
     <div class="suggestions" id="suggestions"></div>
   </div>
 </header>
 <div class="container">
 <div class="grid" id="toolGrid">
-<!-- Tools List -->
-<div class="tool"><i class="fa-solid fa-file-pdf"></i><span>Image to PDF Converter</span></div>
-<div class="tool"><i class="fa-solid fa-file-pdf"></i><span>Merge Multiple PDFs</span></div>
+<div class="tool"><i class="fa-solid fa-file-arrow-down"></i><span>Image to PDF Converter</span></div>
+<div class="tool"><i class="fa-solid fa-object-group"></i><span>Merge Multiple PDFs</span></div>
 <div class="tool"><i class="fa-solid fa-scissors"></i><span>Split PDF Pages</span></div>
-<div class="tool"><i class="fa-solid fa-compress"></i><span>Compress PDF Size</span></div>
+<div class="tool"><i class="fa-solid fa-file-zipper"></i><span>Compress PDF Size</span></div>
 <div class="tool"><i class="fa-solid fa-rotate"></i><span>Rotate PDF Pages</span></div>
 <div class="tool"><i class="fa-solid fa-lock-open"></i><span>Unlock Protected PDF</span></div>
 <div class="tool"><i class="fa-solid fa-lock"></i><span>Password Protect PDF</span></div>
-<div class="tool"><i class="fa-solid fa-pen"></i><span>Edit PDF Online</span></div>
+<div class="tool"><i class="fa-solid fa-pen-to-square"></i><span>Edit PDF Online</span></div>
 <div class="tool"><i class="fa-solid fa-image"></i><span>Convert PDF to Image</span></div>
 <div class="tool"><i class="fa-solid fa-images"></i><span>Image to PNG/JPG</span></div>
 <div class="tool"><i class="fa-solid fa-image"></i><span>JPG to PNG Converter</span></div>
 <div class="tool"><i class="fa-solid fa-image"></i><span>PNG to JPG Converter</span></div>
-<div class="tool"><i class="fa-solid fa-expand"></i><span>Resize Image Dimensions</span></div>
+<div class="tool"><i class="fa-solid fa-up-right-and-down-left-from-center"></i><span>Resize Image Dimensions</span></div>
 <div class="tool"><i class="fa-solid fa-crop"></i><span>Crop Image Tool</span></div>
 <div class="tool"><i class="fa-solid fa-repeat"></i><span>Flip or Rotate Image</span></div>
-<div class="tool"><i class="fa-solid fa-water"></i><span>Add Watermark to Image</span></div>
-<div class="tool"><i class="fa-solid fa-water"></i><span>Add Watermark to PDF</span></div>
+<div class="tool"><i class="fa-solid fa-droplet"></i><span>Add Watermark to Image</span></div>
+<div class="tool"><i class="fa-solid fa-droplet"></i><span>Add Watermark to PDF</span></div>
 <div class="tool"><i class="fa-solid fa-sort"></i><span>Reorder PDF Pages</span></div>
-<div class="tool"><i class="fa-solid fa-trash"></i><span>Delete PDF Pages</span></div>
+<div class="tool"><i class="fa-solid fa-trash-can"></i><span>Delete PDF Pages</span></div>
 <div class="tool"><i class="fa-solid fa-code"></i><span>Convert HTML to PDF</span></div>
 <div class="tool"><i class="fa-solid fa-file-lines"></i><span>Text to PDF Converter</span></div>
 <div class="tool"><i class="fa-solid fa-eye-dropper"></i><span>Color Picker Tool</span></div>
@@ -114,6 +115,11 @@ function searchTools(){
     const name = tool.innerText.toLowerCase();
     tool.style.display = name.includes(query) ? 'block' : 'none';
   });
+}
+function clearSearch(){
+  document.getElementById('searchInput').value = '';
+  document.getElementById('suggestions').style.display = 'none';
+  searchTools();
 }
 </script>
 </body>
