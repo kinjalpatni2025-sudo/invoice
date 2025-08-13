@@ -1,17 +1,35 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Smarttool Hub — All PDF Tools</title>
-  <meta name="description" content="Smarttool Hub - All-in-one free online PDF tools. Convert, organize, edit, protect your PDFs." />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Smarttool Hub — Free Online PDF Tools</title>
+  <meta name="description" content="Smarttool Hub offers free online PDF tools to convert, merge, split, compress, edit and protect your PDF files instantly in your browser.">
+  <meta name="keywords" content="PDF tools, merge PDF, split PDF, convert PDF, compress PDF, edit PDF, protect PDF, unlock PDF">
+  <meta name="author" content="Smarttool Hub">
   <link rel="icon" href="https://img.icons8.com/color/48/toolbox.png" type="image/png">
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Smarttool Hub",
+    "url": "https://yourdomain.com",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://yourdomain.com/search?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+
   <style>
     body{margin:0;font-family:Arial,sans-serif;background:#e6f0ff;color:#333}
-    header{background:#003366;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:10px 20px;box-shadow:0 2px 6px rgba(0,0,0,0.1)}
+    header{background:#003366;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:10px 20px;flex-wrap:wrap}
     header .logo{display:flex;align-items:center;gap:10px;font-size:1.2rem;font-weight:bold;color:#fff;text-decoration:none}
     header .logo img{height:36px;width:36px}
-    nav{display:flex;gap:16px;align-items:center}
+    nav{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
     nav a{color:#fff;text-decoration:none;font-weight:600;font-size:0.95rem}
     nav a:hover{color:#ffcc00}
     .dropdown{position:relative}
@@ -36,25 +54,30 @@
     #embedArea{display:none;max-width:1200px;margin:40px auto;padding:0 20px}
     #embedArea h2{margin-bottom:10px;color:#003366}
     iframe{width:100%;height:640px;border:none;border-radius:8px;background:#fff;box-shadow:0 4px 16px rgba(2,6,23,0.06)}
-    footer{max-width:1200px;margin:30px auto;padding:0 20px;color:#475569;font-size:0.95rem;text-align:center}
-    @media (max-width:820px){ header{padding:12px} .hero{padding:26px} iframe{height:520px} }
+    footer{background:#003366;color:#fff;padding:20px 0;margin-top:40px}
+    .footer-container{max-width:1200px;margin:auto;padding:0 20px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:20px}
+    .footer-section h4{margin-bottom:10px;font-size:1.1rem}
+    .footer-section ul{list-style:none;padding:0;margin:0}
+    .footer-section ul li{margin-bottom:6px}
+    .footer-section ul li a{color:#fff;text-decoration:none;font-size:0.9rem}
+    .footer-section ul li a:hover{text-decoration:underline}
+    .footer-bottom{text-align:center;margin-top:20px;font-size:0.85rem;color:#ccc}
+    @media (max-width:820px){ header{padding:12px} .hero{padding:26px} iframe{height:520px} .footer-container{flex-direction:column;align-items:center} }
   </style>
 </head>
 <body>
   <header>
-    <a href="#" class="logo">
-      <img src="https://img.icons8.com/color/96/toolbox.png" alt="Smarttool Hub Logo">
+    <a href="#" class="logo" aria-label="Smarttool Hub Home">
+      <img src="https://img.icons8.com/color/96/toolbox.png" alt="Smarttool Hub Logo" loading="lazy">
       Smarttool Hub
     </a>
-
-    <nav>
+    <nav aria-label="Main navigation">
       <a href="#">MERGE PDF</a>
       <a href="#">SPLIT PDF</a>
       <a href="#">COMPRESS PDF</a>
-
       <div class="dropdown">
         <a href="#">CONVERT PDF ▾</a>
-        <div class="dropdown-content" aria-hidden="true">
+        <div class="dropdown-content">
           <a href="#">PDF to Word</a>
           <a href="#">Word to PDF</a>
           <a href="#">PDF to PowerPoint</a>
@@ -63,17 +86,15 @@
           <a href="#">Excel to PDF</a>
         </div>
       </div>
-
       <div class="dropdown">
         <a href="#">ALL PDF TOOLS ▾</a>
-        <div class="dropdown-content" aria-hidden="true">
+        <div class="dropdown-content">
           <a href="#">Edit PDF</a>
           <a href="#">Unlock PDF</a>
           <a href="#">Protect PDF</a>
           <a href="#">Rotate PDF</a>
         </div>
       </div>
-
       <a href="#">Login</a>
       <a href="#" style="background:#ffcc00;color:#003366;padding:6px 10px;border-radius:6px;">Sign up</a>
     </nav>
@@ -87,62 +108,70 @@
 
     <section class="category">
       <h2>Convert</h2>
-      <div class="grid" id="convertGrid"></div>
+      <div class="grid" id="convertGrid" aria-label="Convert Tools"></div>
     </section>
 
     <section class="category">
       <h2>Organize</h2>
-      <div class="grid" id="organizeGrid"></div>
+      <div class="grid" id="organizeGrid" aria-label="Organize Tools"></div>
     </section>
 
     <section class="category">
       <h2>Edit</h2>
-      <div class="grid" id="editGrid"></div>
+      <div class="grid" id="editGrid" aria-label="Edit Tools"></div>
     </section>
 
     <section class="category">
       <h2>Protect</h2>
-      <div class="grid" id="protectGrid"></div>
+      <div class="grid" id="protectGrid" aria-label="Protect Tools"></div>
     </section>
 
     <section id="embedArea">
       <h2 id="embedTitle"></h2>
-      <iframe id="toolFrame" srcdoc=""></iframe>
+      <iframe id="toolFrame" srcdoc="" title="Embedded Tool"></iframe>
       <div style="margin-top:10px;display:flex;gap:12px;align-items:center">
         <a id="openNew" href="#" target="_blank" class="btn">Open in new tab</a>
         <button id="closeEmbed" class="btn" style="background:#666">Close</button>
       </div>
     </section>
-
-    <footer>
-      © Smarttool Hub — All processing happens client-side unless a tool requires server-side. Add your tools under /tools/&lt;slug&gt;/index.html and update the categories array in this file.
-    </footer>
   </div>
 
+  <footer>
+    <div class="footer-container">
+      <div class="footer-section">
+        <h4>About</h4>
+        <p>Smarttool Hub provides free online tools to make working with PDFs simple and fast.</p>
+      </div>
+      <div class="footer-section">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="#">Home</a></li>
+          <li><a href="#">All Tools</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h4>Follow Us</h4>
+        <ul>
+          <li><a href="#">Facebook</a></li>
+          <li><a href="#">Twitter</a></li>
+          <li><a href="#">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      © <span id="year"></span> Smarttool Hub — All rights reserved.
+    </div>
+  </footer>
+
   <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
     const categories = {
       convert: [
         {title:'Image → PDF',desc:'Convert images to PDF.',path:'tools/image-to-pdf/index.html',icon:'https://img.icons8.com/fluency/96/pdf.png'},
-        {title:'Text → PDF',desc:'Convert text to PDF.',path:'tools/text-to-pdf/index.html',icon:'https://img.icons8.com/fluency/96/document.png'},
-        {title:'PDF → Word',desc:'Convert PDF to Word.',path:'tools/pdf-to-word/index.html',icon:'https://img.icons8.com/fluency/96/microsoft-word-2019.png'},
-        {title:'Word → PDF',desc:'Convert Word to PDF.',path:'tools/word-to-pdf/index.html',icon:'https://img.icons8.com/fluency/96/pdf-2.png'},
-        {title:'PDF → PowerPoint',desc:'Convert PDF to PPT.',path:'tools/pdf-to-ppt/index.html',icon:'https://img.icons8.com/fluency/96/microsoft-powerpoint-2019.png'},
-        {title:'PowerPoint → PDF',desc:'Convert PPT to PDF.',path:'tools/ppt-to-pdf/index.html',icon:'https://img.icons8.com/fluency/96/pdf-2.png'},
-        {title:'PDF → Excel',desc:'Convert PDF to Excel.',path:'tools/pdf-to-excel/index.html',icon:'https://img.icons8.com/fluency/96/microsoft-excel-2019.png'},
-        {title:'Excel → PDF',desc:'Convert Excel to PDF.',path:'tools/excel-to-pdf/index.html',icon:'https://img.icons8.com/fluency/96/pdf-2.png'}
-      ],
-      organize: [
-        {title:'Merge PDF',desc:'Merge multiple PDFs.',path:'tools/merge-pdf/index.html',icon:'https://img.icons8.com/fluency/96/merge-files.png'},
-        {title:'Split PDF',desc:'Split PDF into parts.',path:'tools/split-pdf/index.html',icon:'https://img.icons8.com/fluency/96/split-files.png'},
-        {title:'Rotate PDF',desc:'Rotate PDF pages.',path:'tools/rotate-pdf/index.html',icon:'https://img.icons8.com/fluency/96/rotate-right.png'}
-      ],
-      edit: [
-        {title:'Edit PDF',desc:'Edit PDF content.',path:'tools/edit-pdf/index.html',icon:'https://img.icons8.com/fluency/96/edit.png'},
-        {title:'Compress PDF',desc:'Reduce PDF file size.',path:'tools/compress-pdf/index.html',icon:'https://img.icons8.com/fluency/96/compress.png'}
-      ],
-      protect: [
-        {title:'Unlock PDF',desc:'Remove PDF password.',path:'tools/unlock-pdf/index.html',icon:'https://img.icons8.com/fluency/96/unlock.png'},
-        {title:'Protect PDF',desc:'Add password to PDF.',path:'tools/protect-pdf/index.html',icon:'https://img.icons8.com/fluency/96/lock-2.png'}
+        {title:'Text → PDF',desc:'Convert text to PDF.',path:'tools/text-to-pdf/index.html',icon:'https://img.icons8.com/fluency/96/document.png'}
       ]
     };
 
@@ -151,7 +180,7 @@
       tools.forEach(tool => {
         const card = document.createElement('div');
         card.className = 'card';
-        card.innerHTML = `<img src="${tool.icon}" alt="${tool.title}"><h3>${tool.title}</h3><p>${tool.desc}</p><a href="#" class="btn" data-path="${tool.path}" data-title="${tool.title}">Open</a>`;
+        card.innerHTML = `<img src="${tool.icon}" alt="${tool.title}" loading="lazy"><h3>${tool.title}</h3><p>${tool.desc}</p><a href="#" class="btn" data-path="${tool.path}" data-title="${tool.title}">Open</a>`;
         grid.appendChild(card);
       });
     }
@@ -173,18 +202,13 @@
         toolFrame.srcdoc = html;
         openNew.href = btn.dataset.path;
         embedArea.style.display = 'block';
-        setTimeout(()=> window.scrollTo({top:embedArea.offsetTop,behavior:'smooth'}),100);
-      }).catch(err=>{
-        toolFrame.srcdoc = `<div style="padding:24px;font-family:Arial;color:#333">Tool not found at <strong>${btn.dataset.path}</strong><br/>Make sure the file exists in your repo under that path.</div>`;
-        openNew.href = btn.dataset.path;
-        embedArea.style.display = 'block';
+        window.scrollTo({top:embedArea.offsetTop,behavior:'smooth'});
       });
     });
 
     closeEmbed.addEventListener('click', ()=>{
       embedArea.style.display = 'none';
       toolFrame.srcdoc = '';
-      window.scrollTo({top:0,behavior:'smooth'});
     });
   </script>
 </body>
