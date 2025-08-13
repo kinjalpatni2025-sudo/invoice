@@ -4,16 +4,18 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Smarttool Hub — All PDF Tools</title>
-  <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/pdf.png">
+  <link rel="icon" type="image/png" href="https://img.icons8.com/color/48/toolbox.png">
   <meta name="description" content="Smarttool Hub - All-in-one free online PDF tools. Convert, organize, edit, protect your PDFs." />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body{margin:0;font-family:Arial,sans-serif;background:#0f1724;color:#fff;display:flex;flex-direction:column;min-height:100vh;}
-    header{background:#fff;color:#000;display:flex;align-items:center;justify-content:space-between;padding:10px 20px;}
-    header .logo{display:flex;align-items:center;gap:10px;font-size:1.5rem;font-weight:bold;color:#000}
-    nav{display:flex;gap:20px;align-items:center}
+    header{background:#fff;color:#000;display:flex;align-items:center;justify-content:space-between;padding:10px 20px;gap:20px;flex-wrap:wrap;}
+    .logo{display:flex;align-items:center;gap:10px;font-size:1.5rem;font-weight:bold;color:#000}
+    nav{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
     nav a{color:#000;text-decoration:none;font-weight:500}
     nav a:hover{color:#0ea5a5}
+    .search-box{flex:1;display:flex;justify-content:center;}
+    .search-box input{padding:6px 10px;border:1px solid #ccc;border-radius:4px;width:100%;max-width:250px;}
     .dropdown{position:relative}
     .dropdown-content{display:none;position:absolute;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.15);padding:10px;top:100%;left:0;z-index:100}
     .dropdown:hover .dropdown-content{display:block}
@@ -39,30 +41,17 @@
 </head>
 <body>
   <header>
-    <div class="logo"><img src="https://img.icons8.com/fluency/48/pdf.png" alt="logo"> Smarttool Hub</div>
+    <div class="logo"><img src="https://img.icons8.com/color/48/toolbox.png" alt="logo"> Smarttool Hub</div>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search tools..." />
+    </div>
     <nav>
       <a href="#">MERGE PDF</a>
       <a href="#">SPLIT PDF</a>
       <a href="#">COMPRESS PDF</a>
       <div class="dropdown">
         <a href="#">CONVERT PDF ▾</a>
-        <div class="dropdown-content">
-          <a href="#">PDF to Word</a>
-          <a href="#">Word to PDF</a>
-          <a href="#">PDF to PowerPoint</a>
-          <a href="#">PowerPoint to PDF</a>
-          <a href="#">PDF to Excel</a>
-          <a href="#">Excel to PDF</a>
-        </div>
-      </div>
-      <div class="dropdown">
-        <a href="#">ALL PDF TOOLS ▾</a>
-        <div class="dropdown-content">
-          <a href="#">Edit PDF</a>
-          <a href="#">Unlock PDF</a>
-          <a href="#">Protect PDF</a>
-          <a href="#">Rotate PDF</a>
-        </div>
+        <div class="dropdown-content" id="convertDropdown"></div>
       </div>
       <a href="#">Login</a>
       <a href="#" style="background:#e63946;color:#fff;padding:6px 12px;border-radius:4px;">Sign up</a>
@@ -71,20 +60,8 @@
 
   <main>
     <section class="category">
-      <h2>Convert</h2>
-      <div class="grid" id="convertGrid"></div>
-    </section>
-    <section class="category">
-      <h2>Organize</h2>
-      <div class="grid" id="organizeGrid"></div>
-    </section>
-    <section class="category">
-      <h2>Edit</h2>
-      <div class="grid" id="editGrid"></div>
-    </section>
-    <section class="category">
-      <h2>Protect</h2>
-      <div class="grid" id="protectGrid"></div>
+      <h2>All Tools</h2>
+      <div class="grid" id="toolGrid"></div>
     </section>
     <section id="embedArea">
       <h2 id="embedTitle"></h2>
@@ -101,66 +78,77 @@
   </footer>
 
   <script>
-    const categories = {
-      convert: [
-        {title:'Image → PDF',desc:'Convert images to PDF.',path:'tools/image-to-pdf/index.html',icon:'https://img.icons8.com/fluency/96/pdf.png'},
-        {title:'Text → PDF',desc:'Convert text to PDF.',path:'tools/text-to-pdf/index.html',icon:'https://img.icons8.com/fluency/96/document.png'},
-        {title:'PDF → Word',desc:'Convert PDF to Word.',path:'tools/pdf-to-word/index.html',icon:'https://img.icons8.com/fluency/96/microsoft-word-2019.png'},
-        {title:'Word → PDF',desc:'Convert Word to PDF.',path:'tools/word-to-pdf/index.html',icon:'https://img.icons8.com/fluency/96/pdf-2.png'},
-        {title:'PDF → PowerPoint',desc:'Convert PDF to PPT.',path:'tools/pdf-to-ppt/index.html',icon:'https://img.icons8.com/fluency/96/microsoft-powerpoint-2019.png'},
-        {title:'PowerPoint → PDF',desc:'Convert PPT to PDF.',path:'tools/ppt-to-pdf/index.html',icon:'https://img.icons8.com/fluency/96/pdf-2.png'},
-        {title:'PDF → Excel',desc:'Convert PDF to Excel.',path:'tools/pdf-to-excel/index.html',icon:'https://img.icons8.com/fluency/96/microsoft-excel-2019.png'},
-        {title:'Excel → PDF',desc:'Convert Excel to PDF.',path:'tools/excel-to-pdf/index.html',icon:'https://img.icons8.com/fluency/96/pdf-2.png'}
-      ],
-      organize: [
-        {title:'Merge PDF',desc:'Merge multiple PDFs.',path:'tools/merge-pdf/index.html',icon:'https://img.icons8.com/fluency/96/merge-files.png'},
-        {title:'Split PDF',desc:'Split PDF into parts.',path:'tools/split-pdf/index.html',icon:'https://img.icons8.com/fluency/96/split-files.png'},
-        {title:'Rotate PDF',desc:'Rotate PDF pages.',path:'tools/rotate-pdf/index.html',icon:'https://img.icons8.com/fluency/96/rotate-right.png'}
-      ],
-      edit: [
-        {title:'Edit PDF',desc:'Edit PDF content.',path:'tools/edit-pdf/index.html',icon:'https://img.icons8.com/fluency/96/edit.png'},
-        {title:'Compress PDF',desc:'Reduce PDF file size.',path:'tools/compress-pdf/index.html',icon:'https://img.icons8.com/fluency/96/compress.png'}
-      ],
-      protect: [
-        {title:'Unlock PDF',desc:'Remove PDF password.',path:'tools/unlock-pdf/index.html',icon:'https://img.icons8.com/fluency/96/unlock.png'},
-        {title:'Protect PDF',desc:'Add password to PDF.',path:'tools/protect-pdf/index.html',icon:'https://img.icons8.com/fluency/96/lock-2.png'}
-      ]
-    };
+    const allTools = [
+      {title:'Image → PDF',desc:'Convert images to PDF.',path:'tools/image-to-pdf/index.html',icon:'https://img.icons8.com/fluency/96/pdf.png'},
+      {title:'Text → PDF',desc:'Convert text to PDF.',path:'tools/text-to-pdf/index.html',icon:'https://img.icons8.com/fluency/96/document.png'},
+      {title:'PDF → Word',desc:'Convert PDF to Word.',path:'tools/pdf-to-word/index.html',icon:'https://img.icons8.com/fluency/96/microsoft-word-2019.png'},
+      {title:'Word → PDF',desc:'Convert Word to PDF.',path:'tools/word-to-pdf/index.html',icon:'https://img.icons8.com/fluency/96/pdf-2.png'},
+      {title:'PDF → PowerPoint',desc:'Convert PDF to PPT.',path:'tools/pdf-to-ppt/index.html',icon:'https://img.icons8.com/fluency/96/microsoft-powerpoint-2019.png'},
+      {title:'PowerPoint → PDF',desc:'Convert PPT to PDF.',path:'tools/ppt-to-pdf/index.html',icon:'https://img.icons8.com/fluency/96/pdf-2.png'},
+      {title:'PDF → Excel',desc:'Convert PDF to Excel.',path:'tools/pdf-to-excel/index.html',icon:'https://img.icons8.com/fluency/96/microsoft-excel-2019.png'},
+      {title:'Excel → PDF',desc:'Convert Excel to PDF.',path:'tools/excel-to-pdf/index.html',icon:'https://img.icons8.com/fluency/96/pdf-2.png'},
+      {title:'Merge PDF',desc:'Merge multiple PDFs.',path:'tools/merge-pdf/index.html',icon:'https://img.icons8.com/fluency/96/merge-files.png'},
+      {title:'Split PDF',desc:'Split PDF into parts.',path:'tools/split-pdf/index.html',icon:'https://img.icons8.com/fluency/96/split-files.png'},
+      {title:'Rotate PDF',desc:'Rotate PDF pages.',path:'tools/rotate-pdf/index.html',icon:'https://img.icons8.com/fluency/96/rotate-right.png'},
+      {title:'Edit PDF',desc:'Edit PDF content.',path:'tools/edit-pdf/index.html',icon:'https://img.icons8.com/fluency/96/edit.png'},
+      {title:'Compress PDF',desc:'Reduce PDF file size.',path:'tools/compress-pdf/index.html',icon:'https://img.icons8.com/fluency/96/compress.png'},
+      {title:'Unlock PDF',desc:'Remove PDF password.',path:'tools/unlock-pdf/index.html',icon:'https://img.icons8.com/fluency/96/unlock.png'},
+      {title:'Protect PDF',desc:'Add password to PDF.',path:'tools/protect-pdf/index.html',icon:'https://img.icons8.com/fluency/96/lock-2.png'}
+    ];
 
-    function renderCategory(catId, tools){
-      const grid = document.getElementById(catId+'Grid');
-      tools.forEach(tool => {
+    const toolGrid = document.getElementById('toolGrid');
+    const convertDropdown = document.getElementById('convertDropdown');
+
+    allTools.forEach(tool => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `<img src="${tool.icon}" alt="${tool.title}"><h3>${tool.title}</h3><p>${tool.desc}</p><a href="#" class="btn" data-path="${tool.path}" data-title="${tool.title}">Open</a>`;
+      toolGrid.appendChild(card);
+
+      if(tool.title.includes('PDF →') || tool.title.includes('→ PDF')){
+        const link = document.createElement('a');
+        link.href = '#';
+        link.textContent = tool.title;
+        link.addEventListener('click', e => {
+          e.preventDefault();
+          openTool(tool);
+        });
+        convertDropdown.appendChild(link);
+      }
+    });
+
+    document.getElementById('searchInput').addEventListener('input', function(){
+      const query = this.value.toLowerCase();
+      toolGrid.innerHTML = '';
+      const results = allTools.filter(tool => tool.title.toLowerCase().includes(query));
+      results.forEach(tool => {
         const card = document.createElement('div');
         card.className = 'card';
         card.innerHTML = `<img src="${tool.icon}" alt="${tool.title}"><h3>${tool.title}</h3><p>${tool.desc}</p><a href="#" class="btn" data-path="${tool.path}" data-title="${tool.title}">Open</a>`;
-        grid.appendChild(card);
+        toolGrid.appendChild(card);
+      });
+    });
+
+    function openTool(tool){
+      document.getElementById('embedTitle').textContent = tool.title;
+      fetch(tool.path).then(r=>r.text()).then(html=>{
+        document.getElementById('toolFrame').srcdoc = html;
+        document.getElementById('openNew').href = tool.path;
+        document.getElementById('embedArea').style.display = 'block';
+        window.scrollTo({top:document.getElementById('embedArea').offsetTop,behavior:'smooth'});
       });
     }
-
-    Object.entries(categories).forEach(([cat, tools]) => renderCategory(cat, tools));
-
-    const embedArea = document.getElementById('embedArea');
-    const toolFrame = document.getElementById('toolFrame');
-    const embedTitle = document.getElementById('embedTitle');
-    const openNew = document.getElementById('openNew');
-    const closeEmbed = document.getElementById('closeEmbed');
 
     document.body.addEventListener('click', e => {
       const btn = e.target.closest('.btn');
       if(!btn || !btn.dataset.path) return;
       e.preventDefault();
-      embedTitle.textContent = btn.dataset.title;
-      fetch(btn.dataset.path).then(r=>r.text()).then(html=>{
-        toolFrame.srcdoc = html;
-        openNew.href = btn.dataset.path;
-        embedArea.style.display = 'block';
-        window.scrollTo({top:embedArea.offsetTop,behavior:'smooth'});
-      });
+      openTool({title: btn.dataset.title, path: btn.dataset.path});
     });
 
-    closeEmbed.addEventListener('click', ()=>{
-      embedArea.style.display = 'none';
-      toolFrame.srcdoc = '';
+    document.getElementById('closeEmbed').addEventListener('click', ()=>{
+      document.getElementById('embedArea').style.display = 'none';
+      document.getElementById('toolFrame').srcdoc = '';
     });
   </script>
 </body>
