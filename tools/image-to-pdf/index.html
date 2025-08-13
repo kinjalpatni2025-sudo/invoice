@@ -1,173 +1,168 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Image → PDF Converter — Smarttool Hub</title>
-  <meta name="description" content="Convert multiple PNG/JPG images into a single PDF — free, fast, secure. Add borders, colors, text, and custom margins to each page with live preview." />
-  <style>
-    body{margin:0;font-family:Inter,system-ui,sans-serif;background:#0f1724;color:#fff;padding:20px}
-    h1{color:#0ea5a5}
-    .container{max-width:900px;margin:auto}
-    .drop{border:2px dashed rgba(255,255,255,0.2);padding:20px;text-align:center;border-radius:8px;margin-top:20px}
-    input[type=file]{display:none}
-    .btn{background:linear-gradient(90deg,#0ea5a5,#60a5fa);padding:10px 15px;color:#022;font-weight:600;text-decoration:none;border:none;border-radius:8px;cursor:pointer}
-    .preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px}
-    .preview-item{position:relative;border-radius:4px;overflow:hidden}
-    .options{margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
-    label{display:block;margin-bottom:4px;color:#94a3b8}
-    input[type=color],input[type=number],input[type=text]{width:100%;padding:6px;border-radius:4px;border:none}
-    /* Delete button styles */
-    .delete-btn {
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      background: rgba(255,0,0,0.8);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 22px;
-      height: 22px;
-      cursor: pointer;
-      font-size: 14px;
-      line-height: 18px;
-      text-align: center;
-    }
-    .delete-btn:hover { background: red; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image to PDF Converter — Smarttool Hub</title>
+<meta name="description" content="Convert multiple PNG/JPG images into a PDF — maintain original size, auto margin, rotate images, and combine multiple per page. Free and secure.">
+<link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/toolbox.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+body{font-family:Arial,sans-serif;background:#121826;color:#fff;margin:0;padding:0}
+header{background:linear-gradient(90deg,#6366f1,#0ea5e9);padding:15px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.4)}
+header h1{margin:0;font-size:1.8rem;color:#fff}
+header p{margin:5px 0;color:#e0f2fe}
+.container{max-width:900px;margin:20px auto;padding:20px;background:#1e293b;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,0.5)}
+.drop{border:2px dashed rgba(255,255,255,0.2);padding:20px;text-align:center;border-radius:8px;margin-top:10px}
+input[type=file]{display:none}
+.btn{background:linear-gradient(90deg,#0ea5a5,#60a5fa);padding:10px 15px;color:#022;font-weight:600;text-decoration:none;border:none;border-radius:8px;cursor:pointer}
+.preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px;justify-content:center}
+.preview-item{position:relative;border-radius:4px;overflow:hidden;background:#0f172a;padding:5px}
+.options{margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+label{display:block;margin-bottom:4px;color:#94a3b8}
+select,input[type=color]{width:100%;padding:6px;border-radius:4px;border:none}
+.delete-btn,.rotate-btn{
+  position:absolute;top:5px;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:14px;line-height:20px;text-align:center
+}
+.delete-btn{right:5px}
+.rotate-btn{left:5px}
+.delete-btn:hover{background:red}
+.rotate-btn:hover{background:#0ea5e9}
+.back-home{display:inline-block;margin-bottom:10px;padding:8px 12px;background:#0ea5e9;color:#fff;border-radius:6px;text-decoration:none}
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>Image → PDF Converter</h1>
-    <p>Select multiple images (PNG/JPG), customize border, background color, thickness, text, margins for each page, and see a live preview before converting.</p>
-    <div class="drop" id="drop">
-      <p>Drag & drop images here or</p>
-      <button class="btn" id="pick">Select Images</button>
-      <input type="file" id="files" accept="image/*" multiple>
-    </div>
+<header>
+<h1><i class="fa-solid fa-file-arrow-down"></i> Image to PDF Converter</h1>
+<p>Maintain original size • Auto margin • Rotate • Multiple per page</p>
+</header>
+<div class="container">
+<a href="../../index.html" class="back-home"><i class="fa fa-arrow-left"></i> Back to Home</a>
 
-    <div class="options">
-      <div><label>Border Color</label><input type="color" id="borderColor" value="#000000"></div>
-      <div><label>Border Thickness (px)</label><input type="number" id="borderThickness" value="2" min="0"></div>
-      <div><label>Page Background Color</label><input type="color" id="bgColor" value="#ffffff"></div>
-      <div><label>Text to Add</label><input type="text" id="pageText" placeholder="Enter text"></div>
-      <div><label>Text Color</label><input type="color" id="textColor" value="#000000"></div>
-      <div><label>Font Size (pt)</label><input type="number" id="fontSize" value="14" min="6"></div>
-      <div><label>Top Margin (px)</label><input type="number" id="marginTop" value="10" min="0"></div>
-      <div><label>Bottom Margin (px)</label><input type="number" id="marginBottom" value="10" min="0"></div>
-      <div><label>Left Margin (px)</label><input type="number" id="marginLeft" value="10" min="0"></div>
-      <div><label>Right Margin (px)</label><input type="number" id="marginRight" value="10" min="0"></div>
-    </div>
+<div class="drop" id="drop">
+  <p>Drag & drop images here or</p>
+  <button class="btn" id="pick">Select Images</button>
+  <input type="file" id="files" accept="image/*" multiple>
+</div>
 
-    <div class="preview" id="preview"></div>
-    <button class="btn" id="generate" style="margin-top:20px">Convert to PDF</button>
+<div class="options">
+  <div>
+    <label>Images per page</label>
+    <select id="layout">
+      <option value="1">1 × 1</option>
+      <option value="4">2 × 2</option>
+      <option value="9">3 × 3</option>
+    </select>
   </div>
+  <div>
+    <label>Page Background Color</label>
+    <input type="color" id="bgColor" value="#ffffff">
+  </div>
+</div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script>
-    const { jsPDF } = window.jspdf;
-    const filesEl = document.getElementById('files');
-    const pickBtn = document.getElementById('pick');
-    const drop = document.getElementById('drop');
-    const preview = document.getElementById('preview');
-    const generate = document.getElementById('generate');
+<div class="preview" id="preview"></div>
+<button class="btn" id="generate" style="margin-top:20px">Convert to PDF</button>
+</div>
 
-    const borderColor = document.getElementById('borderColor');
-    const borderThickness = document.getElementById('borderThickness');
-    const bgColor = document.getElementById('bgColor');
-    const pageText = document.getElementById('pageText');
-    const textColor = document.getElementById('textColor');
-    const fontSize = document.getElementById('fontSize');
-    const marginTop = document.getElementById('marginTop');
-    const marginBottom = document.getElementById('marginBottom');
-    const marginLeft = document.getElementById('marginLeft');
-    const marginRight = document.getElementById('marginRight');
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const { jsPDF } = window.jspdf;
+const filesEl = document.getElementById('files');
+const pickBtn = document.getElementById('pick');
+const drop = document.getElementById('drop');
+const preview = document.getElementById('preview');
+const generate = document.getElementById('generate');
+const layoutSel = document.getElementById('layout');
+const bgColor = document.getElementById('bgColor');
 
-    let images = [];
+let images = [];
 
-    pickBtn.addEventListener('click', () => filesEl.click());
-    filesEl.addEventListener('change', handleFiles);
-    ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.style.borderColor='#0ea5a5'}));
-    ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.style.borderColor='rgba(255,255,255,0.2)'}));
-    drop.addEventListener('drop', e => {e.preventDefault();handleFilesList(Array.from(e.dataTransfer.files));});
+pickBtn.addEventListener('click', () => filesEl.click());
+filesEl.addEventListener('change', e => handleFilesList(Array.from(e.target.files)));
+['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.style.borderColor='#0ea5a5'}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.style.borderColor='rgba(255,255,255,0.2)'}));
+drop.addEventListener('drop', e => {e.preventDefault();handleFilesList(Array.from(e.dataTransfer.files));});
 
-    function handleFiles(e){handleFilesList(Array.from(e.target.files));}
+function handleFilesList(list){
+  const imageFiles = list.filter(f => f.type.startsWith('image/'));
+  imageFiles.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      images.push({src: ev.target.result, rotation: 0});
+      renderPreviews();
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
-    function handleFilesList(list){
-      const imageFiles = list.filter(f => f.type.startsWith('image/'));
-      imageFiles.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = ev => {
-          images.push(ev.target.result);
-          renderPreviews();
-        };
-        reader.readAsDataURL(file);
-      });
+function renderPreviews(){
+  preview.innerHTML = '';
+  images.forEach((imgObj, idx) => {
+    const img = new Image();
+    img.src = imgObj.src;
+    img.style.maxWidth = "150px";
+    img.style.transform = `rotate(${imgObj.rotation}deg)`;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'preview-item';
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'delete-btn';
+    delBtn.innerHTML = '&times;';
+    delBtn.onclick = () => { images.splice(idx, 1); renderPreviews(); };
+
+    const rotBtn = document.createElement('button');
+    rotBtn.className = 'rotate-btn';
+    rotBtn.innerHTML = '⟳';
+    rotBtn.onclick = () => { imgObj.rotation = (imgObj.rotation + 90) % 360; renderPreviews(); };
+
+    wrapper.appendChild(delBtn);
+    wrapper.appendChild(rotBtn);
+    wrapper.appendChild(img);
+    preview.appendChild(wrapper);
+  });
+}
+
+generate.addEventListener('click', () => {
+  if(images.length === 0){alert('Please select at least one image.');return;}
+  const perPage = parseInt(layoutSel.value);
+  const pdf = new jsPDF();
+  let pageImages = [];
+
+  images.forEach((imgObj, idx) => {
+    pageImages.push(imgObj);
+    if(pageImages.length === perPage || idx === images.length - 1){
+      addImagesToPDF(pdf, pageImages, perPage);
+      pageImages = [];
+      if(idx !== images.length - 1) pdf.addPage();
     }
+  });
 
-    function renderPreviews(){
-      preview.innerHTML = '';
-      images.forEach((src, idx) => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        const img = new Image();
-        img.onload = () => {
-          canvas.width = img.width;
-          canvas.height = img.height;
-          ctx.fillStyle = bgColor.value;
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(img, parseFloat(marginLeft.value), parseFloat(marginTop.value), canvas.width - parseFloat(marginLeft.value) - parseFloat(marginRight.value), canvas.height - parseFloat(marginTop.value) - parseFloat(marginBottom.value));
-          ctx.strokeStyle = borderColor.value;
-          ctx.lineWidth = parseFloat(borderThickness.value);
-          ctx.strokeRect(0, 0, canvas.width, canvas.height);
-          ctx.fillStyle = textColor.value;
-          ctx.font = `${fontSize.value}px Arial`;
-          ctx.textAlign = 'center';
-          ctx.fillText(pageText.value, canvas.width / 2, canvas.height - parseFloat(marginBottom.value) / 2);
-        };
-        img.src = src;
-        const wrapper = document.createElement('div');
-        wrapper.className = 'preview-item';
+  pdf.save('images.pdf');
+});
 
-        const delBtn = document.createElement('button');
-        delBtn.className = 'delete-btn';
-        delBtn.innerHTML = '&times;';
-        delBtn.onclick = () => {
-          images.splice(idx, 1);
-          renderPreviews();
-        };
+function addImagesToPDF(pdf, imgs, perPage){
+  const gridSize = Math.sqrt(perPage);
+  const pageW = pdf.internal.pageSize.getWidth();
+  const pageH = pdf.internal.pageSize.getHeight();
+  const cellW = pageW / gridSize;
+  const cellH = pageH / gridSize;
 
-        wrapper.appendChild(delBtn);
-        wrapper.appendChild(canvas);
-        preview.appendChild(wrapper);
-      });
-    }
+  pdf.setFillColor(bgColor.value);
+  pdf.rect(0, 0, pageW, pageH, 'F');
 
-    [borderColor,borderThickness,bgColor,pageText,textColor,fontSize,marginTop,marginBottom,marginLeft,marginRight].forEach(el => el.addEventListener('input', renderPreviews));
-
-    generate.addEventListener('click', async () => {
-      if(images.length === 0){alert('Please select at least one image before converting.');return;}
-      const pdf = new jsPDF();
-      for(let i=0;i<images.length;i++){
-        const img = images[i];
-        const imgProps = pdf.getImageProperties(img);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        pdf.setFillColor(bgColor.value);
-        pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
-        pdf.setDrawColor(borderColor.value);
-        pdf.setLineWidth(parseFloat(borderThickness.value));
-        pdf.rect(0, 0, pdfWidth, pdfHeight);
-        pdf.addImage(img, 'JPEG', parseFloat(marginLeft.value), parseFloat(marginTop.value), pdfWidth - parseFloat(marginLeft.value) - parseFloat(marginRight.value), pdfHeight - parseFloat(marginTop.value) - parseFloat(marginBottom.value));
-        if(pageText.value.trim() !== ''){
-          pdf.setFontSize(parseInt(fontSize.value));
-          pdf.setTextColor(textColor.value);
-          pdf.text(pageText.value, pdfWidth/2, pdfHeight - parseFloat(marginBottom.value) / 2, {align:'center'});
-        }
-        if(i < images.length - 1) pdf.addPage();
-      }
-      pdf.save('images.pdf');
-    });
-  </script>
+  imgs.forEach((imgObj, i) => {
+    const imgProps = pdf.getImageProperties(imgObj.src);
+    let iw = cellW;
+    let ih = (imgProps.height * iw) / imgProps.width;
+    if(ih > cellH){ ih = cellH; iw = (imgProps.width * ih) / imgProps.height; }
+    const col = i % gridSize;
+    const row = Math.floor(i / gridSize);
+    const x = col * cellW + (cellW - iw)/2;
+    const y = row * cellH + (cellH - ih)/2;
+    pdf.addImage(imgObj.src, 'JPEG', x, y, iw, ih, undefined, 'FAST', imgObj.rotation);
+  });
+}
+</script>
 </body>
 </html>
