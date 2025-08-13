@@ -3,155 +3,255 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Smarttool Hub — All PDF Tools</title>
-  <link rel="icon" type="image/png" href="https://img.icons8.com/color/48/toolbox.png">
-  <meta name="description" content="Smarttool Hub - All-in-one free online PDF tools. Convert, organize, edit, protect your PDFs." />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <title>Smarttool Hub — Free Browser Tools</title>
+  <meta name="description" content="Smarttool Hub — 33 free browser-only utilities: PDF, image, text, converters and handy dev tools. No server required for many tools." />
+  <link rel="icon" href="https://img.icons8.com/fluency/48/toolbox.png" />
   <style>
-    body{margin:0;font-family:Arial,sans-serif;background:#0f1724;color:#fff;display:flex;flex-direction:column;min-height:100vh;}
-    header{background:#0ea5a5;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:10px 20px;gap:20px;flex-wrap:wrap;box-shadow:0 2px 5px rgba(0,0,0,0.2);}
-    .logo{display:flex;align-items:center;gap:10px;font-size:1.5rem;font-weight:bold;color:#fff}
-    .headline{font-size:1rem;font-weight:500;margin-left:15px;color:#fff;opacity:0.9;}
-    nav{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
-    nav a{color:#fff;text-decoration:none;font-weight:500}
-    nav a:hover{color:#022}
-    .search-box{flex:1;display:flex;justify-content:center;max-width:300px;}
-    .search-box input{padding:8px 12px;border:none;border-radius:20px;width:100%;outline:none;font-size:0.95rem;box-shadow:0 2px 6px rgba(0,0,0,0.15);}
-    .dropdown{position:relative}
-    .dropdown-content{display:none;position:absolute;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.15);padding:10px;top:100%;left:0;z-index:100}
-    .dropdown:hover .dropdown-content{display:block}
-    .dropdown-content a{display:block;padding:5px 10px;color:#000;text-decoration:none;white-space:nowrap}
-    .dropdown-content a:hover{background:#0ea5a5;color:#fff}
-    .category{margin:40px auto;max-width:1200px;padding:0 20px}
-    .category h2{color:#0ea5a5;margin-bottom:20px;font-size:1.8rem}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px}
-    .card{background:#1e293b;padding:20px;border-radius:8px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.1);transition:transform 0.2s}
-    .card:hover{transform:translateY(-4px)}
-    .card img{width:64px;height:64px;margin-bottom:10px}
-    .card h3{margin:0 0 10px;font-size:1.1rem;color:#fff}
-    .card p{font-size:0.9rem;color:#cbd5e1;margin-bottom:12px}
-    .btn{display:inline-block;background:#0ea5a5;color:#022;padding:8px 14px;border-radius:6px;text-decoration:none;font-size:0.9rem;font-weight:bold}
-    .btn:hover{background:#14b8a6;color:#fff}
-    #embedArea{display:none;max-width:1200px;margin:40px auto;padding:0 20px}
-    #embedArea h2{margin-bottom:10px;color:#0ea5a5}
-    iframe{width:100%;height:600px;border:none;border-radius:8px;background:#fff}
-    footer{background:#0ea5a5;color:#fff;text-align:center;padding:15px 10px;font-size:0.9rem;}
-    footer a{color:#022;font-weight:bold;text-decoration:none;}
-    footer a:hover{text-decoration:underline;}
+    :root{
+      --bg:#0f1724; --panel:#0b1220; --accent:#0ea5a5; --muted:#94a3b8;
+      --card:#111827;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,'Noto Sans',sans-serif;background:var(--bg);color:#e6eef8;min-height:100vh;display:flex;flex-direction:column}
+    header{display:flex;align-items:center;gap:16px;padding:14px 20px;background:linear-gradient(90deg,var(--panel),#071428);box-shadow:0 6px 20px rgba(2,6,23,0.6)}
+    .logo{display:flex;align-items:center;gap:10px}
+    .logo img{width:40px;height:40px;border-radius:8px}
+    .brand{font-weight:700;color:var(--accent);font-size:1.15rem}
+    .headline{color:var(--muted);font-size:0.95rem;margin-left:8px}
+    .search-wrap{margin-left:auto;max-width:520px;flex:1;display:flex;justify-content:flex-end}
+    .search{width:100%;max-width:480px;display:flex;align-items:center;gap:8px;background:#071428;padding:6px;border-radius:999px;border:1px solid rgba(255,255,255,0.03)}
+    .search input{flex:1;background:transparent;border:0;color:inherit;padding:8px 10px;font-size:0.95rem;outline:none}
+    .search button{background:var(--accent);color:#022;border:none;padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:600}
+    main{flex:1;max-width:1200px;margin:22px auto;padding:0 18px;width:100%}
+    .top{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+    .kicker{color:var(--muted);font-size:0.95rem}
+    .tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:14px;border-radius:10px;min-height:140px;display:flex;flex-direction:column;gap:8px;box-shadow:0 8px 26px rgba(2,6,23,0.5)}
+    .card .icon{width:64px;height:64px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:6px}
+    .card h3{margin:0;font-size:1.02rem;color:#fff}
+    .card p{margin:0;color:var(--muted);font-size:0.88rem;flex:1}
+    .card .actions{display:flex;gap:8px;margin-top:8px}
+    .btn{background:linear-gradient(90deg,var(--accent),#60a5fa);color:#022;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:700;text-decoration:none}
+    .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+    #embedArea{display:none;margin-top:20px;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
+    #embedToolbar{display:flex;justify-content:space-between;align-items:center;padding:10px;background:#071428}
+    #embedFrame{width:100%;height:640px;border:none;display:block}
+    footer{padding:18px 20px;text-align:center;color:var(--muted);font-size:0.92rem;background:linear-gradient(90deg,#071428,#061021);margin-top:20px}
+    /* suggestions */
+    .suggestions{position:absolute;background:#071428;border:1px solid rgba(255,255,255,0.03);margin-top:6px;border-radius:8px;max-height:260px;overflow:auto;z-index:60;width:100%}
+    .suggestions button{display:block;width:100%;padding:10px;text-align:left;border:0;background:transparent;color:inherit;cursor:pointer}
+    .suggestions button:hover{background:rgba(255,255,255,0.02)}
+    @media (max-width:900px){ .search-wrap{order:3;width:100%;margin-top:10px} header{flex-wrap:wrap} }
   </style>
 </head>
 <body>
   <header>
-    <div class="logo"><img src="https://img.icons8.com/color/48/toolbox.png" alt="logo"> Smarttool Hub</div>
-    <div class="headline">All Free Tools in One Place</div>
-    <div class="search-box">
-      <input type="text" id="searchInput" placeholder="🔍 Search any tool..." />
-    </div>
-    <nav>
-      <a href="#">MERGE PDF</a>
-      <a href="#">SPLIT PDF</a>
-      <a href="#">COMPRESS PDF</a>
-      <div class="dropdown">
-        <a href="#">CONVERT PDF ▾</a>
-        <div class="dropdown-content" id="convertDropdown"></div>
+    <div class="logo">
+      <img src="https://img.icons8.com/fluency/48/toolbox.png" alt="Smarttool Hub logo">
+      <div>
+        <div class="brand">Smarttool Hub</div>
+        <div class="headline">All Free Tools in One Place</div>
       </div>
-      <a href="#">Login</a>
-      <a href="#" style="background:#e63946;color:#fff;padding:6px 12px;border-radius:4px;">Sign up</a>
-    </nav>
+    </div>
+
+    <div class="search-wrap" aria-hidden="false">
+      <div style="position:relative;width:100%">
+        <div class="search" role="search">
+          <input id="searchInput" type="search" placeholder="Search tools — e.g. 'merge', 'compress', 'image to pdf'…" aria-label="Search tools">
+          <button id="clearSearch" title="Clear">Clear</button>
+        </div>
+        <div id="suggestions" class="suggestions" style="display:none"></div>
+      </div>
+    </div>
   </header>
 
   <main>
-    <section class="category">
-      <h2>All Tools</h2>
-      <div class="grid" id="toolGrid"></div>
-    </section>
+    <div class="top">
+      <div class="kicker">Use any tool in your browser — client-side where possible. Click a card to open the tool below.</div>
+    </div>
+
+    <section id="toolGrid" class="tools-grid" aria-live="polite"></section>
+
     <section id="embedArea">
-      <h2 id="embedTitle"></h2>
-      <iframe id="toolFrame" srcdoc=""></iframe>
-      <div style="margin-top:10px">
-        <a id="openNew" href="#" target="_blank" class="btn">Open in new tab</a>
-        <button id="closeEmbed" class="btn" style="background:#666;color:#fff;">Close</button>
+      <div id="embedToolbar">
+        <strong id="embedTitle">Tool</strong>
+        <div>
+          <a id="openNew" class="btn secondary" target="_blank" rel="noopener">Open in new tab</a>
+          <button id="closeEmbed" class="btn secondary">Close</button>
+        </div>
       </div>
+      <iframe id="embedFrame" title="Tool preview"></iframe>
     </section>
   </main>
 
   <footer>
-    <p>© 2025 Smarttool Hub. All rights reserved. | <a href="#">Home</a> | <a href="#">All Tools</a></p>
+    © 2025 Smarttool Hub — Built for privacy: many tools run entirely in your browser. Add your custom domain in GitHub Pages settings.
   </footer>
 
   <script>
-    const allTools = [
-      {title:'Image → PDF',desc:'Convert images to PDF.',path:'tools/image-to-pdf/index.html',icon:'https://img.icons8.com/fluency/96/pdf.png'},
-      {title:'Text → PDF',desc:'Convert text to PDF.',path:'tools/text-to-pdf/index.html',icon:'https://img.icons8.com/fluency/96/document.png'},
-      {title:'PDF → Word',desc:'Convert PDF to Word.',path:'tools/pdf-to-word/index.html',icon:'https://img.icons8.com/fluency/96/microsoft-word-2019.png'},
-      {title:'Word → PDF',desc:'Convert Word to PDF.',path:'tools/word-to-pdf/index.html',icon:'https://img.icons8.com/fluency/96/pdf-2.png'},
-      {title:'PDF → PowerPoint',desc:'Convert PDF to PPT.',path:'tools/pdf-to-ppt/index.html',icon:'https://img.icons8.com/fluency/96/microsoft-powerpoint-2019.png'},
-      {title:'PowerPoint → PDF',desc:'Convert PPT to PDF.',path:'tools/ppt-to-pdf/index.html',icon:'https://img.icons8.com/fluency/96/pdf-2.png'},
-      {title:'PDF → Excel',desc:'Convert PDF to Excel.',path:'tools/pdf-to-excel/index.html',icon:'https://img.icons8.com/fluency/96/microsoft-excel-2019.png'},
-      {title:'Excel → PDF',desc:'Convert Excel to PDF.',path:'tools/excel-to-pdf/index.html',icon:'https://img.icons8.com/fluency/96/pdf-2.png'},
-      {title:'Merge PDF',desc:'Merge multiple PDFs.',path:'tools/merge-pdf/index.html',icon:'https://img.icons8.com/fluency/96/merge-files.png'},
-      {title:'Split PDF',desc:'Split PDF into parts.',path:'tools/split-pdf/index.html',icon:'https://img.icons8.com/fluency/96/split-files.png'},
-      {title:'Rotate PDF',desc:'Rotate PDF pages.',path:'tools/rotate-pdf/index.html',icon:'https://img.icons8.com/fluency/96/rotate-right.png'},
-      {title:'Edit PDF',desc:'Edit PDF content.',path:'tools/edit-pdf/index.html',icon:'https://img.icons8.com/fluency/96/edit.png'},
-      {title:'Compress PDF',desc:'Reduce PDF file size.',path:'tools/compress-pdf/index.html',icon:'https://img.icons8.com/fluency/96/compress.png'},
-      {title:'Unlock PDF',desc:'Remove PDF password.',path:'tools/unlock-pdf/index.html',icon:'https://img.icons8.com/fluency/96/unlock.png'},
-      {title:'Protect PDF',desc:'Add password to PDF.',path:'tools/protect-pdf/index.html',icon:'https://img.icons8.com/fluency/96/lock-2.png'}
+    // ====== TOOL LIST: slug must match folder in /tools/<slug>/index.html ======
+    const tools = [
+      {slug:'image-to-pdf', title:'Image → PDF', desc:'Convert PNG/JPG images into a single PDF.', icon:'https://img.icons8.com/fluency/96/pdf.png'},
+      {slug:'merge-pdf', title:'Merge PDF', desc:'Combine multiple PDF files into one.', icon:'https://img.icons8.com/fluency/96/merge-files.png'},
+      {slug:'split-pdf', title:'Split PDF', desc:'Split a PDF into multiple files or pages.', icon:'https://img.icons8.com/fluency/96/split-files.png'},
+      {slug:'compress-pdf', title:'Compress PDF', desc:'Reduce PDF file size with client-side compression.', icon:'https://img.icons8.com/fluency/96/compress.png'},
+      {slug:'rotate-pdf', title:'Rotate PDF', desc:'Rotate PDF pages clockwise or counterclockwise.', icon:'https://img.icons8.com/fluency/96/rotate-right.png'},
+      {slug:'unlock-pdf', title:'Unlock PDF', desc:'Remove known password from a PDF (user must provide it).', icon:'https://img.icons8.com/fluency/96/unlock.png'},
+      {slug:'protect-pdf', title:'Protect PDF', desc:'Add password protection to a PDF file.', icon:'https://img.icons8.com/fluency/96/lock-2.png'},
+      {slug:'edit-pdf', title:'Edit PDF', desc:'Add basic annotations: text, highlights, drawings.', icon:'https://img.icons8.com/fluency/96/edit.png'},
+      {slug:'pdf-to-image', title:'PDF → Image', desc:'Export PDF pages as PNG/JPG images.', icon:'https://img.icons8.com/fluency/96/image.png'},
+      {slug:'image-convert', title:'Image to PNG/JPG', desc:'Convert image formats (JPG ↔ PNG).', icon:'https://img.icons8.com/fluency/96/image-file.png'},
+
+      {slug:'jpg-to-png', title:'JPG → PNG', desc:'Convert JPG images to PNG format.', icon:'https://img.icons8.com/fluency/96/jpg.png'},
+      {slug:'png-to-jpg', title:'PNG → JPG', desc:'Convert PNG images to JPG format.', icon:'https://img.icons8.com/fluency/96/png.png'},
+      {slug:'resize-image', title:'Resize Image', desc:'Resize images to custom dimensions.', icon:'https://img.icons8.com/fluency/96/resize.png'},
+      {slug:'crop-image', title:'Crop Image', desc:'Crop images visually.', icon:'https://img.icons8.com/fluency/96/crop.png'},
+      {slug:'flip-rotate-image', title:'Flip/Rotate Image', desc:'Flip or rotate images.', icon:'https://img.icons8.com/fluency/96/rotate-left.png'},
+      {slug:'watermark-image', title:'Add Watermark to Image', desc:'Overlay watermark text or image.', icon:'https://img.icons8.com/fluency/96/watermark.png'},
+      {slug:'watermark-pdf', title:'Add Watermark to PDF', desc:'Add text/image watermark to PDF pages.', icon:'https://img.icons8.com/fluency/96/watermark.png'},
+
+      {slug:'pdf-page-reorder', title:'PDF Page Reorder', desc:'Reorder pages within a PDF.', icon:'https://img.icons8.com/fluency/96/sort.png'},
+      {slug:'pdf-page-delete', title:'PDF Page Delete', desc:'Delete pages from a PDF.', icon:'https://img.icons8.com/fluency/96/delete-page.png'},
+      {slug:'html-to-pdf', title:'HTML → PDF', desc:'Render basic HTML to PDF (client-side).', icon:'https://img.icons8.com/fluency/96/html-5.png'},
+      {slug:'text-to-pdf', title:'Text → PDF', desc:'Convert plain text into a PDF.', icon:'https://img.icons8.com/fluency/96/txt.png'},
+
+      {slug:'color-picker', title:'Color Picker', desc:'Pick color and get HEX/RGB values.', icon:'https://img.icons8.com/fluency/96/color-picker.png'},
+      {slug:'qr-generator', title:'QR Code Generator', desc:'Generate QR codes from text/URLs.', icon:'https://img.icons8.com/fluency/96/qr-code.png'},
+      {slug:'qr-scanner', title:'QR Scanner (Webcam)', desc:'Scan QR codes using your camera.', icon:'https://img.icons8.com/fluency/96/qr-code-scanner.png'},
+
+      {slug:'base64', title:'Base64 Encode/Decode', desc:'Encode or decode Base64 strings.', icon:'https://img.icons8.com/fluency/96/base64.png'},
+      {slug:'url-encode', title:'URL Encode/Decode', desc:'Encode or decode URLs.', icon:'https://img.icons8.com/fluency/96/link.png'},
+      {slug:'case-convert', title:'Case Converter', desc:'Uppercase, lowercase, title case.', icon:'https://img.icons8.com/fluency/96/case.png'},
+      {slug:'word-counter', title:'Word / Char Counter', desc:'Count words and characters from text.', icon:'https://img.icons8.com/fluency/96/characters.png'},
+      {slug:'notepad', title:'Online Notepad', desc:'Quick notepad that saves to local storage.', icon:'https://img.icons8.com/fluency/96/notepad.png'},
+
+      {slug:'json-formatter', title:'JSON Formatter/Validator', desc:'Format and validate JSON.', icon:'https://img.icons8.com/fluency/96/json.png'},
+      {slug:'csv-to-json', title:'CSV → JSON', desc:'Convert CSV files to JSON.', icon:'https://img.icons8.com/fluency/96/csv.png'},
+      {slug:'json-to-csv', title:'JSON → CSV', desc:'Convert JSON to CSV.', icon:'https://img.icons8.com/fluency/96/csv-2.png'},
+      {slug:'image-filters', title:'Image Filters', desc:'Apply simple filters: grayscale, blur, brightness.', icon:'https://img.icons8.com/fluency/96/adjust.png'}
     ];
 
-    const toolGrid = document.getElementById('toolGrid');
-    const convertDropdown = document.getElementById('convertDropdown');
-
-    allTools.forEach(tool => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.innerHTML = `<img src="${tool.icon}" alt="${tool.title}"><h3>${tool.title}</h3><p>${tool.desc}</p><a href="#" class="btn" data-path="${tool.path}" data-title="${tool.title}">Open</a>`;
-      toolGrid.appendChild(card);
-
-      if(tool.title.includes('PDF →') || tool.title.includes('→ PDF')){
-        const link = document.createElement('a');
-        link.href = '#';
-        link.textContent = tool.title;
-        link.addEventListener('click', e => {
-          e.preventDefault();
-          openTool(tool);
-        });
-        convertDropdown.appendChild(link);
-      }
+    // render grid
+    const grid = document.getElementById('toolGrid');
+    tools.forEach(t => {
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.innerHTML = `
+        <div class="icon"><img src="${t.icon}" alt="${t.title}" width="64" height="64"></div>
+        <h3>${t.title}</h3>
+        <p>${t.desc}</p>
+        <div class="actions">
+          <a href="#" class="btn" data-slug="${t.slug}" data-title="${t.title}">Open</a>
+          <a href="tools/${t.slug}/index.html" target="_blank" class="btn secondary">Open new</a>
+        </div>
+      `;
+      grid.appendChild(el);
     });
 
-    document.getElementById('searchInput').addEventListener('input', function(){
-      const query = this.value.toLowerCase();
-      toolGrid.innerHTML = '';
-      const results = allTools.filter(tool => tool.title.toLowerCase().includes(query));
-      results.forEach(tool => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `<img src="${tool.icon}" alt="${tool.title}"><h3>${tool.title}</h3><p>${tool.desc}</p><a href="#" class="btn" data-path="${tool.path}" data-title="${tool.title}">Open</a>`;
-        toolGrid.appendChild(card);
+    // search + suggestions
+    const searchInput = document.getElementById('searchInput');
+    const suggestionsEl = document.getElementById('suggestions');
+    const embedArea = document.getElementById('embedArea');
+    const embedFrame = document.getElementById('embedFrame');
+    const embedTitle = document.getElementById('embedTitle');
+    const openNew = document.getElementById('openNew');
+    const closeEmbed = document.getElementById('closeEmbed');
+
+    function showSuggestions(matches){
+      if(!matches.length){ suggestionsEl.style.display='none'; return; }
+      suggestionsEl.innerHTML = '';
+      matches.slice(0,8).forEach(m=>{
+        const btn = document.createElement('button');
+        btn.textContent = m.title;
+        btn.dataset.slug = m.slug;
+        btn.addEventListener('click', e => { e.preventDefault(); openToolBySlug(m.slug); suggestionsEl.style.display='none'; searchInput.value=''; });
+        suggestionsEl.appendChild(btn);
+      });
+      suggestionsEl.style.display = 'block';
+    }
+
+    searchInput.addEventListener('input', (e)=>{
+      const q = (e.target.value||'').trim().toLowerCase();
+      if(!q){ suggestionsEl.style.display='none'; renderGridAll(); return; }
+      const matches = tools.filter(t => (t.title + ' ' + t.desc).toLowerCase().includes(q));
+      showSuggestions(matches);
+      // update grid to show results
+      grid.innerHTML = '';
+      matches.forEach(t=>{
+        const el = document.createElement('div');
+        el.className='card';
+        el.innerHTML = `<div class="icon"><img src="${t.icon}" alt="${t.title}" width="64" height="64"></div><h3>${t.title}</h3><p>${t.desc}</p><div class="actions"><a href="#" class="btn" data-slug="${t.slug}" data-title="${t.title}">Open</a><a href="tools/${t.slug}/index.html" target="_blank" class="btn secondary">Open new</a></div>`;
+        grid.appendChild(el);
       });
     });
 
-    function openTool(tool){
-      document.getElementById('embedTitle').textContent = tool.title;
-      fetch(tool.path).then(r=>r.text()).then(html=>{
-        document.getElementById('toolFrame').srcdoc = html;
-        document.getElementById('openNew').href = tool.path;
-        document.getElementById('embedArea').style.display = 'block';
-        window.scrollTo({top:document.getElementById('embedArea').offsetTop,behavior:'smooth'});
+    document.addEventListener('click', (e)=>{
+      if(!e.target.closest('.suggestions') && e.target.id!=='searchInput') suggestionsEl.style.display='none';
+    });
+
+    function renderGridAll(){
+      grid.innerHTML = '';
+      tools.forEach(t=>{
+        const el = document.createElement('div');
+        el.className = 'card';
+        el.innerHTML = `<div class="icon"><img src="${t.icon}" alt="${t.title}" width="64" height="64"></div><h3>${t.title}</h3><p>${t.desc}</p><div class="actions"><a href="#" class="btn" data-slug="${t.slug}" data-title="${t.title}">Open</a><a href="tools/${t.slug}/index.html" target="_blank" class="btn secondary">Open new</a></div>`;
+        grid.appendChild(el);
       });
     }
 
-    document.body.addEventListener('click', e => {
+    // initial grid
+    renderGridAll();
+
+    // open tool by slug: fetch file and set embed
+    async function openToolBySlug(slug){
+      const tool = tools.find(t=>t.slug===slug);
+      if(!tool) return alert('Tool not found');
+      embedTitle.textContent = tool.title;
+      openNew.href = `tools/${slug}/index.html`;
+      try{
+        const res = await fetch(`tools/${slug}/index.html`);
+        if(!res.ok) throw new Error('Not found');
+        const html = await res.text();
+        embedFrame.srcdoc = html;
+        embedArea.style.display = 'block';
+        window.scrollTo({top:embedArea.offsetTop-10, behavior:'smooth'});
+      }catch(err){
+        embedFrame.srcdoc = `<div style="padding:24px;color:#fff;background:#071428">Tool not found. Make sure <code>tools/${slug}/index.html</code> exists in your repo.</div>`;
+        embedArea.style.display = 'block';
+      }
+    }
+
+    // delegate clicks on open buttons
+    document.body.addEventListener('click', (e)=>{
       const btn = e.target.closest('.btn');
-      if(!btn || !btn.dataset.path) return;
-      e.preventDefault();
-      openTool({title: btn.dataset.title, path: btn.dataset.path});
+      if(!btn) return;
+      const slug = btn.dataset.slug;
+      const title = btn.dataset.title || '';
+      if(slug){
+        e.preventDefault();
+        openToolBySlug(slug);
+      }
     });
 
-    document.getElementById('closeEmbed').addEventListener('click', ()=>{
-      document.getElementById('embedArea').style.display = 'none';
-      document.getElementById('toolFrame').srcdoc = '';
+    // embed controls
+    closeEmbed.addEventListener('click', ()=> { embedArea.style.display='none'; embedFrame.srcdoc=''; });
+    document.getElementById('openNew').addEventListener('click', (e)=> { /* openNew already has href set when tool opens */ });
+
+    // clear search
+    document.getElementById('clearSearch').addEventListener('click', ()=>{ searchInput.value=''; renderGridAll(); suggestionsEl.style.display='none'; });
+
+    // keyboard: Enter opens first suggestion / first match
+    searchInput.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter'){
+        const q = searchInput.value.trim().toLowerCase();
+        if(!q) return;
+        const first = tools.find(t=> (t.title+' '+t.desc).toLowerCase().includes(q) );
+        if(first) openToolBySlug(first.slug);
+      }
     });
+
+    // accessibility: hide suggestions when focus lost on small devices
+    searchInput.addEventListener('blur', ()=> setTimeout(()=> suggestionsEl.style.display='none', 200));
   </script>
 </body>
 </html>
