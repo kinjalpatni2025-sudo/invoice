@@ -4,10 +4,9 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Split PDF Pages — Smarttool Hub</title>
-<link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/toolbox.png"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 <style>
-body{font-family:Arial,sans-serif;background:#121826;color:#fff;margin:0}
+body{font-family:Arial,sans-serif;background:#121826;color:#fff;margin:0;padding:0}
 header{background:linear-gradient(90deg,#6366f1,#0ea5e9);padding:15px;text-align:center}
 h1{margin:0;font-size:1.4rem}
 .container{max-width:1100px;margin:20px auto;padding:20px}
@@ -46,81 +45,74 @@ h1{margin:0;font-size:1.4rem}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 <script>
-if(!window.pdfjsLib || !window.PDFLib){
-  alert("Error loading PDF libraries. Please check your internet connection.");
-}
+let pdfDoc = null, selectedPages = [], fileBytes = null;
 
-const input=document.getElementById('fileInput');
-const drop=document.getElementById('dropZone');
-const pagesDiv=document.getElementById('pages');
-const exportBtn=document.getElementById('exportBtn');
-let pdfDoc=null, selectedPages=[], fileBytes=null;
-
-input.addEventListener('change', e=>{
+// File select
+document.getElementById('fileInput').addEventListener('change', e => {
   if(e.target.files.length) loadPDF(e.target.files[0]);
 });
 
-['dragover','dragenter'].forEach(ev=> drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag');}));
-['dragleave','drop'].forEach(ev=> drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag');}));
-drop.addEventListener('drop', e=>{
+// Drag & Drop
+const dropZone = document.getElementById('dropZone');
+['dragover','dragenter'].forEach(ev => dropZone.addEventListener(ev, e => {e.preventDefault();dropZone.classList.add('drag');}));
+['dragleave','drop'].forEach(ev => dropZone.addEventListener(ev, e => {e.preventDefault();dropZone.classList.remove('drag');}));
+dropZone.addEventListener('drop', e => {
   if(e.dataTransfer.files.length) loadPDF(e.dataTransfer.files[0]);
 });
 
+// Load PDF and show pages
 async function loadPDF(file){
   if(!file.name.toLowerCase().endsWith('.pdf')){alert('Only PDFs allowed');return;}
-  fileBytes=await file.arrayBuffer();
-  const loadingTask=pdfjsLib.getDocument({data:fileBytes});
-  pdfDoc=await loadingTask.promise;
-  pagesDiv.innerHTML='';
-  selectedPages=[];
+  fileBytes = await file.arrayBuffer();
+  const loadingTask = pdfjsLib.getDocument({data:fileBytes});
+  pdfDoc = await loadingTask.promise;
+  const pagesDiv = document.getElementById('pages');
+  pagesDiv.innerHTML = '';
+  selectedPages = [];
+
   for(let p=1;p<=pdfDoc.numPages;p++){
-    const page=await pdfDoc.getPage(p);
-    const viewport=page.getViewport({scale:0.3});
-    const canvas=document.createElement('canvas');
-    const ctx=canvas.getContext('2d');
-    canvas.height=viewport.height;
-    canvas.width=viewport.width;
+    const page = await pdfDoc.getPage(p);
+    const viewport = page.getViewport({scale:0.3});
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
     await page.render({canvasContext:ctx,viewport}).promise;
-    const thumb=document.createElement('div');
-    thumb.className='page-thumb';
-    thumb.innerHTML=`<img src="${canvas.toDataURL()}"><div style="text-align:center;font-size:12px;color:#ccc">${p}</div>`;
+
+    const thumb = document.createElement('div');
+    thumb.className = 'page-thumb';
+    thumb.innerHTML = `<img src="${canvas.toDataURL()}"><div style="text-align:center;font-size:12px;color:#ccc">${p}</div>`;
     thumb.addEventListener('click',()=>{
       thumb.classList.toggle('selected');
       if(selectedPages.includes(p)){
-        selectedPages=selectedPages.filter(n=>n!==p);
-      }else{
+        selectedPages = selectedPages.filter(n => n !== p);
+      } else {
         selectedPages.push(p);
       }
-      console.log("Selected Pages:",selectedPages);
-      exportBtn.style.display=selectedPages.length?'inline-flex':'none';
+      document.getElementById('exportBtn').style.display = selectedPages.length ? 'inline-flex' : 'none';
     });
     pagesDiv.appendChild(thumb);
   }
 }
 
-exportBtn.addEventListener('click', async ()=>{
+// Export selected pages
+document.getElementById('exportBtn').addEventListener('click', async ()=>{
   if(!selectedPages.length) return alert("No pages selected!");
-  console.log("Exporting pages:",selectedPages);
-  const srcPdf=await PDFLib.PDFDocument.load(fileBytes);
-  const newPdf=await PDFLib.PDFDocument.create();
+  const srcPdf = await PDFLib.PDFDocument.load(fileBytes);
+  const newPdf = await PDFLib.PDFDocument.create();
   for(const p of selectedPages){
-    const [copied]=await newPdf.copyPages(srcPdf,[p-1]);
+    const [copied] = await newPdf.copyPages(srcPdf,[p-1]);
     newPdf.addPage(copied);
   }
-  const bytes=await newPdf.save();
-  const blob=new Blob([bytes],{type:'application/pdf'});
-  const url=URL.createObjectURL(blob);
-
-  // Try direct download
-  const a=document.createElement('a');
-  a.href=url;
-  a.download='split.pdf';
+  const bytes = await newPdf.save();
+  const blob = new Blob([bytes], {type:'application/pdf'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'split.pdf';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-
-  // Fallback open in new tab
-  setTimeout(()=>{ window.open(url,'_blank'); },500);
 });
 </script>
 </body>
