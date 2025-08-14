@@ -21,7 +21,6 @@
   .title{display:flex;align-items:center;gap:10px;margin:0 0 10px}
   .subtitle{color:var(--muted);margin:0 0 16px}
   .btn{display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;padding:10px 14px;border-radius:10px;background:var(--pri1);color:#fff;font-weight:600}
-  label.btn{cursor:pointer}
   #fileInput{display:none}
   .drop{border:2px dashed var(--pri2);border-radius:12px;padding:28px;text-align:center;margin:12px 0}
   .drop.drag{border-color:#fff;background:#0b1220}
@@ -59,7 +58,10 @@
 
     <div id="pages" class="pages"></div>
 
-    <button id="exportBtn" class="btn" style="margin-top:15px;display:none"><i class="fa fa-download"></i> Export Selected Pages</button>
+    <div style="margin-top:15px; display:none;" id="actionButtons">
+      <button id="toggleSelectAllBtn" class="btn"><i class="fa fa-check-double"></i> Select All Pages</button>
+      <button id="exportBtn" class="btn"><i class="fa fa-download"></i> Export Selected Pages</button>
+    </div>
   </div>
 </div>
 
@@ -77,9 +79,11 @@ const selectBtn=document.getElementById('selectBtn');
 const drop=document.getElementById('dropZone');
 const pagesDiv=document.getElementById('pages');
 const exportBtn=document.getElementById('exportBtn');
-let pdfDoc=null, selectedPages=[], fileBytes=null;
+const toggleSelectAllBtn=document.getElementById('toggleSelectAllBtn');
+const actionButtons=document.getElementById('actionButtons');
+let pdfDoc=null, selectedPages=[], fileBytes=null, allSelected=false;
 
-// Open file explorer when button clicked
+// Open file explorer
 selectBtn.addEventListener('click', ()=>input.click());
 
 // Handle file input
@@ -124,7 +128,27 @@ async function loadPDF(file){
     });
     pagesDiv.appendChild(thumb);
   }
+  actionButtons.style.display='block';
 }
+
+// Toggle select all/deselect all
+toggleSelectAllBtn.addEventListener('click',()=>{
+  const thumbs=document.querySelectorAll('.page-thumb');
+  if(!allSelected){
+    thumbs.forEach((thumb,i)=>{
+      if(!thumb.classList.contains('selected')) thumb.classList.add('selected');
+    });
+    selectedPages = Array.from({length:pdfDoc.numPages}, (_,i)=>i+1);
+    toggleSelectAllBtn.innerHTML='<i class="fa fa-times-circle"></i> Deselect All Pages';
+    allSelected=true;
+  } else {
+    thumbs.forEach(thumb=>thumb.classList.remove('selected'));
+    selectedPages=[];
+    toggleSelectAllBtn.innerHTML='<i class="fa fa-check-double"></i> Select All Pages';
+    allSelected=false;
+  }
+  exportBtn.style.display=selectedPages.length?'inline-flex':'none';
+});
 
 // Export selected pages
 exportBtn.addEventListener('click', async ()=>{
