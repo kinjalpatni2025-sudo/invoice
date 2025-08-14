@@ -1,1 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Rotate PDF Pages — Smarttool Hub</title>
+<link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/toolbox.png"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<style>
+:root{
+  --bg:#121826;--card:#1e293b;--muted:#94a3b8;--text:#fff;
+  --pri1:#6366f1;--pri2:#0ea5e9;--warn:#ef4444;--ok:#10b981
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial, sans-serif;background:var(--bg);color:var(--text)}
+header{background:linear-gradient(90deg,var(--pri1),var(--pri2));padding:15px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:0 4px 12px rgba(0,0,0,0.4)}
+header .logo{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none}
+header .logo img{width:40px;height:40px;border-radius:8px}
+header h1{margin:0;font-size:1.35rem}
+header .tagline{color:#e0f2fe;font-size:0.9rem}
+header a.home{color:#fff;text-decoration:none;font-weight:bold}
+.container{max-width:1100px;margin:20px auto;padding:18px}
+.card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+.title{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.subtitle{color:var(--muted);margin:0 0 16px}
+.btn{display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;padding:10px 14px;border-radius:10px;background:var(--pri1);color:#fff;font-weight:600}
+.btn.secondary{background:#334155}
+.btn.ok{background:var(--ok)}
+.btn.warn{background:var(--warn)}
+label.btn{cursor:pointer}
+#fileInput{display:none}
+.drop{border:2px dashed var(--pri2);border-radius:12px;padding:28px;text-align:center;margin:12px 0}
+.drop.drag{border-color:#fff;background:#0b1220}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+.toolbar .group{display:flex;gap:10px;flex-wrap:wrap}
+.select{background:#0b1220;border:1px solid #1f2937;color:#e2e8f0;border-radius:10px;padding:10px 12px}
+.pages{display:grid;grid-template-columns:repeat(auto-fill,120px);gap:12px;margin-top:16px}
+.page-thumb{position:relative;border:2px solid transparent;border-radius:8px;cursor:pointer;overflow:hidden;background:#0b1220}
+.page-thumb img{width:100%;display:block;transition:transform .2s ease}
+.page-thumb.selected{border-color:var(--pri2)}
+.badge{position:absolute;top:6px;left:6px;background:rgba(15,23,42,.8);color:#e2e8f0;font-size:12px;padding:3px 6px;border-radius:999px}
+.thumb-actions{position:absolute;bottom:6px;left:6px;display:flex;gap:6px}
+.thumb-actions button{background:rgba(15,23,42,.85);border:1px solid #334155;color:#e2e8f0;border-radius:8px;padding:4px 6px;font-size:12px;cursor:pointer}
+.progress-wrap{display:none;margin-top:14px}
+.progress{height:10px;border-radius:999px;background:#0b1220;border:1px solid #1f2937;overflow:hidden}
+.progress > div{height:100%;width:0%;background:linear-gradient(90deg,var(--pri1),var(--pri2))}
+.meta{display:none;margin-top:8px;color:#cbd5e1;font-size:14px}
+footer{background:linear-gradient(90deg,#0f172a,var(--pri2));color:#94a3b8;text-align:center;padding:20px;margin-top:30px;font-size:13px}
+footer a{color:#fff;text-decoration:none}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="../../index.html">
+    <img src="https://img.icons8.com/fluency/48/toolbox.png"/>
+    <div>
+      <h1>Smarttool Hub</h1>
+      <div class="tagline">Free Online Tools</div>
+    </div>
+  </a>
+  <a class="home" href="../../index.html"><i class="fa fa-home"></i> All Tools</a>
+</header>
+
+<div class="container">
+  <div class="card">
+    <h2 class="title"><i class="fa fa-rotate"></i> Rotate PDF Pages</h2>
+    <p class="subtitle">Upload a PDF, select pages, rotate left/right in 90° steps, and export a rotated PDF. 100% in your browser.</p>
+
+    <label class="btn"><i class="fa fa-file-arrow-up"></i> Select PDF
+      <input id="fileInput" type="file" accept=".pdf,application/pdf">
+    </label>
+    <div id="dropZone" class="drop">
+      <i class="fa fa-cloud-arrow-up"></i> Drag & Drop PDF here
+    </div>
+
+    <div class="toolbar" id="toolbar" style="display:none">
+      <div class="group">
+        <button id="rotLeftSel" class="btn secondary"><i class="fa fa-rotate-left"></i> Rotate Selected -90°</button>
+        <button id="rotRightSel" class="btn secondary"><i class="fa fa-rotate-right"></i> Rotate Selected +90°</button>
+      </div>
+      <div class="group">
+        <button id="selectAll" class="btn secondary"><i class="fa fa-check-double"></i> Select All</button>
+        <button id="clearSel" class="btn secondary"><i class="fa fa-xmark"></i> Clear</button>
+      </div>
+      <div class="group">
+        <select id="exportScope" class="select">
+          <option value="all" selected>Export: All pages (apply rotations)</option>
+          <option value="selected">Export: Only selected pages</option>
+        </select>
+        <button id="exportBtn" class="btn ok"><i class="fa fa-download"></i> Export Rotated PDF</button>
+      </div>
+    </div>
+
+    <div id="meta" class="meta">Pages: <span id="pageCount">—</span></div>
+
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress"><div id="progressBar"></div></div>
+      <div id="progressText" style="margin-top:8px;color:#cbd5e1;font-size:14px">Preparing…</div>
+    </div>
+
+    <div id="pages" class="pages"></div>
+  </div>
+</div>
+
+<footer>
+  © 2025 Smarttool Hub — <a href="../../index.html">Back to Home</a>
+</footer>
+
+<!-- pdf-lib -->
+<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+
+<!-- Primary PDF.js v3 -->
+<script id="pdfjs-primary" src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<!-- Fallback PDF.js v2 (auto-activated only if needed) -->
+<script id="pdfjs-fallback" src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js" defer></script>
+
+<script>
+let pdfjsVersion = 3;
+function setupWorker(){
+  if (pdfjsVersion === 3) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  } else {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
+  }
+}
+setupWorker();
+
+const input = document.getElementById('fileInput');
+const drop = document.getElementById('dropZone');
+const pagesDiv = document.getElementById('pages');
+const exportBtn = document.getElementById('exportBtn');
+const rotLeftSel = document.getElementById('rotLeftSel');
+const rotRightSel = document.getElementById('rotRightSel');
+const selectAllBtn = document.getElementById('selectAll');
+const clearSelBtn = document.getElementById('clearSel');
+const toolbar = document.getElementById('toolbar');
+const progressWrap = document.getElementById('progressWrap');
+const progressBar = document.getElementById('progressBar');
+const progressText = document.getElementById('progressText');
+const meta = document.getElementById('meta');
+const pageCountEl = document.getElementById('pageCount');
+const exportScopeEl = document.getElementById('exportScope');
+
+let pdfDoc = null, fileBytes = null, fileName = "rotated.pdf";
+let rotationMap = {};  // { pageIndex(1-based): 0|90|180|270 }
+
+input.addEventListener('change', e => { if (e.target.files.length) loadPDF(e.target.files[0]); });
+['dragover','dragenter'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('drag'); }));
+['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('drag'); }));
+drop.addEventListener('drop', e => { if (e.dataTransfer.files.length) loadPDF(e.dataTransfer.files[0]); });
+
+function nextAngle(a, delta){ const x=((a||0)+delta)%360; return x<0?x+360:x; }
+function pageIsSelected(el){ return el.classList.contains('selected'); }
+function getSelectedPages(){ return Array.from(document.querySelectorAll('.page-thumb.selected')).map(t=>parseInt(t.dataset.page)).sort((a,b)=>a-b); }
+
+async function loadPDF(file){
+  if(!file.name.toLowerCase().endsWith('.pdf')){ alert('Only PDFs allowed'); return; }
+  fileName = file.name.replace(/\.pdf$/i,'') + "_rotated.pdf";
+  rotationMap = {};
+  pagesDiv.innerHTML = '';
+  toolbar.style.display = 'none';
+  meta.style.display = 'none';
+
+  try{
+    fileBytes = await file.arrayBuffer();
+    const task = pdfjsLib.getDocument({ data: fileBytes });
+    pdfDoc = await task.promise;
+  }catch(err){
+    console.warn("Primary PDF.js failed, switching to fallback…", err);
+    if(pdfjsVersion === 3){
+      pdfjsVersion = 2;
+      setupWorker();
+      setTimeout(()=>loadPDF(file), 300);
+      return;
+    } else {
+      alert("Failed to load PDF. The file may be encrypted or corrupted.");
+      console.error(err);
+      return;
+    }
+  }
+
+  // Build thumbs
+  for(let p=1; p<=pdfDoc.numPages; p++){
+    rotationMap[p] = 0;
+    const page = await pdfDoc.getPage(p);
+    const viewport = page.getViewport({ scale: 0.28 });
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = Math.max(1, Math.floor(viewport.width));
+    canvas.height = Math.max(1, Math.floor(viewport.height));
+    await page.render({ canvasContext: ctx, viewport }).promise;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'page-thumb';
+    wrap.dataset.page = p;
+    wrap.innerHTML = `
+      <span class="badge" id="badge-${p}">0°</span>
+      <img id="img-${p}" src="${canvas.toDataURL('image/jpeg',0.7)}" alt="p${p}">
+      <div class="thumb-actions">
+        <button data-act="left" data-p="${p}"><i class="fa fa-rotate-left"></i></button>
+        <button data-act="right" data-p="${p}"><i class="fa fa-rotate-right"></i></button>
+      </div>
+    `;
+    // toggle select
+    wrap.addEventListener('click', (ev)=>{
+      // avoid click on inline buttons bubbling as selection
+      if (ev.target.closest('button')) return;
+      wrap.classList.toggle('selected');
+    });
+
+    // per-thumb rotate buttons
+    wrap.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click', (ev)=>{
+        ev.stopPropagation();
+        const pg = parseInt(btn.dataset.p);
+        const act = btn.dataset.act;
+        rotationMap[pg] = nextAngle(rotationMap[pg], act==='left' ? -90 : 90);
+        // visual rotate
+        const img = document.getElementById(`img-${pg}`);
+        const badge = document.getElementById(`badge-${pg}`);
+        img.style.transform = `rotate(${rotationMap[pg]}deg)`;
+        badge.textContent = `${rotationMap[pg]}°`;
+      });
+    });
+
+    pagesDiv.appendChild(wrap);
+  }
+
+  toolbar.style.display = 'flex';
+  meta.style.display = 'block';
+  pageCountEl.textContent = pdfDoc.numPages;
+}
+
+// Bulk rotate selected
+rotLeftSel.addEventListener('click', ()=>{
+  const sel = getSelectedPages();
+  if(!sel.length) return alert('Select pages first');
+  sel.forEach(p=>{
+    rotationMap[p] = nextAngle(rotationMap[p], -90);
+    const img = document.getElementById(`img-${p}`);
+    const badge = document.getElementById(`badge-${p}`);
+    img.style.transform = `rotate(${rotationMap[p]}deg)`;
+    badge.textContent = `${rotationMap[p]}°`;
+  });
+});
+rotRightSel.addEventListener('click', ()=>{
+  const sel = getSelectedPages();
+  if(!sel.length) return alert('Select pages first');
+  sel.forEach(p=>{
+    rotationMap[p] = nextAngle(rotationMap[p], 90);
+    const img = document.getElementById(`img-${p}`);
+    const badge = document.getElementById(`badge-${p}`);
+    img.style.transform = `rotate(${rotationMap[p]}deg)`;
+    badge.textContent = `${rotationMap[p]}°`;
+  });
+});
+
+// selection helpers
+selectAllBtn.addEventListener('click', ()=>{
+  document.querySelectorAll('.page-thumb').forEach(t=>t.classList.add('selected'));
+});
+clearSelBtn.addEventListener('click', ()=>{
+  document.querySelectorAll('.page-thumb').forEach(t=>t.classList.remove('selected'));
+});
+
+// Export
+exportBtn.addEventListener('click', async ()=>{
+  if(!pdfDoc || !fileBytes) return;
+
+  const scope = exportScopeEl.value; // all | selected
+  let exportPages = [];
+  if(scope === 'selected'){
+    exportPages = getSelectedPages();
+    if(!exportPages.length) return alert('Select at least one page or switch scope to "All pages".');
+  } else {
+    exportPages = Array.from({length: pdfDoc.numPages}, (_,i)=>i+1);
+  }
+
+  progressWrap.style.display = 'block';
+  progressBar.style.width = '0%';
+  progressText.textContent = 'Exporting (fast mode)…';
+
+  // Primary: copy pages & setRotation (fast, keeps vectors)
+  try{
+    const srcPdf = await PDFLib.PDFDocument.load(fileBytes, { ignoreEncryption: true });
+    const outPdf = await PDFLib.PDFDocument.create();
+
+    for (let idx = 0; idx < exportPages.length; idx++){
+      const pNum = exportPages[idx]; // 1-based
+      const [copied] = await outPdf.copyPages(srcPdf, [pNum-1]);
+      const orig = srcPdf.getPage(pNum-1);
+      const origAngle = (orig.getRotation && orig.getRotation().angle) ? orig.getRotation().angle : 0;
+      const delta = rotationMap[pNum] || 0;
+      const finalAngle = (origAngle + delta) % 360;
+      copied.setRotation(PDFLib.degrees(finalAngle));
+      outPdf.addPage(copied);
+
+      const pct = Math.round(((idx+1)/exportPages.length)*100);
+      progressBar.style.width = pct + '%';
+    }
+
+    const bytes = await outPdf.save();
+    const blob = new Blob([bytes], { type:'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = fileName;
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    progressText.textContent = 'Done!';
+    progressBar.style.width = '100%';
+    return;
+  } catch(err){
+    console.warn('Fast rotation failed, switching to raster fallback…', err);
+  }
+
+  // Fallback: rasterize & rotate canvas (max compatibility)
+  try{
+    progressText.textContent = 'Exporting (compatibility mode)…';
+    const outPdf = await PDFLib.PDFDocument.create();
+
+    // Re-open with pdf.js to render
+    const task = pdfjsLib.getDocument({ data: fileBytes });
+    const src = await task.promise;
+
+    for (let idx = 0; idx < exportPages.length; idx++){
+      const pNum = exportPages[idx];
+      const page = await src.getPage(pNum);
+      const vp = page.getViewport({ scale: 1 });
+
+      // render onto canvas
+      const base = document.createElement('canvas');
+      base.width = Math.max(1, Math.floor(vp.width));
+      base.height = Math.max(1, Math.floor(vp.height));
+      const bctx = base.getContext('2d');
+      await page.render({ canvasContext: bctx, viewport: vp }).promise;
+
+      // rotate on a new canvas
+      const delta = (rotationMap[pNum] || 0) % 360;
+      let outW = base.width, outH = base.height;
+      if(delta === 90 || delta === 270){ outW = base.height; outH = base.width; }
+
+      const rot = document.createElement('canvas');
+      rot.width = outW; rot.height = outH;
+      const rctx = rot.getContext('2d');
+      rctx.save();
+      // rotate origin & draw
+      if(delta === 90){
+        rctx.translate(outW, 0);
+        rctx.rotate(Math.PI/2);
+      } else if(delta === 180){
+        rctx.translate(outW, outH);
+        rctx.rotate(Math.PI);
+      } else if(delta === 270){
+        rctx.translate(0, outH);
+        rctx.rotate(3*Math.PI/2);
+      }
+      rctx.drawImage(base, 0, 0);
+      rctx.restore();
+
+      // embed as JPG (smaller) — quality 0.9 for fidelity
+      const jpgU8 = dataURLtoUint8(rot.toDataURL('image/jpeg', 0.9));
+      const jpg = await outPdf.embedJpg(jpgU8);
+      const pdfPage = outPdf.addPage([rot.width, rot.height]);
+      pdfPage.drawImage(jpg, { x:0, y:0, width:rot.width, height:rot.height });
+
+      const pct = Math.round(((idx+1)/exportPages.length)*100);
+      progressBar.style.width = pct + '%';
+    }
+
+    const bytes = await outPdf.save();
+    const blob = new Blob([bytes], { type:'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = fileName;
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    progressText.textContent = 'Done!';
+    progressBar.style.width = '100%';
+  } catch(err){
+    console.error('Rotate (fallback) failed:', err);
+    alert('Failed to rotate PDF. The file may be encrypted or corrupted.');
+  }
+});
+
+// helpers
+function dataURLtoUint8(dataURL){
+  const b64 = dataURL.split(',')[1];
+  const bin = atob(b64);
+  const len = bin.length;
+  const u8 = new Uint8Array(len);
+  for(let i=0;i<len;i++) u8[i] = bin.charCodeAt(i);
+  return u8;
+}
+</script>
+</body>
+</html>
 
