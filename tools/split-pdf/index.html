@@ -81,7 +81,7 @@ const pagesDiv=document.getElementById('pages');
 const exportBtn=document.getElementById('exportBtn');
 const toggleSelectAllBtn=document.getElementById('toggleSelectAllBtn');
 const actionButtons=document.getElementById('actionButtons');
-let pdfDoc=null, selectedPages=[], fileBytes=null, allSelected=false;
+let pdfDoc=null, fileBytes=null, allSelected=false;
 
 // Open file explorer
 selectBtn.addEventListener('click', ()=>input.click());
@@ -105,7 +105,6 @@ async function loadPDF(file){
   const loadingTask=pdfjsLib.getDocument({data:fileBytes});
   pdfDoc=await loadingTask.promise;
   pagesDiv.innerHTML='';
-  selectedPages=[];
   for(let p=1;p<=pdfDoc.numPages;p++){
     const page=await pdfDoc.getPage(p);
     const viewport=page.getViewport({scale:0.3});
@@ -116,42 +115,44 @@ async function loadPDF(file){
     await page.render({canvasContext:ctx,viewport}).promise;
     const thumb=document.createElement('div');
     thumb.className='page-thumb';
+    thumb.dataset.page=p;
     thumb.innerHTML=`<img src="${canvas.toDataURL()}"><div style="text-align:center;font-size:12px;color:#ccc">${p}</div>`;
     thumb.addEventListener('click',()=>{
       thumb.classList.toggle('selected');
-      if(selectedPages.includes(p)){
-        selectedPages=selectedPages.filter(n=>n!==p);
-      }else{
-        selectedPages.push(p);
-      }
-      exportBtn.style.display=selectedPages.length?'inline-flex':'none';
+      updateSelectedPages();
     });
     pagesDiv.appendChild(thumb);
   }
   actionButtons.style.display='block';
+  updateSelectedPages();
+}
+
+// Update selected pages array
+function updateSelectedPages(){
+  const selectedThumbs=document.querySelectorAll('.page-thumb.selected');
+  const selectedPages=Array.from(selectedThumbs).map(t=>parseInt(t.dataset.page)).sort((a,b)=>a-b);
+  exportBtn.style.display=selectedPages.length?'inline-flex':'none';
+  return selectedPages;
 }
 
 // Toggle select all/deselect all
 toggleSelectAllBtn.addEventListener('click',()=>{
   const thumbs=document.querySelectorAll('.page-thumb');
   if(!allSelected){
-    thumbs.forEach((thumb,i)=>{
-      if(!thumb.classList.contains('selected')) thumb.classList.add('selected');
-    });
-    selectedPages = Array.from({length:pdfDoc.numPages}, (_,i)=>i+1);
-    toggleSelectAllBtn.innerHTML='<i class="fa fa-times-circle"></i> Deselect All Pages';
+    thumbs.forEach(thumb=>thumb.classList.add('selected'));
     allSelected=true;
+    toggleSelectAllBtn.innerHTML='<i class="fa fa-times-circle"></i> Deselect All Pages';
   } else {
     thumbs.forEach(thumb=>thumb.classList.remove('selected'));
-    selectedPages=[];
-    toggleSelectAllBtn.innerHTML='<i class="fa fa-check-double"></i> Select All Pages';
     allSelected=false;
+    toggleSelectAllBtn.innerHTML='<i class="fa fa-check-double"></i> Select All Pages';
   }
-  exportBtn.style.display=selectedPages.length?'inline-flex':'none';
+  updateSelectedPages();
 });
 
 // Export selected pages
 exportBtn.addEventListener('click', async ()=>{
+  const selectedPages=updateSelectedPages();
   if(!selectedPages.length) return;
   const srcPdf=await PDFLib.PDFDocument.load(fileBytes);
   const newPdf=await PDFLib.PDFDocument.create();
