@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Unlock Protected PDF — Smarttool Hub</title>
+<link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/toolbox.png"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<style>
+:root{
+  --bg:#121826;--card:#1e293b;--muted:#94a3b8;--text:#fff;
+  --pri1:#6366f1;--pri2:#0ea5e9;--ok:#10b981;--warn:#ef4444
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial, sans-serif;background:var(--bg);color:var(--text)}
+header{background:linear-gradient(90deg,var(--pri1),var(--pri2));padding:15px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:0 4px 12px rgba(0,0,0,0.4)}
+header .logo{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none}
+header .logo img{width:40px;height:40px;border-radius:8px}
+header h1{margin:0;font-size:1.35rem}
+header .tagline{color:#e0f2fe;font-size:0.9rem}
+header a.home{color:#fff;text-decoration:none;font-weight:bold}
+.container{max-width:1100px;margin:20px auto;padding:18px}
+.card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+.title{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.subtitle{color:var(--muted);margin:0 0 16px}
+.btn{display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;padding:10px 14px;border-radius:10px;background:var(--pri1);color:#fff;font-weight:600}
+.btn.secondary{background:#334155}
+.btn.ok{background:var(--ok)}
+label.btn{cursor:pointer}
+#fileInput{display:none}
+.drop{border:2px dashed var(--pri2);border-radius:12px;padding:28px;text-align:center;margin:12px 0}
+.drop.drag{border-color:#fff;background:#0b1220}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:10px}
+.control{background:#0b1220;border:1px solid #0f172a;border-radius:10px;padding:10px}
+.control label{display:block;font-size:14px;margin-bottom:6px;color:#cbd5e1}
+.input{width:100%;padding:10px;border-radius:10px;border:1px solid #1f2937;background:#0b1220;color:#e2e8f0}
+.meta{display:none;gap:14px;flex-wrap:wrap;color:#cbd5e1;font-size:14px;margin-top:10px}
+.badge{background:#0b1220;border:1px solid #1f2937;padding:6px 10px;border-radius:999px}
+.progress-wrap{display:none;margin-top:14px}
+.progress{height:10px;border-radius:999px;background:#0b1220;border:1px solid #1f2937;overflow:hidden}
+.progress>div{height:100%;width:0%;background:linear-gradient(90deg,var(--pri1),var(--pri2))}
+.pages{display:grid;grid-template-columns:repeat(auto-fill,120px);gap:12px;margin-top:18px}
+.page-thumb{border:2px solid transparent;border-radius:8px;overflow:hidden;background:#0b1220}
+.page-thumb img{width:100%;display:block}
+.note{color:#93c5fd;font-size:13px;margin-top:6px}
+footer{background:linear-gradient(90deg,#0f172a,var(--pri2));color:#94a3b8;text-align:center;padding:20px;margin-top:30px;font-size:13px}
+footer a{color:#fff;text-decoration:none}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="../../index.html">
+    <img src="https://img.icons8.com/fluency/48/toolbox.png"/>
+    <div>
+      <h1>Smarttool Hub</h1>
+      <div class="tagline">Free Online Tools</div>
+    </div>
+  </a>
+  <a class="home" href="../../index.html"><i class="fa fa-home"></i> All Tools</a>
+</header>
+
+<div class="container">
+  <div class="card">
+    <h2 class="title"><i class="fa fa-lock-open"></i> Unlock Protected PDF</h2>
+    <p class="subtitle">Open an encrypted PDF with its password and export an unlocked copy. Fully in your browser.</p>
+
+    <label class="btn"><i class="fa fa-file-arrow-up"></i> Select PDF
+      <input id="fileInput" type="file" accept=".pdf,application/pdf">
+    </label>
+    <div id="dropZone" class="drop">
+      <i class="fa fa-cloud-arrow-up"></i> Drag & Drop PDF here
+    </div>
+
+    <div class="controls">
+      <div class="control">
+        <label for="password">Password (if required)</label>
+        <input id="password" class="input" type="password" placeholder="Enter PDF password">
+        <div class="note">We don’t upload anything. The password is used locally to open the file.</div>
+      </div>
+      <div class="control">
+        <button id="unlockBtn" class="btn ok" disabled><i class="fa fa-unlock"></i> Unlock & Preview</button>
+      </div>
+      <div class="control">
+        <button id="exportBtn" class="btn" disabled><i class="fa fa-download"></i> Export Unlocked PDF</button>
+        <div class="note">Exported PDF will not have a password.</div>
+      </div>
+    </div>
+
+    <div class="meta" id="meta">
+      <span class="badge" id="infoPages"><i class="fa fa-file"></i> Pages: —</span>
+      <span class="badge" id="infoIn"><i class="fa fa-download"></i> Input: —</span>
+    </div>
+
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress"><div id="progressBar"></div></div>
+      <div id="progressText" style="margin-top:8px;color:#cbd5e1;font-size:14px">Preparing…</div>
+    </div>
+
+    <div id="pages" class="pages"></div>
+  </div>
+</div>
+
+<footer>
+  © 2025 Smarttool Hub — <a href="../../index.html">Back to Home</a>
+</footer>
+
+<!-- pdf-lib -->
+<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+<!-- Primary PDF.js v3 -->
+<script id="pdfjs-primary" src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<!-- Fallback PDF.js v2 -->
+<script id="pdfjs-fallback" src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js" defer></script>
+
+<script>
+let pdfjsVersion = 3;
+function setupWorker(){
+  if (pdfjsVersion === 3) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  } else {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
+  }
+}
+setupWorker();
+
+const input = document.getElementById('fileInput');
+const drop = document.getElementById('dropZone');
+const passwordEl = document.getElementById('password');
+const unlockBtn = document.getElementById('unlockBtn');
+const exportBtn = document.getElementById('exportBtn');
+const pagesDiv = document.getElementById('pages');
+const meta = document.getElementById('meta');
+const infoPages = document.getElementById('infoPages');
+const infoIn = document.getElementById('infoIn');
+const progressWrap = document.getElementById('progressWrap');
+const progressBar = document.getElementById('progressBar');
+const progressText = document.getElementById('progressText');
+
+let fileBytes = null, pdfDoc = null, fileName = 'unlocked.pdf', inputFile = null, inputSize = 0;
+
+// DnD + input
+input.addEventListener('change', e => { if (e.target.files.length) prepareFile(e.target.files[0]); });
+['dragover','dragenter'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('drag'); }));
+['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('drag'); }));
+drop.addEventListener('drop', e => { if (e.dataTransfer.files.length) prepareFile(e.dataTransfer.files[0]); });
+
+function fmtBytes(b){const u=['B','KB','MB','GB'];let i=0;while(b>=1024&&i<u.length-1){b/=1024;i++;}return `${b.toFixed(2)} ${u[i]}`;}
+
+async function prepareFile(file){
+  if(!file.name.toLowerCase().endsWith('.pdf')){ alert('Only PDFs allowed'); return; }
+  inputFile = file;
+  fileName = file.name.replace(/\.pdf$/i,'') + "_unlocked.pdf";
+  fileBytes = await file.arrayBuffer();
+  inputSize = file.size;
+  unlockBtn.disabled = false;
+  exportBtn.disabled = true;
+  pagesDiv.innerHTML = '';
+  meta.style.display = 'none';
+}
+
+unlockBtn.addEventListener('click', () => {
+  if (!fileBytes) return;
+  openPdfWithPassword(passwordEl.value || null);
+});
+
+async function openPdfWithPassword(pwd){
+  try{
+    const params = { data: fileBytes };
+    if (pwd) params.password = pwd;
+    const task = pdfjsLib.getDocument(params);
+    pdfDoc = await task.promise;
+    await renderPreview();
+  }catch(err){
+    // Handle password prompts / errors
+    const NEED = (pdfjsLib.PasswordResponses && pdfjsLib.PasswordResponses.NEED_PASSWORD) || 1;
+    const WRONG = (pdfjsLib.PasswordResponses && pdfjsLib.PasswordResponses.INCORRECT_PASSWORD) || 2;
+
+    if (err && (err.code === NEED || err.message?.toLowerCase().includes('password'))){
+      alert('This PDF is encrypted. Please enter the correct password.');
+      passwordEl.focus();
+      return;
+    } else if (err && err.code === WRONG){
+      alert('Incorrect password. Please try again.');
+      passwordEl.focus();
+      return;
+    }
+
+    console.warn('Primary pdf.js failed, trying fallback…', err);
+    // Switch to v2 and retry once
+    if (pdfjsVersion === 3){
+      pdfjsVersion = 2; setupWorker();
+      setTimeout(()=>openPdfWithPassword(pwd), 300);
+      return;
+    } else {
+      alert('Failed to open the PDF. The file may be corrupted or uses an unsupported encryption.');
+      console.error(err);
+    }
+  }
+}
+
+async function renderPreview(){
+  pagesDiv.innerHTML = '';
+  for (let p=1; p<=pdfDoc.numPages; p++){
+    const page = await pdfDoc.getPage(p);
+    const viewport = page.getViewport({ scale: 0.25 });
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = Math.max(1, Math.floor(viewport.width));
+    canvas.height = Math.max(1, Math.floor(viewport.height));
+    await page.render({ canvasContext: ctx, viewport }).promise;
+
+    const box = document.createElement('div');
+    box.className = 'page-thumb';
+    box.innerHTML = `<img alt="p${p}" src="${canvas.toDataURL('image/jpeg',0.7)}"><div style="text-align:center;font-size:12px;color:#ccc">${p}</div>`;
+    pagesDiv.appendChild(box);
+  }
+  meta.style.display = 'flex';
+  infoPages.textContent = `Pages: ${pdfDoc.numPages}`;
+  infoIn.textContent = `Input: ${fmtBytes(inputSize)}`;
+  exportBtn.disabled = false;
+}
+
+// Export: rebuild a fresh, unencrypted PDF
+exportBtn.addEventListener('click', async ()=>{
+  if(!pdfDoc) return;
+
+  progressWrap.style.display = 'block';
+  progressBar.style.width = '0%';
+  progressText.textContent = 'Exporting…';
+
+  try{
+    const newPdf = await PDFLib.PDFDocument.create();
+
+    for (let p=1; p<=pdfDoc.numPages; p++){
+      const page = await pdfDoc.getPage(p);
+      const viewport = page.getViewport({ scale: 1 }); // 1.0 for fidelity
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      canvas.width = Math.max(1, Math.floor(viewport.width));
+      canvas.height = Math.max(1, Math.floor(viewport.height));
+      await page.render({ canvasContext: ctx, viewport }).promise;
+
+      // Use JPEG (smaller). If you want lossless, switch to embedPng(canvas.toDataURL('image/png'))
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+      const jpgU8 = dataURLtoUint8(dataUrl);
+      const jpg = await newPdf.embedJpg(jpgU8);
+      const pdfPage = newPdf.addPage([canvas.width, canvas.height]);
+      pdfPage.drawImage(jpg, { x:0, y:0, width:canvas.width, height:canvas.height });
+
+      const pct = Math.round((p/pdfDoc.numPages)*100);
+      progressBar.style.width = pct + '%';
+    }
+
+    const out = await newPdf.save(); // no encryption => unlocked
+    const blob = new Blob([out], { type:'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = fileName;
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+
+    progressText.textContent = 'Done!';
+    progressBar.style.width = '100%';
+  }catch(err){
+    console.error('Export error:', err);
+    alert('Failed to export unlocked PDF.');
+  }finally{
+    setTimeout(()=>{ progressWrap.style.display='none'; }, 800);
+  }
+});
+
+function dataURLtoUint8(dataURL){
+  const b64 = dataURL.split(',')[1];
+  const bin = atob(b64);
+  const len = bin.length;
+  const u8 = new Uint8Array(len);
+  for(let i=0;i<len;i++) u8[i] = bin.charCodeAt(i);
+  return u8;
+}
+</script>
+</body>
+</html>
