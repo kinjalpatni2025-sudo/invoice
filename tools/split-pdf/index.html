@@ -15,7 +15,7 @@ h1{margin:0;font-size:1.4rem}
 .drop{border:2px dashed #0ea5e9;border-radius:12px;padding:28px;text-align:center;margin:12px 0}
 .drop.drag{border-color:#fff;background:#0b1220}
 .pages{display:grid;grid-template-columns:repeat(auto-fill,120px);gap:12px;margin-top:20px}
-.page-thumb{border:2px solid transparent;border-radius:8px;cursor:pointer;background:#0b1220}
+.page-thumb{border:2px solid transparent;border-radius:8px;cursor:pointer;background:#0b1220;transition:border-color 0.2s}
 .page-thumb img{width:100%;display:block}
 .page-thumb.selected{border-color:#0ea5e9}
 </style>
@@ -89,6 +89,7 @@ async function loadPDF(file){
       } else {
         selectedPages.push(p);
       }
+      console.log("Selected Pages:", selectedPages);
       document.getElementById('exportBtn').style.display = selectedPages.length ? 'inline-flex' : 'none';
     });
     pagesDiv.appendChild(thumb);
@@ -97,22 +98,35 @@ async function loadPDF(file){
 
 // Export selected pages
 document.getElementById('exportBtn').addEventListener('click', async ()=>{
-  if(!selectedPages.length) return alert("No pages selected!");
-  const srcPdf = await PDFLib.PDFDocument.load(fileBytes);
-  const newPdf = await PDFLib.PDFDocument.create();
-  for(const p of selectedPages){
-    const [copied] = await newPdf.copyPages(srcPdf,[p-1]);
-    newPdf.addPage(copied);
+  if(!selectedPages.length) {
+    alert("No pages selected!");
+    return;
   }
-  const bytes = await newPdf.save();
-  const blob = new Blob([bytes], {type:'application/pdf'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'split.pdf';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+
+  // Sort & remove duplicates
+  selectedPages = [...new Set(selectedPages)].sort((a,b) => a-b);
+  console.log("Exporting Pages:", selectedPages);
+
+  try {
+    const srcPdf = await PDFLib.PDFDocument.load(fileBytes);
+    const newPdf = await PDFLib.PDFDocument.create();
+    for(const p of selectedPages){
+      const [copied] = await newPdf.copyPages(srcPdf,[p-1]);
+      newPdf.addPage(copied);
+    }
+    const bytes = await newPdf.save();
+    const blob = new Blob([bytes], {type:'application/pdf'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'split.pdf';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } catch(err) {
+    console.error("Export Error:", err);
+    alert("Error exporting selected pages. See console for details.");
+  }
 });
 </script>
 </body>
