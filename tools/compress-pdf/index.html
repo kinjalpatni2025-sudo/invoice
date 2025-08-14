@@ -1,1 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Compress PDF — Smarttool Hub</title>
+<link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/toolbox.png"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<style>
+:root{
+  --bg:#121826;--card:#1e293b;--muted:#94a3b8;--text:#fff;
+  --pri1:#6366f1;--pri2:#0ea5e9;--ok:#10b981;--warn:#ef4444
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial, sans-serif;background:var(--bg);color:var(--text)}
+header{background:linear-gradient(90deg,var(--pri1),var(--pri2));padding:15px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:0 4px 12px rgba(0,0,0,0.4)}
+header .logo{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none}
+header .logo img{width:40px;height:40px;border-radius:8px}
+header h1{margin:0;font-size:1.35rem}
+header .tagline{color:#e0f2fe;font-size:0.9rem}
+header a.home{color:#fff;text-decoration:none;font-weight:bold}
+.container{max-width:1100px;margin:20px auto;padding:18px}
+.card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+.title{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.subtitle{color:var(--muted);margin:0 0 16px}
+.controls{display:grid;grid-template-columns:repeat(auto-fit, minmax(220px,1fr));gap:14px;margin-top:10px}
+.control{background:#0b1220;border:1px solid #0f172a;border-radius:10px;padding:10px}
+.control label{display:flex;justify-content:space-between;align-items:center;font-size:14px;margin-bottom:6px;color:#cbd5e1}
+.range{width:100%}
+small.hint{color:#93c5fd}
+.btn{display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;padding:10px 14px;border-radius:10px;background:var(--pri1);color:#fff;font-weight:600}
+.btn.secondary{background:#334155}
+.btn.ok{background:var(--ok)}
+.btn.warn{background:var(--warn)}
+label.btn{cursor:pointer}
+#fileInput{display:none}
+.drop{border:2px dashed var(--pri2);border-radius:12px;padding:28px;text-align:center;margin:12px 0}
+.drop.drag{border-color:#fff;background:#0b1220}
+.meta{display:flex;gap:14px;flex-wrap:wrap;color:#cbd5e1;font-size:14px;margin-top:8px}
+.badge{background:#0b1220;border:1px solid #1f2937;padding:6px 10px;border-radius:999px}
+.progress-wrap{display:none;margin-top:14px}
+.progress{height:10px;border-radius:999px;background:#0b1220;border:1px solid #1f2937;overflow:hidden}
+.progress > div{height:100%;width:0%;background:linear-gradient(90deg,var(--pri1),var(--pri2))}
+.pages{display:grid;grid-template-columns:repeat(auto-fill,120px);gap:12px;margin-top:20px}
+.page-thumb{border:2px solid transparent;border-radius:8px;overflow:hidden;background:#0b1220}
+.page-thumb img{width:100%;display:block}
+footer{background:linear-gradient(90deg,#0f172a,var(--pri2));color:#94a3b8;text-align:center;padding:20px;margin-top:30px;font-size:13px}
+footer a{color:#fff;text-decoration:none}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="../../index.html">
+    <img src="https://img.icons8.com/fluency/48/toolbox.png"/>
+    <div>
+      <h1>Smarttool Hub</h1>
+      <div class="tagline">Free Online Tools</div>
+    </div>
+  </a>
+  <a class="home" href="../../index.html"><i class="fa fa-home"></i> All Tools</a>
+</header>
+
+<div class="container">
+  <div class="card">
+    <h2 class="title"><i class="fa fa-compress"></i> Compress PDF</h2>
+    <p class="subtitle">Shrink a PDF by re-encoding pages as compressed images. 100% in your browser.</p>
+
+    <label class="btn"><i class="fa fa-file-arrow-up"></i> Select PDF
+      <input id="fileInput" type="file" accept=".pdf,application/pdf">
+    </label>
+    <div id="dropZone" class="drop">
+      <i class="fa fa-cloud-arrow-up"></i> Drag & Drop PDF here
+    </div>
+
+    <div class="controls">
+      <div class="control">
+        <label>
+          Quality <span><b id="qVal">0.6</b></span>
+        </label>
+        <input id="quality" class="range" type="range" min="0.2" max="0.95" step="0.05" value="0.6">
+        <small class="hint">Lower = smaller file • Recommended: 0.5–0.75</small>
+      </div>
+
+      <div class="control">
+        <label>
+          Scale <span><b id="sVal">0.8×</b></span>
+        </label>
+        <input id="scale" class="range" type="range" min="0.4" max="1" step="0.05" value="0.8">
+        <small class="hint">Downscale page resolution to reduce size</small>
+      </div>
+
+      <div class="control">
+        <label><span>Grayscale</span>
+          <input id="grayscale" type="checkbox">
+        </label>
+        <small class="hint">Converts colors to gray for extra savings</small>
+      </div>
+
+      <div class="control">
+        <button id="compressBtn" class="btn ok" disabled><i class="fa fa-wand-magic-sparkles"></i> Compress PDF</button>
+      </div>
+    </div>
+
+    <div class="meta" id="meta" style="display:none">
+      <span class="badge" id="infoPages"><i class="fa fa-file"></i> Pages: —</span>
+      <span class="badge" id="infoIn"><i class="fa fa-download"></i> Input: —</span>
+      <span class="badge" id="infoOut"><i class="fa fa-upload"></i> Estimated Output: —</span>
+    </div>
+
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress"><div id="progressBar"></div></div>
+      <div id="progressText" style="margin-top:8px;color:#cbd5e1;font-size:14px">Preparing…</div>
+    </div>
+
+    <div id="pages" class="pages"></div>
+  </div>
+</div>
+
+<footer>
+  © 2025 Smarttool Hub — <a href="../../index.html">Back to Home</a>
+</footer>
+
+<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+<!-- Primary PDF.js v3 -->
+<script id="pdfjs-primary" src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<!-- Fallback PDF.js v2 (auto-used if v3 fails) -->
+<script id="pdfjs-fallback" src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js" defer></script>
+
+<script>
+let pdfjsVersion = 3; // use v3 first, then fallback to v2 if needed
+function setupWorker(){
+  if (pdfjsVersion === 3) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  } else {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
+  }
+}
+setupWorker();
+
+const input = document.getElementById('fileInput');
+const drop = document.getElementById('dropZone');
+const pagesDiv = document.getElementById('pages');
+const compressBtn = document.getElementById('compressBtn');
+const qualityEl = document.getElementById('quality');
+const scaleEl = document.getElementById('scale');
+const grayscaleEl = document.getElementById('grayscale');
+const qVal = document.getElementById('qVal');
+const sVal = document.getElementById('sVal');
+const meta = document.getElementById('meta');
+const infoPages = document.getElementById('infoPages');
+const infoIn = document.getElementById('infoIn');
+const infoOut = document.getElementById('infoOut');
+const progressWrap = document.getElementById('progressWrap');
+const progressBar = document.getElementById('progressBar');
+const progressText = document.getElementById('progressText');
+
+let fileBytes = null, pdfDoc = null, fileName = "compressed.pdf", inputSize = 0;
+
+// UI updates
+qualityEl.addEventListener('input', () => qVal.textContent = (+qualityEl.value).toFixed(2));
+scaleEl.addEventListener('input', () => sVal.textContent = (+(+scaleEl.value)).toFixed(2) + "×");
+
+// File input + DnD
+input.addEventListener('change', e => { if (e.target.files.length) loadPDF(e.target.files[0]); });
+['dragover','dragenter'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('drag'); }));
+['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('drag'); }));
+drop.addEventListener('drop', e => { if (e.dataTransfer.files.length) loadPDF(e.dataTransfer.files[0]); });
+
+function fmtBytes(b){
+  if(!b && b!==0) return "—";
+  const u=['B','KB','MB','GB']; let i=0;
+  while(b>=1024 && i<u.length-1){ b/=1024; i++; }
+  return `${b.toFixed(2)} ${u[i]}`;
+}
+
+async function loadPDF(file){
+  if(!file.name.toLowerCase().endsWith('.pdf')){ alert('Only PDFs allowed'); return; }
+  fileName = file.name.replace(/\.pdf$/i,'') + "_compressed.pdf";
+  fileBytes = await file.arrayBuffer();
+  inputSize = file.size;
+  try{
+    const task = pdfjsLib.getDocument({ data: fileBytes });
+    pdfDoc = await task.promise;
+  }catch(err){
+    console.warn("Primary PDF.js failed, switching to fallback…", err);
+    if(pdfjsVersion === 3){
+      pdfjsVersion = 2;
+      setupWorker();
+      setTimeout(()=>loadPDF(file), 300);
+      return;
+    } else {
+      alert("Failed to load PDF. The file might be encrypted or corrupted.");
+      console.error(err);
+      return;
+    }
+  }
+
+  // Thumbnails
+  pagesDiv.innerHTML = '';
+  for(let p=1; p<=pdfDoc.numPages; p++){
+    const page = await pdfDoc.getPage(p);
+    const viewport = page.getViewport({ scale: 0.25 });
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = Math.max(1, Math.floor(viewport.width));
+    canvas.height = Math.max(1, Math.floor(viewport.height));
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    const box = document.createElement('div');
+    box.className = 'page-thumb';
+    box.innerHTML = `<img alt="p${p}" src="${canvas.toDataURL('image/jpeg',0.6)}"><div style="text-align:center;font-size:12px;color:#ccc">${p}</div>`;
+    pagesDiv.appendChild(box);
+  }
+
+  // Meta
+  meta.style.display = 'flex';
+  infoPages.textContent = `Pages: ${pdfDoc.numPages}`;
+  infoIn.textContent = `Input: ${fmtBytes(inputSize)}`;
+  infoOut.textContent = `Estimated Output: —`;
+  compressBtn.disabled = false;
+}
+
+// Grayscale helper
+function toGrayscale(canvas){
+  const c = document.createElement('canvas');
+  c.width = canvas.width;
+  c.height = canvas.height;
+  const ictx = canvas.getContext('2d');
+  const octx = c.getContext('2d');
+  const img = ictx.getImageData(0,0,canvas.width,canvas.height);
+  const d = img.data;
+  for(let i=0;i<d.length;i+=4){
+    const y = 0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2];
+    d[i]=d[i+1]=d[i+2]=y;
+  }
+  octx.putImageData(img,0,0);
+  return c;
+}
+
+function dataURLtoUint8(dataURL){
+  const b64 = dataURL.split(',')[1];
+  const bin = atob(b64);
+  const len = bin.length;
+  const u8 = new Uint8Array(len);
+  for(let i=0;i<len;i++) u8[i] = bin.charCodeAt(i);
+  return u8;
+}
+
+async function estimateOnFirstPage(){
+  // Quick estimate based on first page at chosen settings
+  if(!pdfDoc) return;
+  const q = parseFloat(qualityEl.value);
+  const s = parseFloat(scaleEl.value);
+  const p = await pdfDoc.getPage(1);
+  const vp = p.getViewport({ scale: s });
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  canvas.width = Math.max(1, Math.floor(vp.width));
+  canvas.height = Math.max(1, Math.floor(vp.height));
+  await p.render({ canvasContext: ctx, viewport: vp }).promise;
+  const c2 = grayscaleEl.checked ? toGrayscale(canvas) : canvas;
+  const jpeg = c2.toDataURL('image/jpeg', q);
+  const approxPerPage = (jpeg.length * 3/4); // base64 to bytes approx
+  const est = approxPerPage * pdfDoc.numPages;
+  infoOut.textContent = `Estimated Output: ${fmtBytes(est)}`;
+}
+
+qualityEl.addEventListener('change', estimateOnFirstPage);
+scaleEl.addEventListener('change', estimateOnFirstPage);
+grayscaleEl.addEventListener('change', estimateOnFirstPage);
+
+// Compress action
+compressBtn.addEventListener('click', async ()=>{
+  if(!pdfDoc || !fileBytes) return;
+
+  const q = parseFloat(qualityEl.value);
+  const s = parseFloat(scaleEl.value);
+
+  compressBtn.disabled = true;
+  progressWrap.style.display = 'block';
+  progressBar.style.width = '0%';
+  progressText.textContent = 'Starting…';
+
+  try{
+    const newPdf = await PDFLib.PDFDocument.create();
+    let totalBytes = 0;
+
+    for(let p=1; p<=pdfDoc.numPages; p++){
+      progressText.textContent = `Compressing page ${p}/${pdfDoc.numPages}…`;
+      const page = await pdfDoc.getPage(p);
+      const vp = page.getViewport({ scale: s });
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      canvas.width = Math.max(1, Math.floor(vp.width));
+      canvas.height = Math.max(1, Math.floor(vp.height));
+      await page.render({ canvasContext: ctx, viewport: vp }).promise;
+
+      const c2 = grayscaleEl.checked ? toGrayscale(canvas) : canvas;
+      const dataUrl = c2.toDataURL('image/jpeg', q);
+      const jpgU8 = dataURLtoUint8(dataUrl);
+      totalBytes += jpgU8.byteLength;
+
+      const jpg = await newPdf.embedJpg(jpgU8);
+      const pdfPage = newPdf.addPage([canvas.width, canvas.height]);
+      pdfPage.drawImage(jpg, { x: 0, y: 0, width: canvas.width, height: canvas.height });
+
+      const pct = Math.round((p/pdfDoc.numPages)*100);
+      progressBar.style.width = pct + '%';
+    }
+
+    infoOut.textContent = `Estimated Output: ${fmtBytes(totalBytes)}`;
+
+    progressText.textContent = 'Finalizing PDF…';
+    const outBytes = await newPdf.save();
+    const blob = new Blob([outBytes], { type:'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = fileName;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+
+    progressText.textContent = `Done! Saved ${fmtBytes(inputSize - outBytes.byteLength)} vs input`;
+    progressBar.style.width = '100%';
+  }catch(err){
+    console.error('Compress error:', err);
+    alert('Failed to compress PDF. This file may be encrypted or corrupted.');
+  }finally{
+    compressBtn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>
 
