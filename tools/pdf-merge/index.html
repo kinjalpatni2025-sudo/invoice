@@ -70,12 +70,9 @@
   <div class="grid" id="fileGrid"></div>
 </div>
 
-<!-- pdf-lib for merging without quality loss -->
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-<!-- pdf.js for page thumbnails -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
-  // Configure pdf.js worker
   pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
   const filesInput = document.getElementById('files');
@@ -88,7 +85,6 @@
   const progWrap = document.getElementById('progWrap');
   const progBar = document.getElementById('progBar');
 
-  // Internal list of PDFs (Array of {file, name, bytes, pages:[thumb canvases], id})
   let items = [];
   let dragSrcId = null;
 
@@ -112,12 +108,11 @@
       const id = crypto.getRandomValues(new Uint32Array(1))[0].toString(16);
       const rec = { id, file, name: file.name, bytes, pageCount: 0, thumbs: [] };
       items.push(rec);
-      renderList(); // optimistic render
-      // generate thumbnails async
+      renderList();
       try{
         await buildThumbs(rec);
       }catch(err){ console.error('Thumbs error', err); }
-      renderList(); // update with thumbs
+      renderList();
     }
     updateCount();
   }
@@ -126,11 +121,11 @@
     const loadingTask = pdfjsLib.getDocument({data: rec.bytes});
     const pdf = await loadingTask.promise;
     rec.pageCount = pdf.numPages;
-    const maxThumbs = Math.min(8, pdf.numPages); // show up to 8 thumbs for speed
+    const maxThumbs = Math.min(8, pdf.numPages);
     rec.thumbs = [];
     for(let i=1;i<=maxThumbs;i++){
       const page = await pdf.getPage(i);
-      const viewport = page.getViewport({scale: 0.25}); // small, fast
+      const viewport = page.getViewport({scale: 0.25});
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       canvas.width = Math.floor(viewport.width);
@@ -148,7 +143,6 @@
       card.draggable = true;
       card.dataset.id = it.id;
 
-      // drag events
       card.addEventListener('dragstart', (e)=>{ dragSrcId = it.id; card.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
       card.addEventListener('dragend', ()=>{ dragSrcId=null; card.classList.remove('dragging'); });
       card.addEventListener('dragover', (e)=>{ e.preventDefault(); e.dataTransfer.dropEffect='move'; });
@@ -158,14 +152,13 @@
         if(srcIdx>-1 && dstIdx>-1 && srcIdx!==dstIdx){
           const [moved] = items.splice(srcIdx,1);
           items.splice(dstIdx,0,moved);
-          renderList();
-          updateCount();
+          renderList(); updateCount();
         }
       });
 
       const row = document.createElement('div');
       row.className='file-row';
-      const handle = document.createElement('i'); handle.className='fa-solid fa-grip-lines handle'; handle.title='Drag to reorder';
+      const handle = document.createElement('i'); handle.className='fa-solid fa-grip-lines handle';
       const name = document.createElement('div'); name.className='file-name'; name.textContent = it.name;
       const pages = document.createElement('div'); pages.className='muted'; pages.textContent = it.pageCount? `${it.pageCount}p` : '…';
       row.append(handle, name, pages);
@@ -173,9 +166,6 @@
       const thumbs = document.createElement('div'); thumbs.className='thumbs';
       if(it.thumbs && it.thumbs.length){
         it.thumbs.forEach(cv=>{ const box=document.createElement('div'); box.className='thumb'; box.appendChild(cv); thumbs.appendChild(box); });
-      }else{
-        // placeholder
-        for(let k=0;k<4;k++){ const ph=document.createElement('div'); ph.className='thumb'; ph.innerHTML='<span class="muted">…</span>'; thumbs.appendChild(ph); }
       }
 
       const actions = document.createElement('div'); actions.className='actions';
@@ -185,7 +175,7 @@
       up.onclick = ()=>{ if(idx>0){ const t=items[idx]; items[idx]=items[idx-1]; items[idx-1]=t; renderList(); updateCount(); }};
       const down = document.createElement('button'); down.className='mini ghost'; down.innerHTML='<i class="fa fa-arrow-down"></i>';
       down.onclick = ()=>{ if(idx<items.length-1){ const t=items[idx]; items[idx]=items[idx+1]; items[idx+1]=t; renderList(); updateCount(); }};
-      actions.appendChild(up); actions.appendChild(down); actions.appendChild(rm);
+      actions.append(up,down,rm);
 
       card.append(row, thumbs, actions);
       grid.appendChild(card);
@@ -204,16 +194,19 @@
       const { PDFDocument } = PDFLib;
       const outPdf = await PDFDocument.create();
 
-      // Copy pages file-by-file to preserve quality (no rasterization)
       for(let i=0;i<items.length;i++){
         const it = items[i];
-        // Update progress bar for UX
         progBar.style.width = `${Math.round((i/items.length)*100)}%`;
-
-        const src = await PDFDocument.load(it.bytes, { ignoreEncryption: false });
-        const srcPages = await outPdf.copyPages(src, src.getPageIndices());
-        srcPages.forEach(p => outPdf.addPage(p));
+        try {
+          const src = await PDFDocument.load(it.bytes, { ignoreEncryption: true, updateMetadata: false });
+          const srcPages = await outPdf.copyPages(src, src.getPageIndices());
+          srcPages.forEach(p => outPdf.addPage(p));
+        } catch(e){
+          console.warn("Skipping file (cannot parse):", it.name, e);
+          continue;
+        }
       }
+
       progBar.style.width='100%';
 
       const outBytes = await outPdf.save();
@@ -223,9 +216,10 @@
       a.href = url; a.download = 'merged.pdf';
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(()=>URL.revokeObjectURL(url), 1500);
+
     }catch(err){
       console.error(err);
-      alert('Failed to merge PDFs. If a file is encrypted with a password, please unlock it first.');
+      alert('Unexpected error while merging. Try with different files.');
     }finally{
       setTimeout(()=>{ progWrap.style.display='none'; progBar.style.width='0%'; }, 500);
     }
