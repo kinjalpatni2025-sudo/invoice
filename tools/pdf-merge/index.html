@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Merge Multiple PDFs — Smarttool Hub</title>
+<meta name="description" content="Merge multiple PDFs in your browser. Drag & drop, reorder with thumbnails, no quality loss.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  :root{
+    --bg:#121826; --panel:#1e293b; --muted:#94a3b8; --accent:#0ea5e9; --accent2:#6366f1; --ink:#ffffff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+  header{background:linear-gradient(90deg,var(--accent2),var(--accent));padding:14px 18px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+  header h1{margin:0;font-size:1.6rem;display:inline-flex;gap:10px;align-items:center}
+  header p{margin:6px 0 0;color:#e0f2fe}
+  .container{max-width:1100px;margin:20px auto;padding:18px;background:var(--panel);border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,.5)}
+  .topbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .btn{background:linear-gradient(90deg,#0ea5a5,#60a5fa);color:#022;font-weight:700;border:none;border-radius:10px;padding:9px 14px;cursor:pointer}
+  .btn.secondary{background:rgba(255,255,255,.08);color:#fff}
+  .back{background:#0ea5e9;color:#022;text-decoration:none;border-radius:8px;padding:8px 12px;font-weight:700}
+  .muted{color:var(--muted);font-size:.92rem}
+  .drop{margin-top:12px;border:2px dashed rgba(255,255,255,.15);border-radius:10px;padding:22px;text-align:center;background:rgba(255,255,255,.02)}
+  input[type=file]{display:none}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-top:16px}
+  .card{background:#0b1220;border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px}
+  .file-row{display:flex;align-items:center;gap:8px}
+  .handle{cursor:grab;color:#cbd5e1}
+  .file-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .thumbs{display:grid;grid-template-columns:repeat(4, 1fr);gap:6px}
+  .thumb{background:#0f172a;border:1px solid rgba(255,255,255,.07);border-radius:6px;aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .thumb canvas{width:100%;height:100%;display:block}
+  .actions{display:flex;gap:8px;justify-content:space-between}
+  .mini{padding:6px 10px;border-radius:8px;border:none;cursor:pointer}
+  .danger{background:rgba(255,0,0,.85);color:#fff}
+  .ghost{background:rgba(255,255,255,.08);color:#fff}
+  .dragging{opacity:.6;outline:2px dashed var(--accent)}
+  .progress{height:6px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}
+  .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent2),var(--accent))}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1><i class="fa-solid fa-file-circle-plus"></i> Merge Multiple PDFs</h1>
+  <p>Drag & drop • Reorder with thumbnails • No quality loss • 100% in your browser</p>
+</header>
+
+<div class="container">
+  <div class="topbar">
+    <a class="back" href="../../index.html"><i class="fa fa-arrow-left"></i> Back to Home</a>
+    <span class="muted">Tip: Add all PDFs, drag the <i class="fa fa-grip-lines"></i> handles to reorder, then Merge.</span>
+  </div>
+
+  <div class="drop" id="drop">
+    <p class="muted" style="margin:0 0 8px 0">Drop PDF files here (or use the button)</p>
+    <button class="btn" id="pick"><i class="fa fa-file-arrow-up"></i> Select PDFs</button>
+    <input type="file" id="files" multiple accept="application/pdf">
+  </div>
+
+  <div class="row">
+    <button class="btn" id="mergeBtn"><i class="fa fa-layer-group"></i> Merge PDFs</button>
+    <button class="btn secondary" id="clearBtn"><i class="fa fa-trash"></i> Clear List</button>
+    <span class="muted" id="countInfo">No files added</span>
+  </div>
+
+  <div class="progress" style="margin-top:8px;display:none" id="progWrap"><div class="bar" id="progBar"></div></div>
+
+  <div class="grid" id="fileGrid"></div>
+</div>
+
+<!-- pdf-lib for merging without quality loss -->
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<!-- pdf.js for page thumbnails -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  // Configure pdf.js worker
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+  const filesInput = document.getElementById('files');
+  const pickBtn = document.getElementById('pick');
+  const drop = document.getElementById('drop');
+  const grid = document.getElementById('fileGrid');
+  const mergeBtn = document.getElementById('mergeBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const countInfo = document.getElementById('countInfo');
+  const progWrap = document.getElementById('progWrap');
+  const progBar = document.getElementById('progBar');
+
+  // Internal list of PDFs (Array of {file, name, bytes, pages:[thumb canvases], id})
+  let items = [];
+  let dragSrcId = null;
+
+  pickBtn.onclick = () => filesInput.click();
+  filesInput.onchange = e => addFiles(e.target.files);
+  ['dragenter','dragover'].forEach(type=>drop.addEventListener(type,(ev)=>{ev.preventDefault();drop.style.borderColor='#0ea5e9';}));
+  ['dragleave','drop'].forEach(type=>drop.addEventListener(type,(ev)=>{ev.preventDefault();drop.style.borderColor='rgba(255,255,255,.15)';}));
+  drop.addEventListener('drop',(e)=>{ e.preventDefault(); addFiles(e.dataTransfer.files); });
+
+  function updateCount(){
+    if(items.length===0){ countInfo.textContent='No files added'; return; }
+    const pages = items.reduce((s,it)=>s+(it.pageCount||0),0);
+    countInfo.textContent = `${items.length} file(s), ${pages||'…'} page(s)`;
+  }
+
+  async function addFiles(fileList){
+    const files = [...fileList].filter(f=>f.type==='application/pdf' || f.name.toLowerCase().endsWith('.pdf'));
+    if(files.length===0) return;
+    for(const file of files){
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const id = crypto.getRandomValues(new Uint32Array(1))[0].toString(16);
+      const rec = { id, file, name: file.name, bytes, pageCount: 0, thumbs: [] };
+      items.push(rec);
+      renderList(); // optimistic render
+      // generate thumbnails async
+      try{
+        await buildThumbs(rec);
+      }catch(err){ console.error('Thumbs error', err); }
+      renderList(); // update with thumbs
+    }
+    updateCount();
+  }
+
+  async function buildThumbs(rec){
+    const loadingTask = pdfjsLib.getDocument({data: rec.bytes});
+    const pdf = await loadingTask.promise;
+    rec.pageCount = pdf.numPages;
+    const maxThumbs = Math.min(8, pdf.numPages); // show up to 8 thumbs for speed
+    rec.thumbs = [];
+    for(let i=1;i<=maxThumbs;i++){
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({scale: 0.25}); // small, fast
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = Math.floor(viewport.width);
+      canvas.height = Math.floor(viewport.height);
+      await page.render({canvasContext: ctx, viewport}).promise;
+      rec.thumbs.push(canvas);
+    }
+  }
+
+  function renderList(){
+    grid.innerHTML = '';
+    items.forEach((it, idx)=>{
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.draggable = true;
+      card.dataset.id = it.id;
+
+      // drag events
+      card.addEventListener('dragstart', (e)=>{ dragSrcId = it.id; card.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
+      card.addEventListener('dragend', ()=>{ dragSrcId=null; card.classList.remove('dragging'); });
+      card.addEventListener('dragover', (e)=>{ e.preventDefault(); e.dataTransfer.dropEffect='move'; });
+      card.addEventListener('drop', (e)=>{ e.preventDefault(); if(!dragSrcId) return;
+        const srcIdx = items.findIndex(x=>x.id===dragSrcId);
+        const dstIdx = items.findIndex(x=>x.id===it.id);
+        if(srcIdx>-1 && dstIdx>-1 && srcIdx!==dstIdx){
+          const [moved] = items.splice(srcIdx,1);
+          items.splice(dstIdx,0,moved);
+          renderList();
+          updateCount();
+        }
+      });
+
+      const row = document.createElement('div');
+      row.className='file-row';
+      const handle = document.createElement('i'); handle.className='fa-solid fa-grip-lines handle'; handle.title='Drag to reorder';
+      const name = document.createElement('div'); name.className='file-name'; name.textContent = it.name;
+      const pages = document.createElement('div'); pages.className='muted'; pages.textContent = it.pageCount? `${it.pageCount}p` : '…';
+      row.append(handle, name, pages);
+
+      const thumbs = document.createElement('div'); thumbs.className='thumbs';
+      if(it.thumbs && it.thumbs.length){
+        it.thumbs.forEach(cv=>{ const box=document.createElement('div'); box.className='thumb'; box.appendChild(cv); thumbs.appendChild(box); });
+      }else{
+        // placeholder
+        for(let k=0;k<4;k++){ const ph=document.createElement('div'); ph.className='thumb'; ph.innerHTML='<span class="muted">…</span>'; thumbs.appendChild(ph); }
+      }
+
+      const actions = document.createElement('div'); actions.className='actions';
+      const rm = document.createElement('button'); rm.className='mini danger'; rm.innerHTML='<i class="fa fa-times"></i> Remove';
+      rm.onclick = ()=>{ items.splice(idx,1); renderList(); updateCount(); };
+      const up = document.createElement('button'); up.className='mini ghost'; up.innerHTML='<i class="fa fa-arrow-up"></i>';
+      up.onclick = ()=>{ if(idx>0){ const t=items[idx]; items[idx]=items[idx-1]; items[idx-1]=t; renderList(); updateCount(); }};
+      const down = document.createElement('button'); down.className='mini ghost'; down.innerHTML='<i class="fa fa-arrow-down"></i>';
+      down.onclick = ()=>{ if(idx<items.length-1){ const t=items[idx]; items[idx]=items[idx+1]; items[idx+1]=t; renderList(); updateCount(); }};
+      actions.appendChild(up); actions.appendChild(down); actions.appendChild(rm);
+
+      card.append(row, thumbs, actions);
+      grid.appendChild(card);
+    });
+  }
+
+  clearBtn.onclick = ()=>{ items = []; renderList(); updateCount(); };
+
+  mergeBtn.onclick = async ()=>{
+    if(items.length===0){ alert('Please add at least one PDF.'); return; }
+
+    progWrap.style.display='block';
+    progBar.style.width='0%';
+
+    try{
+      const { PDFDocument } = PDFLib;
+      const outPdf = await PDFDocument.create();
+
+      // Copy pages file-by-file to preserve quality (no rasterization)
+      for(let i=0;i<items.length;i++){
+        const it = items[i];
+        // Update progress bar for UX
+        progBar.style.width = `${Math.round((i/items.length)*100)}%`;
+
+        const src = await PDFDocument.load(it.bytes, { ignoreEncryption: false });
+        const srcPages = await outPdf.copyPages(src, src.getPageIndices());
+        srcPages.forEach(p => outPdf.addPage(p));
+      }
+      progBar.style.width='100%';
+
+      const outBytes = await outPdf.save();
+      const blob = new Blob([outBytes], {type:'application/pdf'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'merged.pdf';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 1500);
+    }catch(err){
+      console.error(err);
+      alert('Failed to merge PDFs. If a file is encrypted with a password, please unlock it first.');
+    }finally{
+      setTimeout(()=>{ progWrap.style.display='none'; progBar.style.width='0%'; }, 500);
+    }
+  };
+</script>
+</body>
+</html>
