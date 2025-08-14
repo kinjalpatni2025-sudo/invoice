@@ -60,7 +60,7 @@
 
     <div style="margin-top:15px; display:none;" id="actionButtons">
       <button id="toggleSelectAllBtn" class="btn"><i class="fa fa-check-double"></i> Select All Pages</button>
-      <button id="exportBtn" class="btn"><i class="fa fa-download"></i> Export Selected Pages</button>
+      <button id="exportBtn" class="btn" style="display:none;"><i class="fa fa-download"></i> Export Selected Pages</button>
     </div>
   </div>
 </div>
@@ -74,97 +74,106 @@
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
-const input=document.getElementById('fileInput');
-const selectBtn=document.getElementById('selectBtn');
-const drop=document.getElementById('dropZone');
-const pagesDiv=document.getElementById('pages');
-const exportBtn=document.getElementById('exportBtn');
-const toggleSelectAllBtn=document.getElementById('toggleSelectAllBtn');
-const actionButtons=document.getElementById('actionButtons');
-let pdfDoc=null, fileBytes=null, allSelected=false;
+const input = document.getElementById('fileInput');
+const selectBtn = document.getElementById('selectBtn');
+const drop = document.getElementById('dropZone');
+const pagesDiv = document.getElementById('pages');
+const exportBtn = document.getElementById('exportBtn');
+const toggleSelectAllBtn = document.getElementById('toggleSelectAllBtn');
+const actionButtons = document.getElementById('actionButtons');
+let pdfDoc = null, fileBytes = null, allSelected = false;
 
 // Open file explorer
-selectBtn.addEventListener('click', ()=>input.click());
+selectBtn.addEventListener('click', () => input.click());
 
 // Handle file input
-input.addEventListener('change', e=>{
+input.addEventListener('change', e => {
   if(e.target.files.length) loadPDF(e.target.files[0]);
 });
 
 // Drag drop
-['dragover','dragenter'].forEach(ev=> drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag');}));
-['dragleave','drop'].forEach(ev=> drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag');}));
-drop.addEventListener('drop', e=>{
+['dragover','dragenter'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('drag'); }));
+['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('drag'); }));
+drop.addEventListener('drop', e => {
   if(e.dataTransfer.files.length) loadPDF(e.dataTransfer.files[0]);
 });
 
 // Load PDF and render thumbnails
 async function loadPDF(file){
-  if(!file.name.toLowerCase().endsWith('.pdf')){alert('Only PDFs allowed');return;}
-  fileBytes=await file.arrayBuffer();
-  const loadingTask=pdfjsLib.getDocument({data:fileBytes});
-  pdfDoc=await loadingTask.promise;
-  pagesDiv.innerHTML='';
-  for(let p=1;p<=pdfDoc.numPages;p++){
-    const page=await pdfDoc.getPage(p);
-    const viewport=page.getViewport({scale:0.3});
-    const canvas=document.createElement('canvas');
-    const ctx=canvas.getContext('2d');
-    canvas.height=viewport.height;
-    canvas.width=viewport.width;
-    await page.render({canvasContext:ctx,viewport}).promise;
-    const thumb=document.createElement('div');
-    thumb.className='page-thumb';
-    thumb.dataset.page=p;
-    thumb.innerHTML=`<img src="${canvas.toDataURL()}"><div style="text-align:center;font-size:12px;color:#ccc">${p}</div>`;
-    thumb.addEventListener('click',()=>{
+  if(!file.name.toLowerCase().endsWith('.pdf')){ alert('Only PDFs allowed'); return; }
+  fileBytes = await file.arrayBuffer();
+  const loadingTask = pdfjsLib.getDocument({data:fileBytes});
+  pdfDoc = await loadingTask.promise;
+  pagesDiv.innerHTML = '';
+  for(let p=1; p<=pdfDoc.numPages; p++){
+    const page = await pdfDoc.getPage(p);
+    const viewport = page.getViewport({scale:0.3});
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+    await page.render({canvasContext:ctx, viewport}).promise;
+    const thumb = document.createElement('div');
+    thumb.className = 'page-thumb';
+    thumb.dataset.page = p;
+    thumb.innerHTML = `<img src="${canvas.toDataURL()}"><div style="text-align:center;font-size:12px;color:#ccc">${p}</div>`;
+    thumb.addEventListener('click', ()=>{
       thumb.classList.toggle('selected');
       updateSelectedPages();
     });
     pagesDiv.appendChild(thumb);
   }
-  actionButtons.style.display='block';
+  actionButtons.style.display = 'block';
   updateSelectedPages();
 }
 
 // Update selected pages array
 function updateSelectedPages(){
-  const selectedThumbs=document.querySelectorAll('.page-thumb.selected');
-  const selectedPages=Array.from(selectedThumbs).map(t=>parseInt(t.dataset.page)).sort((a,b)=>a-b);
-  exportBtn.style.display=selectedPages.length?'inline-flex':'none';
+  const selectedThumbs = document.querySelectorAll('.page-thumb.selected');
+  const selectedPages = Array.from(selectedThumbs).map(t => parseInt(t.dataset.page)).sort((a,b) => a-b);
+  exportBtn.style.display = selectedPages.length ? 'inline-flex' : 'none';
   return selectedPages;
 }
 
 // Toggle select all/deselect all
-toggleSelectAllBtn.addEventListener('click',()=>{
-  const thumbs=document.querySelectorAll('.page-thumb');
+toggleSelectAllBtn.addEventListener('click', () => {
+  const thumbs = document.querySelectorAll('.page-thumb');
   if(!allSelected){
-    thumbs.forEach(thumb=>thumb.classList.add('selected'));
-    allSelected=true;
-    toggleSelectAllBtn.innerHTML='<i class="fa fa-times-circle"></i> Deselect All Pages';
+    thumbs.forEach(thumb => thumb.classList.add('selected'));
+    allSelected = true;
+    toggleSelectAllBtn.innerHTML = '<i class="fa fa-times-circle"></i> Deselect All Pages';
   } else {
-    thumbs.forEach(thumb=>thumb.classList.remove('selected'));
-    allSelected=false;
-    toggleSelectAllBtn.innerHTML='<i class="fa fa-check-double"></i> Select All Pages';
+    thumbs.forEach(thumb => thumb.classList.remove('selected'));
+    allSelected = false;
+    toggleSelectAllBtn.innerHTML = '<i class="fa fa-check-double"></i> Select All Pages';
   }
   updateSelectedPages();
 });
 
 // Export selected pages
-exportBtn.addEventListener('click', async ()=>{
-  const selectedPages=updateSelectedPages();
-  if(!selectedPages.length) return;
-  const srcPdf=await PDFLib.PDFDocument.load(fileBytes);
-  const newPdf=await PDFLib.PDFDocument.create();
-  for(const p of selectedPages){
-    const [copied]=await newPdf.copyPages(srcPdf,[p-1]);
-    newPdf.addPage(copied);
+exportBtn.addEventListener('click', async () => {
+  const selectedPages = updateSelectedPages();
+  if (!selectedPages.length) return alert('Select pages to export!');
+  try {
+    const srcPdf = await PDFLib.PDFDocument.load(fileBytes);
+    const newPdf = await PDFLib.PDFDocument.create();
+    for (const p of selectedPages){
+      const [copiedPage] = await newPdf.copyPages(srcPdf, [p - 1]);
+      newPdf.addPage(copiedPage);
+    }
+    const pdfBytes = await newPdf.save();
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'split.pdf';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  } catch(err){
+    console.error('PDF split error:', err);
+    alert('Failed to split PDF. Check console.');
   }
-  const bytes=await newPdf.save();
-  const blob=new Blob([bytes],{type:'application/pdf'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;a.download='split.pdf';a.click();
 });
 </script>
 </body>
