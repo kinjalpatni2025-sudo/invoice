@@ -98,11 +98,36 @@ drop.addEventListener('drop',e=>{
   if(e.dataTransfer.files.length) loadPDF(e.dataTransfer.files[0]);
 });
 
+// Normalize PDF for compatibility
+async function normalizePDF(fileBytes) {
+  const loadingTask = pdfjsLib.getDocument({ data: fileBytes });
+  const pdfDoc = await loadingTask.promise;
+  const newPdf = await PDFLib.PDFDocument.create();
+
+  for (let p = 1; p <= pdfDoc.numPages; p++) {
+    const page = await pdfDoc.getPage(p);
+    const viewport = page.getViewport({ scale: 1 });
+    const tempCanvas = document.createElement("canvas");
+    const ctx = tempCanvas.getContext("2d");
+    tempCanvas.height = viewport.height;
+    tempCanvas.width = viewport.width;
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    const imgBytes = tempCanvas.toDataURL("image/png");
+    const imgEmbed = await newPdf.embedPng(imgBytes);
+    const pagePdf = newPdf.addPage([viewport.width, viewport.height]);
+    pagePdf.drawImage(imgEmbed, { x: 0, y: 0, width: viewport.width, height: viewport.height });
+  }
+  return await newPdf.save();
+}
+
 // Load PDF
 async function loadPDF(file){
   if(!file.name.toLowerCase().endsWith('.pdf')){alert('Only PDFs allowed');return;}
   try{
     fileBytes=await file.arrayBuffer();
+    // First normalize to improve compatibility
+    fileBytes=await normalizePDF(fileBytes);
+
     const loadingTask=pdfjsLib.getDocument({data:fileBytes});
     pdfDoc=await loadingTask.promise;
   }catch(err){
@@ -162,7 +187,7 @@ exportBtn.addEventListener('click',async()=>{
   if(!selectedPages.length) return alert('Select pages to export!');
   if(!fileBytes) return alert('No PDF loaded!');
   try{
-    const srcPdf=await PDFLib.PDFDocument.load(fileBytes);
+    const srcPdf=await PDFLib.PDFDocument.load(fileBytes,{ ignoreEncryption:true });
     const newPdf=await PDFLib.PDFDocument.create();
     for(const p of selectedPages){
       const [copiedPage]=await newPdf.copyPages(srcPdf,[p-1]);
