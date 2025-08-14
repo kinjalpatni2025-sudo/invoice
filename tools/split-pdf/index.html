@@ -9,10 +9,10 @@
 <style>
 :root{
   --bg:#121826;--card:#1e293b;--muted:#94a3b8;--text:#fff;
-  --pri1:#6366f1;--pri2:#0ea5e9;--warn:#ef4444
+  --pri1:#6366f1;--pri2:#0ea5e9
 }
 body{font-family:Arial,sans-serif;background:var(--bg);color:var(--text);margin:0}
-header{background:linear-gradient(90deg,var(--pri1),var(--pri2));padding:15px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:0 4px 12px rgba(0,0,0,0.4)}
+header{background:linear-gradient(90deg,var(--pri1),var(--pri2));padding:15px 20px;display:flex;align-items:center;justify-content:space-between}
 header .logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
 header .logo img{width:40px;height:40px;border-radius:8px}
 header h1{margin:0;font-size:1.6rem}
@@ -74,9 +74,23 @@ footer a{color:#fff;text-decoration:none}
 </footer>
 
 <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<!-- Primary PDF.js v3 -->
+<script id="pdfjs-primary" src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<!-- Fallback PDF.js v2 -->
+<script id="pdfjs-fallback" src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js" defer></script>
+
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+let pdfjsVersion = 3; // Start with primary
+let fileBytes=null, pdfDoc=null, allSelected=false;
+
+function setupWorker() {
+  if(pdfjsVersion===3){
+    pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  } else {
+    pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
+  }
+}
+setupWorker();
 
 const input=document.getElementById('fileInput');
 const drop=document.getElementById('dropZone');
@@ -84,57 +98,32 @@ const pagesDiv=document.getElementById('pages');
 const exportBtn=document.getElementById('exportBtn');
 const toggleSelectAllBtn=document.getElementById('toggleSelectAllBtn');
 const actionButtons=document.getElementById('actionButtons');
-let pdfDoc=null,fileBytes=null,allSelected=false;
 
-// File select
-input.addEventListener('change',e=>{
-  if(e.target.files.length) loadPDF(e.target.files[0]);
-});
-
-// Drag drop
+input.addEventListener('change',e=>{ if(e.target.files.length) loadPDF(e.target.files[0]); });
 ['dragover','dragenter'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag');}));
 ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag');}));
-drop.addEventListener('drop',e=>{
-  if(e.dataTransfer.files.length) loadPDF(e.dataTransfer.files[0]);
-});
+drop.addEventListener('drop',e=>{ if(e.dataTransfer.files.length) loadPDF(e.dataTransfer.files[0]); });
 
-// Normalize PDF for compatibility
-async function normalizePDF(fileBytes) {
-  const loadingTask = pdfjsLib.getDocument({ data: fileBytes });
-  const pdfDoc = await loadingTask.promise;
-  const newPdf = await PDFLib.PDFDocument.create();
-
-  for (let p = 1; p <= pdfDoc.numPages; p++) {
-    const page = await pdfDoc.getPage(p);
-    const viewport = page.getViewport({ scale: 1 });
-    const tempCanvas = document.createElement("canvas");
-    const ctx = tempCanvas.getContext("2d");
-    tempCanvas.height = viewport.height;
-    tempCanvas.width = viewport.width;
-    await page.render({ canvasContext: ctx, viewport }).promise;
-    const imgBytes = tempCanvas.toDataURL("image/png");
-    const imgEmbed = await newPdf.embedPng(imgBytes);
-    const pagePdf = newPdf.addPage([viewport.width, viewport.height]);
-    pagePdf.drawImage(imgEmbed, { x: 0, y: 0, width: viewport.width, height: viewport.height });
-  }
-  return await newPdf.save();
-}
-
-// Load PDF
 async function loadPDF(file){
-  if(!file.name.toLowerCase().endsWith('.pdf')){alert('Only PDFs allowed');return;}
+  if(!file.name.toLowerCase().endsWith('.pdf')) return alert('Only PDFs allowed');
+  fileBytes = await file.arrayBuffer();
   try{
-    fileBytes=await file.arrayBuffer();
-    // First normalize to improve compatibility
-    fileBytes=await normalizePDF(fileBytes);
-
     const loadingTask=pdfjsLib.getDocument({data:fileBytes});
     pdfDoc=await loadingTask.promise;
+    renderThumbnails();
   }catch(err){
-    alert("Error loading PDF. This file may be corrupted or password protected.");
-    console.error(err);
-    return;
+    console.warn("Primary method failed, switching to fallback...", err);
+    if(pdfjsVersion===3){
+      pdfjsVersion=2;
+      setupWorker();
+      setTimeout(()=>loadPDF(file),500);
+    } else {
+      alert("Error loading PDF even in fallback mode.");
+    }
   }
+}
+
+async function renderThumbnails(){
   pagesDiv.innerHTML='';
   for(let p=1;p<=pdfDoc.numPages;p++){
     const page=await pdfDoc.getPage(p);
@@ -158,7 +147,6 @@ async function loadPDF(file){
   updateSelectedPages();
 }
 
-// Update selection
 function updateSelectedPages(){
   const selectedThumbs=document.querySelectorAll('.page-thumb.selected');
   const selectedPages=Array.from(selectedThumbs).map(t=>parseInt(t.dataset.page)).sort((a,b)=>a-b);
@@ -166,14 +154,13 @@ function updateSelectedPages(){
   return selectedPages;
 }
 
-// Toggle select all/deselect all
 toggleSelectAllBtn.addEventListener('click',()=>{
   const thumbs=document.querySelectorAll('.page-thumb');
   if(!allSelected){
     thumbs.forEach(thumb=>thumb.classList.add('selected'));
     allSelected=true;
     toggleSelectAllBtn.innerHTML='<i class="fa fa-times-circle"></i> Deselect All Pages';
-  }else{
+  } else {
     thumbs.forEach(thumb=>thumb.classList.remove('selected'));
     allSelected=false;
     toggleSelectAllBtn.innerHTML='<i class="fa fa-check-double"></i> Select All Pages';
@@ -181,34 +168,41 @@ toggleSelectAllBtn.addEventListener('click',()=>{
   updateSelectedPages();
 });
 
-// Export
 exportBtn.addEventListener('click',async()=>{
   const selectedPages=updateSelectedPages();
   if(!selectedPages.length) return alert('Select pages to export!');
-  if(!fileBytes) return alert('No PDF loaded!');
   try{
-    // Ensure fileBytes is ArrayBuffer
-    if (fileBytes instanceof Uint8Array) {
-      fileBytes = fileBytes.buffer;
+    const loadingTask = pdfjsLib.getDocument({ data: fileBytes });
+    const srcDoc = await loadingTask.promise;
+    const newPdf = await PDFLib.PDFDocument.create();
+
+    for (const p of selectedPages) {
+      const page = await srcDoc.getPage(p);
+      const viewport = page.getViewport({ scale: 1 });
+      const tempCanvas = document.createElement("canvas");
+      const ctx = tempCanvas.getContext("2d");
+      tempCanvas.height = viewport.height;
+      tempCanvas.width = viewport.width;
+      await page.render({ canvasContext: ctx, viewport }).promise;
+      const imgBytes = tempCanvas.toDataURL("image/png");
+      const imgEmbed = await newPdf.embedPng(imgBytes);
+      const pagePdf = newPdf.addPage([viewport.width, viewport.height]);
+      pagePdf.drawImage(imgEmbed, { x: 0, y: 0, width: viewport.width, height: viewport.height });
     }
-    const srcPdf=await PDFLib.PDFDocument.load(fileBytes,{ ignoreEncryption:true });
-    const newPdf=await PDFLib.PDFDocument.create();
-    for(const p of selectedPages){
-      const [copiedPage]=await newPdf.copyPages(srcPdf,[p-1]);
-      newPdf.addPage(copiedPage);
-    }
-    const pdfBytes=await newPdf.save();
-    const blob=new Blob([pdfBytes],{type:'application/pdf'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url;a.download='split.pdf';
+
+    const pdfBytes = await newPdf.save();
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'split.pdf';
     document.body.appendChild(a);
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+
   }catch(err){
-    console.error('PDF split error:',err);
-    alert('Failed to split PDF. File may be corrupted or password protected.');
+    alert('Failed to split PDF. This file may still be corrupted.');
+    console.error(err);
   }
 });
 </script>
