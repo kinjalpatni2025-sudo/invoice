@@ -202,14 +202,21 @@
           const srcPages = await outPdf.copyPages(src, src.getPageIndices());
           srcPages.forEach(p => outPdf.addPage(p));
         } catch(e){
-          console.warn("Skipping file (cannot parse):", it.name, e);
+          console.warn(\"Skipping file (cannot parse):\", it.name, e);
+      skipped.push(it.name);
+      continue;
           continue;
         }
       }
 
       progBar.style.width='100%';
 
-      const outBytes = await outPdf.save();
+      if (outPdf.getPageCount() === 0) {
+      alert('Merging failed: all files were skipped (possibly encrypted/corrupt). Try different PDFs.');
+      progWrap.style.display='none'; progBar.style.width='0%';
+      return;
+    }
+    const outBytes = await outPdf.save({ useObjectStreams: false });
       const blob = new Blob([outBytes], {type:'application/pdf'});
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
