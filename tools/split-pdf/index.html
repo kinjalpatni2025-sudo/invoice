@@ -187,6 +187,10 @@ exportBtn.addEventListener('click',async()=>{
   if(!selectedPages.length) return alert('Select pages to export!');
   if(!fileBytes) return alert('No PDF loaded!');
   try{
+    // Ensure fileBytes is ArrayBuffer
+    if (fileBytes instanceof Uint8Array) {
+      fileBytes = fileBytes.buffer;
+    }
     const srcPdf=await PDFLib.PDFDocument.load(fileBytes,{ ignoreEncryption:true });
     const newPdf=await PDFLib.PDFDocument.create();
     for(const p of selectedPages){
