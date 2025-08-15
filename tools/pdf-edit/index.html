@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Edit PDF Online — Advanced — Smarttool Hub</title>
+<meta name="description" content="Advanced browser PDF editor. Add draggable text boxes, draw, highlight, insert images, undo/redo, and save work locally." />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<style>
+  :root{--bg:#0b1220;--card:#0f1724;--muted:#9aa8bf;--accent:#60a5fa;--pill:#111827;--glass: rgba(255,255,255,0.03)}
+  body{margin:0;font-family:Inter, Arial, sans-serif;background:var(--bg);color:#e6eef8}
+  header{display:flex;gap:16px;align-items:center;justify-content:space-between;padding:14px 18px;background:linear-gradient(90deg,#3b82f6,#06b6d4)}
+  header h1{margin:0;font-size:18px}
+  .container{max-width:1100px;margin:20px auto;padding:16px}
+  .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 8px 30px rgba(2,6,23,0.6)}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+  .btn{background:transparent;border:1px solid var(--glass);color:inherit;padding:8px 12px;border-radius:10px;cursor:pointer}
+  .btn.primary{background:linear-gradient(90deg,#3b82f6,#06b6d4);border:none;color:#071124}
+  .small{padding:6px 8px}
+  .canvas-wrap{position:relative;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.04);margin-top:12px}
+  canvas{display:block; width:100%; height:auto}
+  #annotLayer{position:absolute;left:0;top:0;pointer-events:none}
+  .text-box{position:absolute;min-width:60px;padding:6px 8px;background:rgba(255,255,255,0.06);border:1px dashed rgba(255,255,255,0.08);color:#fff;border-radius:6px;cursor:move;pointer-events:auto}
+  .text-box[contenteditable="true"]{outline:2px dashed rgba(255,255,255,0.08)}
+  #thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .footer{color:var(--muted);font-size:13px;margin-top:12px}
+  input[type="file"]{display:none}
+  .right{margin-left:auto;display:flex;gap:8px}
+  select, input[type="color"]{background:#071124;border-radius:8px;padding:6px;border:1px solid rgba(255,255,255,0.04);color:#fff}
+  @media (max-width:780px){ header h1{font-size:15px} .toolbar{gap:6px}}
+</style>
+</head>
+<body>
+<header>
+  <div style="display:flex;gap:10px;align-items:center">
+    <img src="https://img.icons8.com/fluency/48/toolbox.png" width="40" height="40" style="border-radius:8px"/>
+    <div><h1 style="margin:0">Smarttool Hub — Advanced PDF Editor</h1><div style="font-size:12px;color:#e6f7ff90">Draggable text, undo/redo, autosave</div></div>
+  </div>
+  <div class="right">
+    <button id="saveLocal" class="btn small"><i class="fa fa-save"></i> Save</button>
+    <button id="loadLocal" class="btn small"><i class="fa fa-folder-open"></i> Load</button>
+    <a href="../../index.html" class="btn small">All Tools</a>
+  </div>
+</header>
+
+<div class="container">
+  <div class="card">
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <label class="btn">
+        <i class="fa fa-file-arrow-up"></i> Select PDF
+        <input id="fileInput" type="file" accept="application/pdf">
+      </label>
+
+      <div class="toolbar">
+        <button id="textBtn" class="btn small"><i class="fa fa-font"></i> Text</button>
+        <button id="drawBtn" class="btn small"><i class="fa fa-pencil"></i> Draw</button>
+        <button id="highlightBtn" class="btn small"><i class="fa fa-highlighter"></i> Highlight</button>
+
+        <label class="btn small">
+          <i class="fa fa-image"></i> Image
+          <input id="imgInput" type="file" accept="image/*">
+        </label>
+
+        <select id="sizeSel" title="Brush size">
+          <option value="2">Thin</option><option value="4" selected>Medium</option><option value="8">Thick</option><option value="18">Highlight</option>
+        </select>
+        <input id="colorInp" type="color" value="#ff4757" title="Color">
+
+        <button id="undoBtn" class="btn small"><i class="fa fa-rotate-left"></i> Undo</button>
+        <button id="redoBtn" class="btn small"><i class="fa fa-rotate-right"></i> Redo</button>
+        <button id="clearBtn" class="btn small"><i class="fa fa-trash"></i> Clear</button>
+        <button id="downloadBtn" class="btn primary small"><i class="fa fa-download"></i> Download</button>
+      </div>
+    </div>
+
+    <div id="pageInfo" style="margin-top:10px;color:#cfe6ff"></div>
+
+    <div class="canvas-wrap" id="canvasWrap">
+      <canvas id="pdfCanvas"></canvas>
+      <!-- annotation canvas (drawings/highlights) -->
+      <canvas id="annotCanvas" style="position:absolute;left:0;top:0;pointer-events:auto"></canvas>
+      <!-- overlay for text boxes and images -->
+      <div id="annotLayer" style="position:absolute;left:0;top:0;pointer-events:none"></div>
+    </div>
+
+    <div id="thumbs"></div>
+    <div class="footer">Auto-save: Local storage. Tip: click "Text" then click canvas to add box. Drag boxes to move. Click box to edit text.</div>
+  </div>
+</div>
+
+<!-- libs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+
+<script>
+/* Advanced PDF Editor
+   - Persistent per-page annotations in localStorage
+   - Undo/Redo across pages (action stack)
+   - Draggable & editable text boxes (DOM)
+   - Images inserted as DOM overlays
+   - Flatten to PDF via PDFLib on download
+*/
+
+// --- State ---
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const fileInput = document.getElementById('fileInput'), imgInput = document.getElementById('imgInput');
+const pdfCanvas = document.getElementById('pdfCanvas'), annotCanvas = document.getElementById('annotCanvas');
+const annotLayer = document.getElementById('annotLayer'), canvasWrap = document.getElementById('canvasWrap');
+const pageInfo = document.getElementById('pageInfo');
+const textBtn = document.getElementById('textBtn'), drawBtn = document.getElementById('drawBtn'), highlightBtn = document.getElementById('highlightBtn');
+const sizeSel = document.getElementById('sizeSel'), colorInp = document.getElementById('colorInp');
+const undoBtn = document.getElementById('undoBtn'), redoBtn = document.getElementById('redoBtn'), clearBtn = document.getElementById('clearBtn');
+const downloadBtn = document.getElementById('downloadBtn'), saveLocal = document.getElementById('saveLocal'), loadLocal = document.getElementById('loadLocal');
+
+const ctxPdf = pdfCanvas.getContext('2d'), ctxAnnot = annotCanvas.getContext('2d');
+
+let pdfDoc = null, fileBytes = null, currentPage = 1, scale = 1.3;
+let mode = null; // 'draw','highlight','text','image'
+let drawColor = colorInp.value, drawSize = parseInt(sizeSel.value,10);
+let drawing = false, lastPos = {x:0,y:0};
+
+// Annotation storage: per-page object { drawingsDataURL, texts: [ {id,x,y,w,h,html,style} ], images: [ {id,x,y,w,h,dataURL} ] }
+let annotations = {}; // key: pageNumber -> annotation object
+
+// Undo/Redo stacks (actions store snapshots)
+let undoStack = [], redoStack = [];
+const STORAGE_KEY = 'smarttool_pdf_edit_v2';
+
+// --- Helpers ---
+function setCanvasSize(w,h){
+  pdfCanvas.width = w; pdfCanvas.height = h;
+  annotCanvas.width = w; annotCanvas.height = h;
+  annotCanvas.style.width = pdfCanvas.width + 'px';
+  annotCanvas.style.height = pdfCanvas.height + 'px';
+  annotLayer.style.width = pdfCanvas.width + 'px';
+  annotLayer.style.height = pdfCanvas.height + 'px';
+  canvasWrap.style.height = pdfCanvas.height + 'px';
+}
+
+function pushUndo(actionDesc='change'){
+  // snapshot current page annotations (as JSON)
+  const snap = JSON.stringify(annotations[currentPage] || {});
+  undoStack.push({page:currentPage, snap, desc:actionDesc});
+  if(undoStack.length>50) undoStack.shift();
+  // clear redo
+  redoStack = [];
+  updateUndoRedoButtons();
+}
+
+function updateUndoRedoButtons(){
+  undoBtn.disabled = undoStack.length===0;
+  redoBtn.disabled = redoStack.length===0;
+}
+
+function saveAnnotationsToLocal(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({fileName: (fileInput.files[0]||{}).name || '', annotations}));
+    console.log('Saved to localStorage');
+  }catch(e){ console.warn('Save failed', e); }
+}
+
+function loadAnnotationsFromLocal(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw) return false;
+  try{
+    const parsed = JSON.parse(raw);
+    annotations = parsed.annotations || {};
+    console.log('Loaded annotations from localStorage');
+    return true;
+  }catch(e){ console.warn('Load fail', e); return false; }
+}
+
+// --- PDF Rendering & thumbnails ---
+async function loadPDF(file){
+  if(!file) return;
+  fileBytes = await file.arrayBuffer();
+  pdfDoc = await pdfjsLib.getDocument({data: fileBytes}).promise;
+  currentPage = 1;
+  await renderThumbnails();
+  await renderPage(currentPage);
+  pageInfo.textContent = `Page ${currentPage} / ${pdfDoc.numPages}`;
+  // attempt load stored annotations if exist
+  const keyExists = loadAnnotationsFromLocal();
+  if(keyExists && annotations[currentPage]) restoreAnnotations(currentPage);
+}
+
+async function renderThumbnails(){
+  document.getElementById('thumbs').innerHTML = '';
+  for(let p=1;p<=pdfDoc.numPages;p++){
+    const pg = await pdfDoc.getPage(p);
+    const vp = pg.getViewport({scale:0.18});
+    const c = document.createElement('canvas');
+    c.width = vp.width; c.height = vp.height;
+    await pg.render({canvasContext: c.getContext('2d'), viewport: vp}).promise;
+    c.style.border = '1px solid rgba(255,255,255,0.04)';
+    c.style.borderRadius='6px';
+    c.style.cursor='pointer';
+    c.onclick = ()=> { saveCurrentPageAnnotations(); currentPage=p; renderPage(p); };
+    document.getElementById('thumbs').appendChild(c);
+  }
+}
+
+async function renderPage(pageNum){
+  const page = await pdfDoc.getPage(pageNum);
+  const vp0 = page.getViewport({scale:1});
+  // fit to max width 900 or container
+  const containerW = Math.min(900, window.innerWidth - 120);
+  const targetScale = (containerW / vp0.width) * (scale/1.3);
+  const viewport = page.getViewport({scale: targetScale});
+  setCanvasSize(viewport.width, viewport.height);
+  await page.render({canvasContext: ctxPdf, viewport}).promise;
+  // load drawing layer if present
+  ctxAnnot.clearRect(0,0,annotCanvas.width,annotCanvas.height);
+  const ann = annotations[pageNum];
+  if(ann && ann.drawingsDataURL){
+    const img = new Image();
+    img.onload = ()=> ctxAnnot.drawImage(img,0,0,annotCanvas.width,annotCanvas.height);
+    img.src = ann.drawingsDataURL;
+  }
+  // load text boxes/images into annotLayer
+  annotLayer.innerHTML = '';
+  if(ann){
+    (ann.texts||[]).forEach(t=> createTextBoxDOM(t));
+    (ann.images||[]).forEach(it=> createImageDOM(it));
+  }
+  pageInfo.textContent = `Page ${pageNum} / ${pdfDoc.numPages}`;
+  updateUndoRedoButtons();
+}
+
+// --- Annotation DOM helpers (text & images) ---
+function createTextBoxDOM(t){
+  const div = document.createElement('div');
+  div.className = 'text-box';
+  div.contentEditable = false;
+  div.dataset.id = t.id;
+  div.style.left = (t.x * annotCanvas.width) + 'px';
+  div.style.top = (t.y * annotCanvas.height) + 'px';
+  div.style.width = (t.w * annotCanvas.width) + 'px';
+  div.style.height = (t.h * annotCanvas.height) + 'px';
+  div.style.fontSize = (t.fontSize || 16) + 'px';
+  div.style.pointerEvents = 'auto';
+  div.innerHTML = t.html || 'Text';
+  // enable drag
+  makeDraggable(div);
+  div.addEventListener('dblclick', ()=> {
+    div.contentEditable = true;
+    div.focus();
+  });
+  div.addEventListener('blur', ()=> {
+    div.contentEditable = false;
+    saveTextBoxBack(div);
+  });
+  annotLayer.appendChild(div);
+}
+
+function createImageDOM(it){
+  const img = new Image();
+  img.dataset.id = it.id;
+  img.src = it.dataURL;
+  img.style.position = 'absolute';
+  img.style.left = (it.x * annotCanvas.width) + 'px';
+  img.style.top = (it.y * annotCanvas.height) + 'px';
+  img.style.width = (it.w * annotCanvas.width) + 'px';
+  img.style.height = (it.h * annotCanvas.height) + 'px';
+  img.style.cursor = 'move';
+  img.style.pointerEvents = 'auto';
+  makeDraggable(img, true);
+  annotLayer.appendChild(img);
+}
+
+// Save DOM text box state back to annotations
+function saveTextBoxBack(div){
+  const pageAnn = annotations[currentPage] || (annotations[currentPage] = {texts:[], images:[], drawingsDataURL:null});
+  const id = div.dataset.id;
+  const rect = div.getBoundingClientRect();
+  const wrapRect = annotLayer.getBoundingClientRect();
+  const x = (rect.left - wrapRect.left) / annotCanvas.width;
+  const y = (rect.top - wrapRect.top) / annotCanvas.height;
+  const w = rect.width / annotCanvas.width;
+  const h = rect.height / annotCanvas.height;
+  const html = div.innerHTML;
+  const existing = (pageAnn.texts||[]).find(t=>t.id===id);
+  const obj = {id, x, y, w, h, html, fontSize: parseInt(window.getComputedStyle(div).fontSize,10) || 16};
+  if(existing){
+    Object.assign(existing, obj);
+  } else {
+    pageAnn.texts = pageAnn.texts||[]; pageAnn.texts.push(obj);
+  }
+  annotations[currentPage] = pageAnn;
+  pushUndo('edit-text'); saveAnnotationsToLocal();
+}
+
+// Make element draggable
+function makeDraggable(el, allowResize=false){
+  el.style.touchAction = 'none';
+  el.onpointerdown = function(e){
+    e.preventDefault();
+    let startX = e.clientX, startY = e.clientY;
+    const r = el.getBoundingClientRect(); const wrapR = annotLayer.getBoundingClientRect();
+    const origLeft = r.left - wrapR.left, origTop = r.top - wrapR.top;
+    function move(ev){
+      const dx = ev.clientX - startX, dy = ev.clientY - startY;
+      el.style.left = (origLeft + dx) + 'px';
+      el.style.top = (origTop + dy) + 'px';
+    }
+    function up(ev){
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      // save new pos
+      if(el.tagName.toLowerCase()==='img') saveImageBack(el);
+      else saveTextBoxBack(el);
+      pushUndo('move'); saveAnnotationsToLocal();
+    }
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+}
+
+// Save image DOM back to annotations
+function saveImageBack(imgEl){
+  const pageAnn = annotations[currentPage] || (annotations[currentPage] = {texts:[], images:[], drawingsDataURL:null});
+  const id = imgEl.dataset.id;
+  const rect = imgEl.getBoundingClientRect();
+  const wrapRect = annotLayer.getBoundingClientRect();
+  const x = (rect.left - wrapRect.left) / annotCanvas.width;
+  const y = (rect.top - wrapRect.top) / annotCanvas.height;
+  const w = rect.width / annotCanvas.width;
+  const h = rect.height / annotCanvas.height;
+  const existing = (pageAnn.images||[]).find(t=>t.id===id);
+  const obj = {id, x, y, w, h, dataURL: imgEl.src};
+  if(existing) Object.assign(existing, obj); else pageAnn.images.push(obj);
+  annotations[currentPage] = pageAnn;
+  saveAnnotationsToLocal();
+}
+
+// --- Drawing handlers ---
+annotCanvas.addEventListener('pointerdown', (ev)=>{
+  if(!pdfDoc) return;
+  const rect = annotCanvas.getBoundingClientRect();
+  const x = (ev.clientX - rect.left) * (annotCanvas.width / rect.width);
+  const y = (ev.clientY - rect.top) * (annotCanvas.height / rect.height);
+  if(mode==='text'){
+    // create new text box at position
+    const id = 't_' + Date.now();
+    const relX = x / annotCanvas.width, relY = y / annotCanvas.height;
+    const newBox = {id, x: relX, y: relY, w:0.18, h:0.06, html:'New text', fontSize:16};
+    annotations[currentPage] = annotations[currentPage]||{texts:[],images:[],drawingsDataURL:null};
+    annotations[currentPage].texts.push(newBox);
+    createTextBoxDOM(newBox);
+    saveTextBoxBack(document.querySelector(`[data-id="${id}"]`));
+    pushUndo('add-text'); saveAnnotationsToLocal();
+    return;
+  }
+  if(mode==='draw' || mode==='highlight'){
+    drawing = true;
+    lastPos = {x,y};
+    pushUndo(mode==='draw'? 'draw':'highlight');
+    ctxAnnot.globalCompositeOperation = 'source-over';
+    if(mode==='draw'){
+      ctxAnnot.lineWidth = drawSize; ctxAnnot.lineCap='round'; ctxAnnot.strokeStyle = drawColor; ctxAnnot.beginPath(); ctxAnnot.moveTo(x,y);
+    } else {
+      ctxAnnot.fillStyle = hexToRgba(drawColor, 0.35); ctxAnnot.fillRect(x - drawSize*4, y - drawSize*2, drawSize*20, drawSize*4);
+      drawing = false;
+      saveDrawingLayer();
+    }
+  }
+});
+
+annotCanvas.addEventListener('pointermove', (ev)=>{
+  if(!drawing) return;
+  const rect = annotCanvas.getBoundingClientRect();
+  const x = (ev.clientX - rect.left) * (annotCanvas.width / rect.width);
+  const y = (ev.clientY - rect.top) * (annotCanvas.height / rect.height);
+  if(mode==='draw'){
+    ctxAnnot.lineTo(x,y); ctxAnnot.stroke();
+  }
+});
+
+annotCanvas.addEventListener('pointerup', ()=> {
+  if(drawing && mode==='draw'){
+    ctxAnnot.closePath();
+    drawing = false;
+    saveDrawingLayer();
+  }
+});
+
+// Save current drawing layer to annotations (as dataURL)
+function saveDrawingLayer(){
+  annotations[currentPage] = annotations[currentPage]||{texts:[],images:[],drawingsDataURL:null};
+  annotations[currentPage].drawingsDataURL = annotCanvas.toDataURL();
+  saveAnnotationsToLocal();
+}
+
+// Save current full page annotations before navigation
+function saveCurrentPageAnnotations(){
+  // save drawings already done
+  if(annotCanvas) saveDrawingLayer();
+  // save text and images positions already handled on blur/drag
+}
+
+// Utility hex to rgba
+function hexToRgba(hex,alpha=1){
+  const h = hex.replace('#','');
+  const bigint = parseInt(h,16);
+  const r=(bigint>>16)&255,g=(bigint>>8)&255,b=bigint&255;
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+// Image input handler - add into DOM and annotations
+imgInput.addEventListener('change', (e)=>{
+  const f = e.target.files[0]; if(!f) return;
+  const id = 'i_' + Date.now();
+  const reader = new FileReader();
+  reader.onload = function(){
+    const imgData = reader.result;
+    const obj = {id, x:0.1, y:0.1, w:0.4, h:0.25, dataURL: imgData};
+    annotations[currentPage] = annotations[currentPage]||{texts:[],images:[],drawingsDataURL:null};
+    annotations[currentPage].images.push(obj);
+    createImageDOM(obj);
+    saveImageBack(document.querySelector(`[data-id="${id}"]`));
+    pushUndo('add-image'); saveAnnotationsToLocal();
+    e.target.value = '';
+  };
+  reader.readAsDataURL(f);
+});
+
+// Undo / Redo
+undoBtn.addEventListener('click', ()=>{
+  if(!undoStack.length) return;
+  const last = undoStack.pop();
+  redoStack.push({page:last.page, snap: JSON.stringify(annotations[last.page]||{})});
+  // restore snapshot
+  if(last.page === currentPage){
+    annotations[currentPage] = JSON.parse(last.snap || '{}');
+    renderPage(currentPage);
+  } else {
+    annotations[last.page] = JSON.parse(last.snap || '{}');
+  }
+  updateUndoRedoButtons();
+  saveAnnotationsToLocal();
+});
+
+redoBtn.addEventListener('click', ()=>{
+  if(!redoStack.length) return;
+  const last = redoStack.pop();
+  undoStack.push({page:last.page, snap: JSON.stringify(annotations[last.page]||{})});
+  annotations[last.page] = JSON.parse(last.snap || '{}');
+  if(last.page === currentPage) renderPage(currentPage);
+  updateUndoRedoButtons();
+  saveAnnotationsToLocal();
+});
+
+// Clear current page annotations
+clearBtn.addEventListener('click', ()=>{
+  if(!pdfDoc) return;
+  if(!confirm('Clear all annotations on this page?')) return;
+  pushUndo('clear');
+  annotations[currentPage] = {texts:[],images:[],drawingsDataURL:null};
+  renderPage(currentPage);
+  saveAnnotationsToLocal();
+});
+
+// UI controls
+textBtn.addEventListener('click', ()=> { mode='text'; setActive(textBtn); enablePointerEvents(); });
+drawBtn.addEventListener('click', ()=> { mode='draw'; setActive(drawBtn); enablePointerEvents(); });
+highlightBtn.addEventListener('click', ()=> { mode='highlight'; setActive(highlightBtn); enablePointerEvents(); });
+sizeSel.addEventListener('change', ()=> drawSize = parseInt(sizeSel.value,10));
+colorInp.addEventListener('input', ()=> drawColor = colorInp.value);
+
+function setActive(btn){
+  [textBtn,drawBtn,highlightBtn].forEach(b=> b.style.opacity = '1');
+  if(btn) btn.style.opacity = '0.9';
+}
+
+function enablePointerEvents(){
+  // annotation canvas should accept pointer events in draw/highlight; others allow DOM interactions
+  if(mode==='draw' || mode==='highlight'){ annotCanvas.style.pointerEvents = 'auto'; annotLayer.style.pointerEvents = 'none'; }
+  else { annotCanvas.style.pointerEvents = 'none'; annotLayer.style.pointerEvents = 'auto'; }
+}
+
+// File input
+fileInput.addEventListener('change', (e)=> loadPDF(e.target.files[0]));
+
+// Save / Load localStorage
+saveLocal.addEventListener('click', ()=> { saveCurrentPageAnnotations(); saveAnnotationsToLocal(); alert('Saved locally in browser.'); });
+loadLocal.addEventListener('click', ()=> { if(loadAnnotationsFromLocal()){ renderPage(currentPage); alert('Loaded saved annotations.'); } else alert('Nothing saved locally.'); });
+
+// Navigation helper: allow left/right keys
+window.addEventListener('keydown', (e)=>{
+  if(!pdfDoc) return;
+  if(e.key==='ArrowRight'){ saveCurrentPageAnnotations(); if(currentPage < pdfDoc.numPages) { currentPage++; renderPage(currentPage);} }
+  if(e.key==='ArrowLeft'){ saveCurrentPageAnnotations(); if(currentPage>1){ currentPage--; renderPage(currentPage);} }
+});
+
+// Download (flatten)
+downloadBtn.addEventListener('click', async ()=>{
+  if(!pdfDoc || !fileBytes) return alert('Load a PDF first');
+  saveCurrentPageAnnotations();
+  downloadBtn.disabled = true; downloadBtn.textContent = 'Preparing...';
+  try{
+    const srcPdf = await PDFLib.PDFDocument.load(fileBytes);
+    const outPdf = await PDFLib.PDFDocument.create();
+    const copied = await outPdf.copyPages(srcPdf, srcPdf.getPageIndices());
+
+    for(let i=0;i<copied.length;i++){
+      const pg = copied[i];
+      outPdf.addPage(pg);
+      const pageNum = i+1;
+      const page = outPdf.getPage(i);
+      const {width, height} = page.getSize();
+
+      // If annotations exist for page, draw them as image overlay
+      const ann = annotations[pageNum];
+      if(ann){
+        // Compose a temporary canvas matching page size and draw annotations scaled to page pixels
+        const tmp = document.createElement('canvas');
+        tmp.width = width; tmp.height = height;
+        const tctx = tmp.getContext('2d');
+
+        // draw drawings layer if present
+        if(ann.drawingsDataURL){
+          const dimg = new Image();
+          await new Promise((res,rej)=>{ dimg.onload = res; dimg.onerror = rej; dimg.src = ann.drawingsDataURL; });
+          tctx.drawImage(dimg,0,0,width,height);
+        }
+
+        // draw images
+        for(const im of (ann.images||[])){
+          const imEl = new Image();
+          await new Promise((res,rej)=>{ imEl.onload = res; imEl.onerror = rej; imEl.src = im.dataURL; });
+          tctx.drawImage(imEl, im.x * width, im.y * height, im.w * width, im.h * height);
+        }
+
+        // draw texts (simple)
+        tctx.fillStyle = 'white'; // will use color white by default; richer styling can be implemented
+        for(const tx of (ann.texts||[])){
+          // create a temp div to measure; basic approach:
+          const fontSz = tx.fontSize || 16;
+          tctx.font = `${fontSz}px Arial`;
+          // strip tags for measuring; for simplicity, use innerText fallback
+          const textContent = (tx.html || '').replace(/<[^>]+>/g, '') || ' ';
+          // left-bottom in canvas coordinate: PDFLib uses origin at bottom-left; but we draw as image overlay matching top-left origin so it's fine
+          tctx.fillStyle = '#fff';
+          // simple wrap: draw text at x,y
+          tctx.fillText(textContent, tx.x * width + 4, (tx.y * height) + fontSz + 4);
+        }
+
+        // embed tmp canvas as PNG into page
+        const pngBytes = tmp.toDataURL('image/png');
+        const pngArrayBuf = await (await fetch(pngBytes)).arrayBuffer();
+        const png = await outPdf.embedPng(pngArrayBuf);
+        page.drawImage(png, {x:0, y:0, width, height});
+      }
+    }
+
+    const outBytes = await outPdf.save();
+    const blob = new Blob([outBytes], {type:'application/pdf'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'edited.pdf'; a.click();
+    URL.revokeObjectURL(url);
+  } catch(e){ console.error(e); alert('Download failed: '+ e); }
+  finally { downloadBtn.disabled = false; downloadBtn.textContent = 'Download'; }
+});
+
+// Utility to restore annotations for page (create DOMs and drawing)
+function restoreAnnotations(pageNum){
+  const ann = annotations[pageNum];
+  if(!ann) return;
+  // ensure drawing data applied
+  ctxAnnot.clearRect(0,0,annotCanvas.width,annotCanvas.height);
+  if(ann.drawingsDataURL){
+    const img = new Image(); img.onload = ()=> ctxAnnot.drawImage(img,0,0,annotCanvas.width,annotCanvas.height); img.src = ann.drawingsDataURL;
+  }
+  annotLayer.innerHTML = '';
+  (ann.texts||[]).forEach(t=> createTextBoxDOM(t));
+  (ann.images||[]).forEach(i=> createImageDOM(i));
+}
+
+// On page change, save previous page annotations
+// Attach save when navigation occurs (left/right via keys) or beforeunload
+window.addEventListener('beforeunload', ()=> saveCurrentPageAnnotations());
+
+// Small helper: generate IDs
+function genId(prefix='id'){ return prefix + '_' + Math.random().toString(36).slice(2,9); }
+
+// File open handler
+fileInput.addEventListener('change', (e)=> loadPDF(e.target.files[0]));
+
+// Initial state: try load from localStorage on page load
+(function init(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(raw){
+    try{ const parsed = JSON.parse(raw); annotations = parsed.annotations || {}; console.log('Loaded stored annotations (init)'); }catch(e){}
+  }
+})();
+
+// Minimal UX: disable pointerCapture on annotLayer so canvas receives events when drawing
+enablePointerEvents(); // default
+
+// Helper: when user navigates via thumbnail or key we call saveCurrentPageAnnotations before renderPage
+// (already invoked in events above)
+
+</script>
+</body>
+</html>
