@@ -1,45 +1,37 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Advanced PDF Editor — Smarttool Hub</title>
-<meta name="description" content="Advanced browser PDF editor with IndexedDB persistence, rich-text, draggable/resize/rotate text boxes, image crop/resize/rotate, page reorder, export/import JSON and ZIP.">
-<link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/toolbox.png">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>PDF Editor — Smarttool Hub (GitHub Pages ready)</title>
+<meta name="description" content="Edit PDF in browser — add text, draw, highlight, insert images, download. Works on GitHub Pages."/>
+<link rel="icon" href="https://img.icons8.com/fluency/48/toolbox.png"/>
 
-<!-- CSS libs -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-
 <style>
   :root{--bg:#071124;--card:#0f1724;--muted:#9aa8bf;--accent:#60a5fa}
   body{margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);color:#e6eef8}
-  header{position:sticky;top:0;z-index:2000;display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:linear-gradient(90deg,#2563eb,#06b6d4);box-shadow:0 4px 14px rgba(0,0,0,0.4)}
+  header{position:sticky;top:0;z-index:999;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:linear-gradient(90deg,#2563eb,#06b6d4)}
   header .left{display:flex;gap:12px;align-items:center}
-  header img{width:40px;height:40px;border-radius:8px}
-  header h1{margin:0;font-size:18px}
-  .container{max-width:1200px;margin:18px auto;padding:12px}
-  .card{background:var(--card);padding:14px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
+  header img{width:36px;height:36px;border-radius:8px}
+  header h1{margin:0;font-size:17px}
+  .container{max-width:980px;margin:18px auto;padding:12px}
+  .card{background:var(--card);padding:14px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.5)}
   .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
-  .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;padding:8px 10px;border-radius:10px;cursor:pointer}
-  .btn.primary{background:linear-gradient(90deg,#3b82f6,#06b6d4);border:none;color:#041124}
+  .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;padding:8px 10px;border-radius:8px;cursor:pointer}
+  .btn.primary{background:#fff;color:#071124;font-weight:700}
   .small{padding:6px 8px;font-size:13px}
-  .canvas-wrap{position:relative;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.04);margin-top:12px}
+  .canvas-wrap{position:relative;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.04);margin-top:12px;background:#fff}
   canvas{display:block;width:100%}
   #annotLayer{position:absolute;left:0;top:0;pointer-events:none}
-  .text-box{position:absolute;min-width:60px;padding:6px 8px;background:rgba(0,0,0,0.45);border:1px dashed rgba(255,255,255,0.08);color:#fff;border-radius:6px;cursor:move;pointer-events:auto;white-space:pre-wrap;overflow:hidden}
-  .text-box[contenteditable="true"]{outline:2px dashed rgba(255,255,255,0.08)}
-  #thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-  .thumb-wrap{display:flex;flex-direction:column;align-items:center}
-  .thumb-wrap canvas{cursor:pointer;border-radius:6px;border:1px solid rgba(255,255,255,0.04)}
-  .sidepanel{display:flex;gap:12px;align-items:center;margin-left:auto}
-  input[type="file"]{display:none}
+  .text-box{position:absolute;padding:6px 8px;background:rgba(0,0,0,0.5);color:#fff;border-radius:6px;border:1px dashed rgba(255,255,255,0.08);cursor:move;pointer-events:auto;min-width:48px;white-space:pre-wrap;overflow:hidden}
+  .text-box[contenteditable="true"]{outline:2px dashed rgba(255,255,255,0.12)}
+  .img-handle{position:absolute;width:12px;height:12px;background:#fff;border-radius:2px;right:-6px;bottom:-6px;border:1px solid rgba(0,0,0,0.2);cursor:se-resize;pointer-events:auto}
+  .thumbs{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap}
   .muted{color:var(--muted);font-size:13px}
-  .flex{display:flex;gap:8px;align-items:center}
-  .json-input{display:none}
-  .page-controls{display:flex;gap:6px;align-items:center}
-  @media (max-width:900px){ .container{padding:8px} .toolbar{gap:6px} header h1{font-size:15px} }
-  a.home-btn{color:#041124;background:#fff;padding:8px 10px;border-radius:8px;text-decoration:none;font-weight:700}
+  input[type="file"]{display:none}
+  .right{margin-left:auto;display:flex;gap:8px}
+  @media (max-width:720px){ .container{padding:8px} header h1{font-size:15px} }
 </style>
 </head>
 <body>
@@ -48,13 +40,11 @@
     <img src="https://img.icons8.com/fluency/48/toolbox.png" alt="logo"/>
     <div>
       <h1>Smarttool Hub — PDF Editor</h1>
-      <div style="font-size:12px;color:#e6f7ff90">IndexedDB • Rich-text • Crop • Pages</div>
+      <div style="font-size:12px;color:#e6f7ff90">Works on GitHub Pages</div>
     </div>
   </div>
-
-  <div class="sidepanel">
-    <!-- Back to Home -->
-    <a class="home-btn" href="../../index.html" title="Back to Home">← Back to Home</a>
+  <div class="right">
+    <a class="btn" href="../../index.html">← Back to Home</a>
   </div>
 </header>
 
@@ -66,7 +56,7 @@
         <input id="fileInput" type="file" accept="application/pdf">
       </label>
 
-      <div class="flex">
+      <div style="display:flex;gap:6px;align-items:center">
         <button id="textBtn" class="btn small"><i class="fa fa-font"></i> Text</button>
         <button id="drawBtn" class="btn small"><i class="fa fa-pencil"></i> Draw</button>
         <button id="highlightBtn" class="btn small"><i class="fa fa-highlighter"></i> Highlight</button>
@@ -76,465 +66,517 @@
         </label>
       </div>
 
-      <select id="fontSelect" style="padding:6px;border-radius:8px;background:#071124;color:#fff">
-        <option value="Arial">Arial</option>
-        <option value="Times New Roman">Times New Roman</option>
-        <option value="Courier New">Courier New</option>
-        <option value="Georgia">Georgia</option>
-        <option value="Verdana">Verdana</option>
+      <select id="fontSelect" style="padding:6px;border-radius:6px;background:#071124;color:#fff">
+        <option>Arial</option><option>Times New Roman</option><option>Courier New</option><option>Georgia</option><option>Verdana</option>
       </select>
 
       <select id="sizeSel" title="Font/Brush size">
-        <option value="12">12</option><option value="16" selected>16</option><option value="20">20</option><option value="28">28</option><option value="36">36</option>
+        <option value="12">12</option><option value="16" selected>16</option><option value="20">20</option><option value="28">28</option>
       </select>
 
-      <input id="colorInp" type="color" value="#ff4757" title="Color">
+      <input id="colorInp" type="color" value="#ff4757" title="Color" style="margin-left:6px">
 
-      <div class="page-controls" style="margin-left:auto">
+      <div class="right" style="margin-left:auto">
         <button id="prevBtn" class="btn small"><i class="fa fa-chevron-left"></i></button>
-        <div id="pageIndicator" style="padding:6px 10px;background:rgba(255,255,255,0.02);border-radius:8px">0 / 0</div>
+        <div id="pageIndicator" style="padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:6px">0 / 0</div>
         <button id="nextBtn" class="btn small"><i class="fa fa-chevron-right"></i></button>
-      </div>
-
-      <div style="margin-left:8px;display:flex;gap:8px">
-        <button id="undoBtn" class="btn small"><i class="fa fa-rotate-left"></i> Undo</button>
-        <button id="redoBtn" class="btn small"><i class="fa fa-rotate-right"></i> Redo</button>
-        <button id="saveBtn" class="btn small"><i class="fa fa-floppy-disk"></i> Save</button>
-        <button id="downloadBtn" class="btn primary small"><i class="fa fa-download"></i> Download PDF</button>
+        <button id="downloadBtn" class="btn primary small" style="margin-left:8px"><i class="fa fa-download"></i> Download</button>
       </div>
     </div>
 
-    <div style="display:flex;gap:12px;flex-wrap:wrap">
-      <div style="flex:1;min-width:420px">
-        <div class="canvas-wrap" id="canvasWrap" style="max-width:980px">
-          <canvas id="pdfCanvas"></canvas>
-          <canvas id="annotCanvas" style="position:absolute;left:0;top:0;pointer-events:auto"></canvas>
-          <div id="annotLayer" style="position:absolute;left:0;top:0;pointer-events:none"></div>
-        </div>
-
-        <div id="thumbs" style="margin-top:12px"></div>
-      </div>
-
-      <div style="width:310px">
-        <div class="card" style="padding:12px;background:#0c1320">
-          <h3 style="margin:0 0 8px 0">Selected</h3>
-          <div id="selectionInfo" class="muted">No selection</div>
-          <hr style="border:none;border-top:1px solid rgba(255,255,255,0.04);margin:10px 0">
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <label class="muted">Font</label>
-            <select id="selFont" style="padding:6px;border-radius:8px;background:#071124;color:#fff">
-              <option>Arial</option><option>Times New Roman</option><option>Courier New</option><option>Georgia</option><option>Verdana</option>
-            </select>
-            <label class="muted">Size</label>
-            <input id="selSize" type="number" value="16" style="padding:6px;border-radius:8px;background:#071124;color:#fff">
-            <label class="muted">Color</label>
-            <input id="selColor" type="color" value="#ffffff">
-            <div style="display:flex;gap:8px">
-              <button id="boldBtn" class="btn small">B</button>
-              <button id="italicBtn" class="btn small"><i class="fa fa-italic"></i></button>
-              <button id="deleteBtn" class="btn small"><i class="fa fa-trash"></i></button>
-            </div>
-            <hr style="border:none;border-top:1px solid rgba(255,255,255,0.04);margin:10px 0">
-            <div style="display:flex;gap:8px">
-              <button id="addPageBtn" class="btn small"><i class="fa fa-plus"></i> Add Page</button>
-              <button id="delPageBtn" class="btn small"><i class="fa fa-trash-can"></i> Delete Page</button>
-            </div>
-            <div style="margin-top:10px">
-              <button id="reorderModeBtn" class="btn small">Toggle Reorder</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card" style="padding:12px;margin-top:12px;background:#0c1320">
-          <h3 style="margin:0 0 8px 0">Image Cropper</h3>
-          <div><input id="cropBtn" class="btn small" value="Open Cropper" readonly></div>
-          <div id="cropPreview" style="margin-top:8px"></div>
-          <div style="margin-top:8px;font-size:13px;color:var(--muted)">Crop images before placing.</div>
-        </div>
-
-      </div>
+    <div class="canvas-wrap" id="canvasWrap">
+      <canvas id="pdfCanvas"></canvas>
+      <canvas id="annotCanvas" style="position:absolute;left:0;top:0;pointer-events:auto"></canvas>
+      <div id="annotLayer" style="position:absolute;left:0;top:0;pointer-events:none"></div>
     </div>
 
+    <div class="thumbs muted" id="thumbsArea">Pages: none</div>
+    <div style="margin-top:8px" class="muted">Tip: Select "Text" then click on page to add. Double-click a text box to edit. Drag elements to move. Images have bottom-right handle to resize.</div>
   </div>
 </div>
 
 <!-- libs -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-<script src="https://unpkg.com/idb-keyval@6/dist/idb-keyval.iife.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
 <script>
-/* Fixed & ready advanced editor
-   - Ensured fileInput change binding is reliable
-   - Added Back to Home link in header (../../index.html)
-   - Keeps previously added advanced features
+/* Reliable, GitHub Pages-friendly PDF editor
+   - Uses pdf.js (CDN) and pdf-lib
+   - Per-page annotations saved in localStorage (keyed by file name if present)
 */
 
-// pdf.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-// DOM references
-const fileInput = document.getElementById('fileInput'), imgInput = document.getElementById('imgInput');
-const pdfCanvas = document.getElementById('pdfCanvas'), annotCanvas = document.getElementById('annotCanvas'), annotLayer = document.getElementById('annotLayer');
-const canvasWrap = document.getElementById('canvasWrap'), thumbs = document.getElementById('thumbs');
+const fileInput = document.getElementById('fileInput');
+const imgInput = document.getElementById('imgInput');
+const pdfCanvas = document.getElementById('pdfCanvas');
+const annotCanvas = document.getElementById('annotCanvas');
+const annotLayer = document.getElementById('annotLayer');
+const canvasWrap = document.getElementById('canvasWrap');
+const thumbsArea = document.getElementById('thumbsArea');
+
+const textBtn = document.getElementById('textBtn');
+const drawBtn = document.getElementById('drawBtn');
+const highlightBtn = document.getElementById('highlightBtn');
+const fontSelect = document.getElementById('fontSelect');
+const sizeSel = document.getElementById('sizeSel');
+const colorInp = document.getElementById('colorInp');
+
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
 const pageIndicator = document.getElementById('pageIndicator');
-const textBtn = document.getElementById('textBtn'), drawBtn = document.getElementById('drawBtn'), highlightBtn = document.getElementById('highlightBtn');
-const sizeSel = document.getElementById('sizeSel'), colorInp = document.getElementById('colorInp'), fontSelect = document.getElementById('fontSelect');
-const prevBtn = document.getElementById('prevBtn'), nextBtn = document.getElementById('nextBtn');
-const undoBtn = document.getElementById('undoBtn'), redoBtn = document.getElementById('redoBtn');
-const saveBtn = document.getElementById('saveBtn'), downloadBtn = document.getElementById('downloadBtn');
-const cropBtn = document.getElementById('cropBtn'), cropPreview = document.getElementById('cropPreview');
+const downloadBtn = document.getElementById('downloadBtn');
 
-const selFont = document.getElementById('selFont'), selSize = document.getElementById('selSize'), selColor = document.getElementById('selColor');
-const boldBtn = document.getElementById('boldBtn'), italicBtn = document.getElementById('italicBtn'), deleteBtn = document.getElementById('deleteBtn');
-const addPageBtn = document.getElementById('addPageBtn'), delPageBtn = document.getElementById('delPageBtn');
-const reorderModeBtn = document.getElementById('reorderModeBtn');
+const ctxPdf = pdfCanvas.getContext('2d');
+const ctxAnnot = annotCanvas.getContext('2d');
 
-const ctxPdf = pdfCanvas.getContext('2d'), ctxAnnot = annotCanvas.getContext('2d');
-
-// State
 let pdfDoc = null, fileBytes = null, pageCount = 0, currentPage = 1, scale = 1.3;
-let mode = 'draw', drawColor = colorInp.value, drawSize = parseInt(sizeSel.value,10);
-let annotations = [], undoStack = [], redoStack = [], selectedEl = null;
-const STORAGE_KEY = 'smarttool_pdf_v_fixed_v1';
-const { set: idbSet, get: idbGet } = idbKeyval;
+let mode = 'draw'; // draw, highlight, text
+let drawColor = colorInp.value, drawSize = parseInt(sizeSel.value,10);
+let annotations = {}; // pageNum -> { drawingsDataURL, texts: [], images: [] }
+const STORAGE_PREFIX = 'simple_pdf_editor_v1_';
 
-// Utility
-function genId(pref='id'){ return pref + '_' + Math.random().toString(36).slice(2,9); }
-function hexToRgba(hex,a=1){ const h=hex.replace('#',''); const n=parseInt(h,16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; }
-function setCanvasSize(w,h){ pdfCanvas.width=w; pdfCanvas.height=h; annotCanvas.width=w; annotCanvas.height=h; annotCanvas.style.width = pdfCanvas.width + 'px'; annotCanvas.style.height = pdfCanvas.height + 'px'; annotLayer.style.width = pdfCanvas.width + 'px'; annotLayer.style.height = pdfCanvas.height + 'px'; canvasWrap.style.height = pdfCanvas.height + 'px'; }
+// helpers
+function setCanvasSize(w,h){
+  pdfCanvas.width=w; pdfCanvas.height=h;
+  annotCanvas.width=w; annotCanvas.height=h;
+  annotCanvas.style.width = pdfCanvas.width + 'px';
+  annotCanvas.style.height = pdfCanvas.height + 'px';
+  annotLayer.style.width = pdfCanvas.width + 'px';
+  annotLayer.style.height = pdfCanvas.height + 'px';
+  canvasWrap.style.height = pdfCanvas.height + 'px';
+}
 
-// --- PDF upload: FIXED binding ---
+function saveAnnotationsToLocal(key){
+  try{
+    const out = JSON.stringify(annotations);
+    if(key) localStorage.setItem(STORAGE_PREFIX + key, out);
+    else localStorage.setItem(STORAGE_PREFIX + 'autosave', out);
+  }catch(e){ console.warn('save failed', e); }
+}
+
+function loadAnnotationsFromLocal(key){
+  try{
+    const raw = key ? localStorage.getItem(STORAGE_PREFIX + key) : localStorage.getItem(STORAGE_PREFIX + 'autosave');
+    if(!raw) return {};
+    return JSON.parse(raw);
+  }catch(e){ return {}; }
+}
+
+function genId(p='id'){ return p + '_' + Math.random().toString(36).slice(2,9); }
+
+// PDF load
 fileInput.addEventListener('change', async (e)=>{
   const f = e.target.files[0];
   if(!f) return;
+  const nameKey = f.name || 'file';
   try{
     fileBytes = await f.arrayBuffer();
-    await loadPDFBytes(fileBytes);
-    annotations = createEmptyAnnotations(pageCount);
-    pushUndo('load-pdf');
-    await saveTempToIDB();
+    pdfDoc = await pdfjsLib.getDocument({data: fileBytes}).promise;
+    pageCount = pdfDoc.numPages;
+    currentPage = 1;
+    // try load saved annotations for this filename
+    annotations = loadAnnotationsFromLocal(nameKey);
+    if(!annotations || Object.keys(annotations).length === 0) annotations = {}; // reset if empty
+    await renderThumbnails();
+    await renderPage(currentPage);
+    // also autosave mapping of filename for later use
+    localStorage.setItem(STORAGE_PREFIX + 'last_filename', nameKey);
   }catch(err){
-    console.error('Load PDF failed', err);
-    alert('Failed to load PDF: ' + (err && err.message? err.message: err));
+    console.error(err);
+    alert('Failed to load PDF: ' + (err.message || err));
   }
 });
 
-// Load PDF from bytes
-async function loadPDFBytes(bytes){
-  pdfDoc = await pdfjsLib.getDocument({data: bytes}).promise;
-  pageCount = pdfDoc.numPages; currentPage = 1;
-  await renderThumbnails(); await renderPage(currentPage);
-}
-
-// create empty annotations
-function createEmptyAnnotations(n){ const arr=[]; for(let i=0;i<n;i++) arr.push({drawingsDataURL:null, texts:[], images:[]}); return arr; }
-
-// render thumbs
-let sortable = null;
+// render thumbnails (small)
 async function renderThumbnails(){
-  thumbs.innerHTML = '';
+  thumbsArea.textContent = '';
   for(let p=1;p<=pageCount;p++){
     const pg = await pdfDoc.getPage(p);
-    const vp = pg.getViewport({scale:0.14});
+    const vp = pg.getViewport({scale:0.12});
     const c = document.createElement('canvas'); c.width = vp.width; c.height = vp.height;
     await pg.render({canvasContext: c.getContext('2d'), viewport: vp}).promise;
-    const wrap = document.createElement('div'); wrap.className='thumb-wrap'; wrap.dataset.page = p;
-    wrap.appendChild(c);
-    const lbl = document.createElement('div'); lbl.textContent = p; lbl.style.color='#cfe6ff'; lbl.style.fontSize='13px';
-    wrap.appendChild(lbl);
-    wrap.style.cursor='pointer';
-    wrap.addEventListener('click', ()=>{ saveCurrentAnnotations(); currentPage = p; renderPage(p); });
-    thumbs.appendChild(wrap);
+    c.style.marginRight = '6px';
+    c.style.border = '1px solid rgba(255,255,255,0.05)';
+    c.style.borderRadius = '4px';
+    c.style.cursor = 'pointer';
+    c.onclick = ()=>{ saveCurrentAnnotations(); currentPage = p; renderPage(p); };
+    thumbsArea.appendChild(c);
   }
-  // enable reorder
-  if(sortable) { sortable.destroy(); sortable = null; }
-  sortable = Sortable.create(thumbs, {
-    animation:150,
-    onEnd: (evt) => {
-      const oldI = evt.oldIndex, newI = evt.newIndex;
-      const item = annotations.splice(oldI,1)[0];
-      annotations.splice(newI,0,item);
-      pushUndo('reorder'); saveTempToIDB(); renderThumbnails(); renderPage(currentPage);
-    }
-  });
 }
 
 // render page
-async function renderPage(pnum){
+async function renderPage(p){
   if(!pdfDoc) return;
-  const page = await pdfDoc.getPage(pnum);
+  const page = await pdfDoc.getPage(p);
   const vp0 = page.getViewport({scale:1});
-  const containerW = Math.min(980, window.innerWidth - 200);
+  const containerW = Math.min(920, window.innerWidth - 80);
   const targetScale = (containerW / vp0.width) * (scale/1.3);
   const viewport = page.getViewport({scale: targetScale});
   setCanvasSize(viewport.width, viewport.height);
   await page.render({canvasContext: ctxPdf, viewport}).promise;
-
   // load annotations
   ctxAnnot.clearRect(0,0,annotCanvas.width,annotCanvas.height);
   annotLayer.innerHTML = '';
-  const ann = annotations[pnum-1];
+  const ann = annotations[p];
   if(ann && ann.drawingsDataURL){
     const img = new Image();
     img.onload = ()=> ctxAnnot.drawImage(img,0,0,annotCanvas.width,annotCanvas.height);
     img.src = ann.drawingsDataURL;
   }
   if(ann){
-    (ann.texts||[]).forEach(t=> createTextBoxDOM(t));
-    (ann.images||[]).forEach(i=> createImageDOM(i));
+    (ann.texts||[]).forEach(t => createTextDiv(t));
+    (ann.images||[]).forEach(i => createImageEl(i));
   }
-  pageIndicator.textContent = `${pnum} / ${pageCount}`;
+  pageIndicator.textContent = `${p} / ${pageCount}`;
 }
 
-// create text box DOM
-function createTextBoxDOM(t){
-  const div = document.createElement('div'); div.className='text-box'; div.dataset.id = t.id || genId('t');
+// Drawing handlers
+let isDrawing = false;
+annotCanvas.addEventListener('pointerdown', (ev)=>{
+  if(!pdfDoc) return;
+  if(mode === 'text') return;
+  const rect = annotCanvas.getBoundingClientRect();
+  const x = (ev.clientX - rect.left) * (annotCanvas.width / rect.width);
+  const y = (ev.clientY - rect.top) * (annotCanvas.height / rect.height);
+  if(mode === 'draw' || mode === 'highlight'){
+    if(mode === 'draw'){
+      ctxAnnot.beginPath();
+      ctxAnnot.lineWidth = drawSize;
+      ctxAnnot.lineCap = 'round';
+      ctxAnnot.strokeStyle = drawColor;
+      ctxAnnot.moveTo(x,y);
+      isDrawing = true;
+    } else {
+      ctxAnnot.fillStyle = hexToRgba(drawColor, 0.35);
+      ctxAnnot.fillRect(x - drawSize*4, y - drawSize*2, drawSize*20, drawSize*4);
+      saveDrawingToPage(currentPage);
+    }
+  }
+});
+annotCanvas.addEventListener('pointermove', (ev)=>{
+  if(!isDrawing) return;
+  const rect = annotCanvas.getBoundingClientRect();
+  const x = (ev.clientX - rect.left) * (annotCanvas.width / rect.width);
+  const y = (ev.clientY - rect.top) * (annotCanvas.height / rect.height);
+  ctxAnnot.lineTo(x,y);
+  ctxAnnot.stroke();
+});
+annotCanvas.addEventListener('pointerup', ()=>{ if(isDrawing){ ctxAnnot.closePath(); isDrawing=false; saveDrawingToPage(currentPage); }});
+
+// save drawing layer as dataURL to annotations
+function saveDrawingToPage(page){
+  annotations[page] = annotations[page] || {drawingsDataURL:null, texts:[], images:[]};
+  annotations[page].drawingsDataURL = annotCanvas.toDataURL();
+  const key = localStorage.getItem(STORAGE_PREFIX + 'last_filename') || 'autosave';
+  saveAnnotationsToLocal(key);
+}
+
+// text mode: click canvasWrap to add text
+canvasWrap.addEventListener('click', (ev)=>{
+  if(!pdfDoc) return;
+  if(mode !== 'text') return;
+  // get coords relative to annotCanvas
+  const rect = annotCanvas.getBoundingClientRect();
+  const x = (ev.clientX - rect.left) * (annotCanvas.width / rect.width);
+  const y = (ev.clientY - rect.top) * (annotCanvas.height / rect.height);
+  const wRel = 0.28, hRel = 0.08;
+  const txt = { id: genId('t'), x: x/annotCanvas.width, y: y/annotCanvas.height, w: wRel, h: hRel, html: 'Type...', fontSize: parseInt(sizeSel.value,10), color: colorInp.value, fontFamily: fontSelect.value };
+  annotations[currentPage] = annotations[currentPage] || {drawingsDataURL:null, texts:[], images:[]};
+  annotations[currentPage].texts = annotations[currentPage].texts || [];
+  annotations[currentPage].texts.push(txt);
+  createTextDiv(txt);
+  saveAnnotationsToLocal(localStorage.getItem(STORAGE_PREFIX + 'last_filename') || 'autosave');
+});
+
+// create text div DOM
+function createTextDiv(t){
+  const div = document.createElement('div');
+  div.className = 'text-box';
+  div.dataset.id = t.id;
   div.style.left = (t.x * annotCanvas.width) + 'px';
   div.style.top = (t.y * annotCanvas.height) + 'px';
   div.style.width = (t.w * annotCanvas.width) + 'px';
   div.style.height = (t.h * annotCanvas.height) + 'px';
   div.style.fontSize = (t.fontSize || 16) + 'px';
   div.style.fontFamily = t.fontFamily || 'Arial';
-  div.innerHTML = t.html || 'Text';
+  div.style.color = t.color || '#fff';
+  div.innerHTML = t.html || '';
   annotLayer.appendChild(div);
-  enableInteract(div);
-  div.addEventListener('dblclick', ()=> { div.contentEditable = true; div.focus(); });
-  div.addEventListener('blur', ()=> { div.contentEditable = false; saveTextBoxBack(div); pushUndo('edit-text'); saveTempToIDB(); });
-  div.addEventListener('click', (e)=> { e.stopPropagation(); selectElement(div); });
+  makeElementDraggable(div);
+  // double-click to edit
+  div.addEventListener('dblclick', (e)=> {
+    e.stopPropagation();
+    div.contentEditable = 'true';
+    div.focus();
+    // on blur save
+    const onBlur = ()=> {
+      div.contentEditable = 'false';
+      saveTextDivToAnnotations(div);
+      div.removeEventListener('blur', onBlur);
+      saveAnnotationsToLocal(localStorage.getItem(STORAGE_PREFIX + 'last_filename') || 'autosave');
+    };
+    div.addEventListener('blur', onBlur);
+  });
+  // click selects for styling (optional)
+  div.addEventListener('click', (e)=> {
+    e.stopPropagation();
+    // show simple editor: update font/selectors
+    // apply immediate changes when user changes controls
+    // we will not show separate UI here, user can double-click to edit text
+  });
 }
 
-// create image DOM
-function createImageDOM(it){
-  const img = new Image(); img.dataset.id = it.id || genId('i'); img.src = it.dataURL;
-  img.style.position='absolute'; img.style.left=(it.x*annotCanvas.width)+'px'; img.style.top=(it.y*annotCanvas.height)+'px';
-  img.style.width=(it.w*annotCanvas.width)+'px'; img.style.height=(it.h*annotCanvas.height)+'px'; img.style.cursor='move';
-  annotLayer.appendChild(img);
-  enableInteract(img, true);
-  img.addEventListener('click', (e)=>{ e.stopPropagation(); selectElement(img); });
-}
-
-// save text box back
-function saveTextBoxBack(div){
-  const idx = currentPage-1;
-  annotations[idx] = annotations[idx] || {drawingsDataURL:null, texts:[], images:[]};
+// save text div back to annotations
+function saveTextDivToAnnotations(div){
+  const page = currentPage;
   const wrap = annotLayer.getBoundingClientRect(), rect = div.getBoundingClientRect();
   const x = (rect.left - wrap.left) / annotCanvas.width;
   const y = (rect.top - wrap.top) / annotCanvas.height;
   const w = rect.width / annotCanvas.width;
   const h = rect.height / annotCanvas.height;
-  const html = div.innerHTML;
   const fontSize = parseInt(window.getComputedStyle(div).fontSize,10) || 16;
   const fontFamily = window.getComputedStyle(div).fontFamily || 'Arial';
-  const id = div.dataset.id;
-  const existing = (annotations[idx].texts||[]).find(tt=>tt.id===id);
-  const obj = {id, x, y, w, h, html, fontSize, fontFamily};
-  if(existing) Object.assign(existing, obj); else annotations[idx].texts.push(obj);
+  const color = window.getComputedStyle(div).color || '#ffffff';
+  const html = div.innerHTML;
+  annotations[page] = annotations[page] || {drawingsDataURL:null, texts:[], images:[]};
+  const arr = annotations[page].texts || [];
+  const existing = arr.find(xe => xe.id === div.dataset.id);
+  const obj = { id: div.dataset.id, x, y, w, h, html, fontSize, color, fontFamily };
+  if(existing) Object.assign(existing, obj); else arr.push(obj);
+  annotations[page].texts = arr;
 }
 
-// save image back
-function saveImageBack(img){
-  const idx = currentPage-1;
-  annotations[idx] = annotations[idx] || {drawingsDataURL:null, texts:[], images:[]};
-  const wrap = annotLayer.getBoundingClientRect(), rect = img.getBoundingClientRect();
-  const x = (rect.left - wrap.left) / annotCanvas.width;
-  const y = (rect.top - wrap.top) / annotCanvas.height;
-  const w = rect.width / annotCanvas.width;
-  const h = rect.height / annotCanvas.height;
-  const id = img.dataset.id;
-  const existing = (annotations[idx].images||[]).find(ii=>ii.id===id);
-  const obj = {id, x, y, w, h, dataURL: img.src};
-  if(existing) Object.assign(existing, obj); else annotations[idx].images.push(obj);
-}
-
-// interact.js enable drag/resize/rotate
-function enableInteract(el, isImage=false){
-  interact(el)
-    .draggable({
-      listeners: {
-        move(event){
-          const target = event.target;
-          const dx = (parseFloat(target.getAttribute('data-x'))||0) + event.dx;
-          const dy = (parseFloat(target.getAttribute('data-y'))||0) + event.dy;
-          const rot = parseFloat(target.getAttribute('data-rot')||0);
-          target.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg)`;
-          target.setAttribute('data-x', dx); target.setAttribute('data-y', dy);
-        },
-        end(){ /* nothing */ }
-      }
-    })
-    .resizable({
-      edges: { left:true, right:true, bottom:true, top:true },
-      listeners: {
-        move(event){
-          const target = event.target;
-          let x = (parseFloat(target.getAttribute('data-x'))||0);
-          let y = (parseFloat(target.getAttribute('data-y'))||0);
-          target.style.width = event.rect.width + 'px';
-          target.style.height = event.rect.height + 'px';
-          x += event.deltaRect.left;
-          y += event.deltaRect.top;
-          const rot = parseFloat(target.getAttribute('data-rot')||0);
-          target.style.transform = `translate(${x}px, ${y}px) rotate(${rot}deg)`;
-          target.setAttribute('data-x', x); target.setAttribute('data-y', y);
-        },
-        end(){ if(isImage) saveImageBack(event.target); else saveTextBoxBack(event.target); pushUndo('resize'); saveTempToIDB(); }
-      },
-      inertia:true
-    })
-    .gesturable({
-      listeners: {
-        move (event){
-          const target = event.target;
-          const currentRot = parseFloat(target.getAttribute('data-rot')||0);
-          const newRot = currentRot + event.da;
-          const x = parseFloat(target.getAttribute('data-x')||0);
-          const y = parseFloat(target.getAttribute('data-y')||0);
-          target.style.transform = `translate(${x}px, ${y}px) rotate(${newRot}deg)`;
-          target.setAttribute('data-rot', newRot);
-        }
-      }
-    });
-}
-
-// drawing handlers
-annotCanvas.addEventListener('pointerdown', (ev)=>{
-  if(!pdfDoc) return;
-  if(mode === 'text') return;
-  const rect = annotCanvas.getBoundingClientRect();
-  const x = (ev.clientX - rect.left)*(annotCanvas.width/rect.width);
-  const y = (ev.clientY - rect.top)*(annotCanvas.height/rect.height);
-  if(mode==='draw' || mode==='highlight'){
-    ctxAnnot.globalCompositeOperation = 'source-over';
-    if(mode==='draw'){ ctxAnnot.lineWidth = drawSize; ctxAnnot.lineCap='round'; ctxAnnot.strokeStyle = drawColor; ctxAnnot.beginPath(); ctxAnnot.moveTo(x,y); pushUndo('draw'); drawing=true; }
-    else { ctxAnnot.fillStyle = hexToRgba(drawColor,0.35); ctxAnnot.fillRect(x - drawSize*4, y - drawSize*2, drawSize*20, drawSize*4); saveDrawingLayer(); }
-  }
-});
-let drawing=false;
-annotCanvas.addEventListener('pointermove', (ev)=>{ if(!drawing) return; const rect = annotCanvas.getBoundingClientRect(); const x=(ev.clientX-rect.left)*(annotCanvas.width/rect.width); const y=(ev.clientY-rect.top)*(annotCanvas.height/rect.height); ctxAnnot.lineTo(x,y); ctxAnnot.stroke(); });
-annotCanvas.addEventListener('pointerup', ()=>{ if(drawing){ ctxAnnot.closePath(); drawing=false; saveDrawingLayer(); }});
-
-// save drawing layer
-function saveDrawingLayer(){ const idx=currentPage-1; annotations[idx]=annotations[idx]||{drawingsDataURL:null,texts:[],images:[]}; annotations[idx].drawingsDataURL = annotCanvas.toDataURL(); saveTempToIDB(); }
-
-// click canvasWrap to add text
-canvasWrap.addEventListener('click', (ev)=>{
-  if(!pdfDoc) return;
-  if(mode !== 'text') return;
-  const rect = annotCanvas.getBoundingClientRect();
-  const x = (ev.clientX - rect.left)*(annotCanvas.width/rect.width);
-  const y = (ev.clientY - rect.top)*(annotCanvas.height/rect.height);
-  const wRel = 0.28, hRel = 0.08;
-  const t = { id: genId('t'), x: x/annotCanvas.width, y: y/annotCanvas.height, w: wRel, h: hRel, html: 'New text', fontSize: parseInt(sizeSel.value,10), fontFamily: fontSelect.value };
-  annotations[currentPage-1] = annotations[currentPage-1] || {drawingsDataURL:null,texts:[],images:[]};
-  annotations[currentPage-1].texts.push(t);
-  createTextBoxDOM(t);
-  pushUndo('add-text'); saveTempToIDB();
-});
-
-// image insert & crop (Cropper.js)
-let cropper=null;
-imgInput.addEventListener('change', (e)=>{
-  const f = e.target.files[0]; if(!f) return;
-  const reader = new FileReader();
-  reader.onload = ()=> openCropper(reader.result);
-  reader.readAsDataURL(f);
-  e.target.value = '';
-});
-function openCropper(dataUrl){
-  cropPreview.innerHTML = '';
-  const img = document.createElement('img'); img.src = dataUrl; img.style.maxWidth='100%'; cropPreview.appendChild(img);
-  cropper = new Cropper(img, { viewMode:1, autoCropArea:0.8, responsive:true });
-  cropBtn.value = 'Crop & Place';
-  cropBtn.onclick = ()=>{
-    const canvas = cropper.getCroppedCanvas();
-    const durl = canvas.toDataURL('image/png');
-    const obj = { id: genId('i'), x:0.1, y:0.1, w:0.5, h:0.4, dataURL: durl };
-    annotations[currentPage-1] = annotations[currentPage-1] || {drawingsDataURL:null,texts:[],images:[]};
-    annotations[currentPage-1].images.push(obj);
-    createImageDOM(obj);
-    saveImageBack(document.querySelector(`[data-id="${obj.id}"]`));
-    pushUndo('add-image'); saveTempToIDB();
-    cropper.destroy(); cropper=null; cropPreview.innerHTML=''; cropBtn.value='Open Cropper'; cropBtn.onclick = ()=>{};
+// simple draggable for text and images
+function makeElementDraggable(el){
+  el.style.touchAction = 'none';
+  el.onpointerdown = function(e){
+    e.preventDefault();
+    const startX = e.clientX, startY = e.clientY;
+    const rect = el.getBoundingClientRect(), wrapRect = annotLayer.getBoundingClientRect();
+    const origLeft = rect.left - wrapRect.left, origTop = rect.top - wrapRect.top;
+    function move(ev){
+      const dx = ev.clientX - startX, dy = ev.clientY - startY;
+      el.style.left = (origLeft + dx) + 'px';
+      el.style.top = (origTop + dy) + 'px';
+    }
+    function up(ev){
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      // save pos
+      if(el.tagName.toLowerCase() === 'div') saveTextDivToAnnotations(el);
+      else saveImageElToAnnotations(el);
+      saveAnnotationsToLocal(localStorage.getItem(STORAGE_PREFIX + 'last_filename') || 'autosave');
+    }
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
   };
 }
 
-// selection helpers
-function selectElement(el){
-  selectedEl = el; document.getElementById('selectionInfo').textContent = 'Selected: ' + (el.tagName.toLowerCase()==='img' ? 'Image' : 'Text');
-  if(el.tagName.toLowerCase()==='img'){ selFont.disabled=true; selSize.disabled=true; selColor.disabled=true; }
-  else { selFont.disabled=false; selSize.disabled=false; selColor.disabled=false; selFont.value = window.getComputedStyle(el).fontFamily || 'Arial'; selSize.value = parseInt(window.getComputedStyle(el).fontSize,10)||16; selColor.value = rgbToHex(window.getComputedStyle(el).color||'#ffffff'); }
+// Image insert and simple resize handle
+imgInput.addEventListener('change', (e)=>{
+  const f = e.target.files[0]; if(!f) return;
+  const reader = new FileReader();
+  reader.onload = ()=> {
+    const data = reader.result;
+    const imgObj = { id: genId('i'), x:0.12, y:0.12, w:0.5, h:0.4, dataURL: data };
+    annotations[currentPage] = annotations[currentPage] || {drawingsDataURL:null, texts:[], images:[]};
+    annotations[currentPage].images = annotations[currentPage].images || [];
+    annotations[currentPage].images.push(imgObj);
+    createImageEl(imgObj);
+    saveAnnotationsToLocal(localStorage.getItem(STORAGE_PREFIX + 'last_filename') || 'autosave');
+  };
+  reader.readAsDataURL(f);
+  e.target.value = '';
+});
+
+function createImageEl(it){
+  const img = new Image();
+  img.src = it.dataURL;
+  img.dataset.id = it.id;
+  img.style.position = 'absolute';
+  img.style.left = (it.x * annotCanvas.width) + 'px';
+  img.style.top = (it.y * annotCanvas.height) + 'px';
+  img.style.width = (it.w * annotCanvas.width) + 'px';
+  img.style.height = (it.h * annotCanvas.height) + 'px';
+  img.style.cursor = 'move';
+  img.style.pointerEvents = 'auto';
+  // handle for resize
+  const wrap = document.createElement('div');
+  wrap.style.position = 'absolute';
+  wrap.style.left = img.style.left;
+  wrap.style.top = img.style.top;
+  wrap.style.width = img.style.width;
+  wrap.style.height = img.style.height;
+  wrap.style.pointerEvents = 'auto';
+  wrap.appendChild(img);
+
+  const handle = document.createElement('div');
+  handle.className = 'img-handle';
+  wrap.appendChild(handle);
+
+  annotLayer.appendChild(wrap);
+
+  // drag wrap
+  makeElementDraggable(wrap);
+  // resize via handle
+  handle.onpointerdown = function(e){
+    e.stopPropagation(); e.preventDefault();
+    const startX = e.clientX, startY = e.clientY;
+    const startW = wrap.getBoundingClientRect().width, startH = wrap.getBoundingClientRect().height;
+    function move(ev){
+      const dx = ev.clientX - startX, dy = ev.clientY - startY;
+      const newW = Math.max(20, startW + dx), newH = Math.max(20, startH + dy);
+      wrap.style.width = newW + 'px';
+      wrap.style.height = newH + 'px';
+      img.style.width = newW + 'px'; img.style.height = newH + 'px';
+    }
+    function up(ev){
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      saveImageElToAnnotations(wrap);
+      saveAnnotationsToLocal(localStorage.getItem(STORAGE_PREFIX + 'last_filename') || 'autosave');
+    }
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+  // save initial
+  saveImageElToAnnotations(wrap);
 }
-function rgbToHex(rgb){ const m=rgb.match(/\d+/g); if(!m) return '#ffffff'; return '#' + ((1<<24)+(parseInt(m[0])<<16)+(parseInt(m[1])<<8)+parseInt(m[2])).toString(16).slice(1); }
 
-// save image/text back on controls
-selFont.addEventListener('change', ()=>{ if(!selectedEl)return; selectedEl.style.fontFamily = selFont.value; saveTextBoxBack(selectedEl); saveTempToIDB(); });
-selSize.addEventListener('change', ()=>{ if(!selectedEl)return; selectedEl.style.fontSize = selSize.value + 'px'; saveTextBoxBack(selectedEl); saveTempToIDB(); });
-selColor.addEventListener('change', ()=>{ if(!selectedEl)return; selectedEl.style.color = selColor.value; saveTextBoxBack(selectedEl); saveTempToIDB(); });
-boldBtn.addEventListener('click', ()=>{ if(!selectedEl)return; const cur = window.getComputedStyle(selectedEl).fontWeight; selectedEl.style.fontWeight = (cur==='700'||cur==='bold') ? '400' : '700'; saveTextBoxBack(selectedEl); saveTempToIDB(); });
-italicBtn.addEventListener('click', ()=>{ if(!selectedEl)return; const cur = window.getComputedStyle(selectedEl).fontStyle; selectedEl.style.fontStyle = (cur==='italic') ? 'normal' : 'italic'; saveTextBoxBack(selectedEl); saveTempToIDB(); });
-deleteBtn.addEventListener('click', ()=>{ if(!selectedEl)return; const id = selectedEl.dataset.id; const pageAnn = annotations[currentPage-1]; if(selectedEl.tagName.toLowerCase()==='img') pageAnn.images = pageAnn.images.filter(x=>x.id!==id); else pageAnn.texts = pageAnn.texts.filter(x=>x.id!==id); selectedEl.remove(); selectedEl=null; saveTempToIDB(); pushUndo('delete'); });
+// save image element back to annotations
+function saveImageElToAnnotations(wrapOrImg){
+  // wrapOrImg may be wrap div (we used wrap), with child img
+  const wrapRect = annotLayer.getBoundingClientRect();
+  const el = wrapOrImg.tagName && wrapOrImg.tagName.toLowerCase()==='div' ? wrapOrImg : wrapOrImg.parentElement;
+  const img = el.querySelector('img');
+  const rect = img.getBoundingClientRect();
+  const x = (rect.left - wrapRect.left) / annotCanvas.width;
+  const y = (rect.top - wrapRect.top) / annotCanvas.height;
+  const w = rect.width / annotCanvas.width;
+  const h = rect.height / annotCanvas.height;
+  const id = img.dataset.id;
+  annotations[currentPage] = annotations[currentPage] || {drawingsDataURL:null, texts:[], images:[]};
+  const arr = annotations[currentPage].images || [];
+  const existing = arr.find(ii=>ii.id===id);
+  const obj = { id, x, y, w, h, dataURL: img.src };
+  if(existing) Object.assign(existing, obj); else arr.push(obj);
+  annotations[currentPage].images = arr;
+}
 
-// page add/delete
-addPageBtn.addEventListener('click', ()=>{ annotations.push({drawingsDataURL:null,texts:[],images:[]}); pageCount++; pushUndo('add-page'); saveTempToIDB(); renderThumbnails(); });
-delPageBtn.addEventListener('click', ()=>{ if(!confirm('Delete current page?')) return; annotations.splice(currentPage-1,1); pageCount--; if(currentPage>pageCount) currentPage = pageCount; pushUndo('delete-page'); saveTempToIDB(); renderThumbnails(); renderPage(currentPage); });
-
-// nav
+// page nav
 prevBtn.addEventListener('click', ()=>{ if(currentPage>1){ saveCurrentAnnotations(); currentPage--; renderPage(currentPage); }});
-nextBtn.addEventListener('click', ()=>{ if(currentPage<pageCount){ saveCurrentAnnotations(); currentPage++; renderPage(currentPage); }});
+nextBtn.addEventListener('click', ()=>{ if(currentPage < pageCount){ saveCurrentAnnotations(); currentPage++; renderPage(currentPage); }});
 
-// undo/redo
-function pushUndo(desc='change'){ undoStack.push(JSON.stringify({annotations, currentPage})); if(undoStack.length>60) undoStack.shift(); redoStack=[]; }
-undoBtn.addEventListener('click', ()=>{ if(!undoStack.length) return; const snap = undoStack.pop(); redoStack.push(JSON.stringify({annotations,currentPage})); const p = JSON.parse(snap); annotations = p.annotations; currentPage = p.currentPage; renderPage(currentPage); saveTempToIDB(); });
-redoBtn.addEventListener('click', ()=>{ if(!redoStack.length) return; const snap = redoStack.pop(); undoStack.push(JSON.stringify({annotations,currentPage})); const p = JSON.parse(snap); annotations = p.annotations; currentPage = p.currentPage; renderPage(currentPage); saveTempToIDB(); });
+// save current annotations snapshots
+function saveCurrentAnnotations(){
+  saveDrawingToPage(currentPage);
+  // save DOM texts/images
+  document.querySelectorAll('.text-box').forEach(tb => saveTextDivToAnnotations(tb));
+  // images: wrap divs in annotLayer
+  annotLayer.querySelectorAll('div').forEach(wrap => {
+    if(wrap.querySelector && wrap.querySelector('img')) saveImageElToAnnotations(wrap);
+  });
+  saveAnnotationsToLocal(localStorage.getItem(STORAGE_PREFIX + 'last_filename') || 'autosave');
+}
 
-// save/load to IndexedDB (idb-keyval)
-async function saveTempToIDB(){ try{ const project={fileBytes: fileBytes? btoa(String.fromCharCode(...new Uint8Array(fileBytes))) : null, annotations, pageCount}; await idbSet(STORAGE_KEY, project); }catch(e){console.warn(e);} }
-async function loadTempFromIDB(){ try{ const p = await idbGet(STORAGE_KEY); if(!p) return false; if(p.fileBytes){ const str = atob(p.fileBytes); const buf = new Uint8Array(str.length); for(let i=0;i<str.length;i++) buf[i]=str.charCodeAt(i); fileBytes = buf.buffer; await loadPDFBytes(fileBytes); annotations = p.annotations || createEmptyAnnotations(pageCount); return true; } else { annotations = p.annotations || annotations; return true; }}catch(e){console.warn(e); return false;} }
+// download flattened PDF
+downloadBtn.addEventListener('click', async ()=>{
+  if(!pdfDoc || !fileBytes) return alert('Load a PDF first');
+  saveCurrentAnnotations();
+  downloadBtn.disabled = true; downloadBtn.textContent = 'Preparing...';
+  try{
+    const out = await exportFlattenedPdf();
+    const blob = new Blob([out], {type:'application/pdf'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'edited.pdf';
+    document.body.appendChild(a); a.click(); a.remove();
+  }catch(e){
+    console.error(e); alert('Export failed: '+e);
+  }finally{
+    downloadBtn.disabled = false; downloadBtn.textContent = 'Download';
+  }
+});
 
-// save button to IndexedDB
-saveBtn.addEventListener('click', async ()=>{ await saveTempToIDB(); alert('Saved to browser storage (IndexedDB).'); });
-
-// export flattened PDF
-downloadBtn.addEventListener('click', async ()=>{ if(!pdfDoc) return alert('Load a PDF first'); saveCurrentAnnotations(); downloadBtn.disabled=true; downloadBtn.textContent='Preparing...'; try{ const out = await exportEditedPdfBytes(); const blob = new Blob([out], {type:'application/pdf'}); saveAs(blob, 'edited.pdf'); }catch(e){ console.error(e); alert('Export failed: '+e);} finally{ downloadBtn.disabled=false; downloadBtn.textContent='Download PDF'; }});
-
-// helper: export edited pdf bytes
-async function exportEditedPdfBytes(){
+async function exportFlattenedPdf(){
   const srcPdf = await PDFLib.PDFDocument.load(fileBytes);
   const outPdf = await PDFLib.PDFDocument.create();
   const copied = await outPdf.copyPages(srcPdf, srcPdf.getPageIndices());
   for(let i=0;i<copied.length;i++){
-    const page = copied[i]; outPdf.addPage(page);
-    const ann = annotations[i]; if(!ann) continue;
-    const {width,height} = page.getSize();
-    const tmp = document.createElement('canvas'); tmp.width=width; tmp.height=height; const tctx=tmp.getContext('2d');
-    if(ann.drawingsDataURL){ const dimg=new Image(); await new Promise((res,rej)=>{ dimg.onload=res; dimg.onerror=rej; dimg.src=ann.drawingsDataURL; }); tctx.drawImage(dimg,0,0,width,height); }
-    for(const im of (ann.images||[])){ const imEl=new Image(); await new Promise((res,rej)=>{ imEl.onload=res; imEl.onerror=rej; imEl.src=im.dataURL; }); tctx.drawImage(imEl, im.x*width, im.y*height, im.w*width, im.h*height); }
-    for(const tx of (ann.texts||[])){ const fontSz = tx.fontSize||16; tctx.font = `${fontSz}px ${tx.fontFamily||'Arial'}`; const textContent = (tx.html||'').replace(/<[^>]+>/g,'') || ' '; tctx.fillStyle='#ffffff'; tctx.fillText(textContent, tx.x*width + 4, tx.y*height + fontSz + 4); }
-    const pngDataUrl = tmp.toDataURL('image/png'); const pngBytes = await (await fetch(pngDataUrl)).arrayBuffer(); const img = await outPdf.embedPng(pngBytes); page.drawImage(img, {x:0,y:0,width,height});
+    const page = copied[i];
+    outPdf.addPage(page);
+    const ann = annotations[i+1];
+    if(!ann) continue;
+    const { width, height } = page.getSize();
+    // build overlay canvas scaled to page size
+    const tmp = document.createElement('canvas'); tmp.width = width; tmp.height = height;
+    const tctx = tmp.getContext('2d');
+    // drawings
+    if(ann.drawingsDataURL){
+      const d = new Image();
+      await new Promise((res, rej)=>{ d.onload = res; d.onerror = rej; d.src = ann.drawingsDataURL; });
+      tctx.drawImage(d, 0, 0, width, height);
+    }
+    // images
+    for(const im of (ann.images||[])){
+      const ii = new Image();
+      await new Promise((res,rej)=>{ ii.onload=res; ii.onerror=rej; ii.src = im.dataURL; });
+      tctx.drawImage(ii, im.x * width, im.y * height, im.w * width, im.h * height);
+    }
+    // texts
+    for(const tx of (ann.texts||[])){
+      const fontSz = tx.fontSize || 16;
+      tctx.font = `${fontSz}px ${tx.fontFamily || 'Arial'}`;
+      const textContent = (tx.html || '').replace(/<[^>]+>/g,'') || ' ';
+      tctx.fillStyle = tx.color || '#ffffff';
+      tctx.fillText(textContent, tx.x * width + 4, tx.y * height + fontSz + 4);
+    }
+    // embed overlay
+    const png = tmp.toDataURL('image/png');
+    const pngBytes = await (await fetch(png)).arrayBuffer();
+    const embedded = await outPdf.embedPng(pngBytes);
+    page.drawImage(embedded, {x:0,y:0,width,height});
   }
-  return await outPdf.save();
+  return outPdf.save();
 }
 
-// save current annotations (drawings + dom)
-function saveCurrentAnnotations(){ saveDrawingLayer(); document.querySelectorAll('.text-box').forEach(tb=>{ if(tb.isContentEditable) tb.blur(); saveTextBoxBack(tb); }); document.querySelectorAll('#annotLayer img').forEach(img=> saveImageBack(img)); }
+// helpers
+function hexToRgba(hex, a=1){ const h=hex.replace('#',''); const n=parseInt(h,16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; }
 
-// helper color convert
-function rgbToHex(rgb){ const m=rgb.match(/\d+/g); if(!m) return '#ffffff'; return '#'+((1<<24)+(parseInt(m[0])<<16)+(parseInt(m[1])<<8)+parseInt(m[2])).toString(16).slice(1); }
-
-// init: try load autosaved project
+// load autosave on start if exists
 (async function init(){
-  const ok = await loadTempFromIDB();
-  if(ok){ if(annotations.length && annotations.length===pageCount){ renderPage(1); } }
+  const last = localStorage.getItem(STORAGE_PREFIX + 'last_filename');
+  if(last){
+    const loaded = loadAnnotationsFromLocal(last);
+    if(loaded && Object.keys(loaded).length) {
+      // keep annotations loaded; but no PDF bytes => user must re-open same file to render
+      annotations = loaded;
+    }
+  }
   // default mode
-  mode = 'draw'; drawBtn.click();
+  setMode('draw');
 })();
 
+// UI mode switches
+textBtn.addEventListener('click', ()=> setMode('text'));
+drawBtn.addEventListener('click', ()=> setMode('draw'));
+highlightBtn.addEventListener('click', ()=> setMode('highlight'));
+sizeSel.addEventListener('change', ()=> drawSize = parseInt(sizeSel.value,10));
+colorInp.addEventListener('change', ()=> drawColor = colorInp.value);
+fontSelect.addEventListener('change', ()=> {/* selection for future new text */});
+
+// helpful window resize: re-render current page (keeps sizes in sync)
+let resizeTimer = null;
+window.addEventListener('resize', ()=> {
+  if(!pdfDoc) return;
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(()=> renderPage(currentPage), 200);
+});
+
+function setMode(m){ mode = m; if(m === 'draw' || m === 'highlight'){ annotCanvas.style.pointerEvents='auto'; annotLayer.style.pointerEvents='none'; } else { annotCanvas.style.pointerEvents='none'; annotLayer.style.pointerEvents='auto'; } }
+
+// small utility to read annotations key by filename; not perfect but fine for local use
 </script>
 </body>
 </html>
