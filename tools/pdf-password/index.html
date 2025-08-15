@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Password Protect PDF — Smarttool Hub</title>
+<meta name="description" content="Password protect PDF files in the browser using qpdf-wasm. Works on GitHub Pages (client-side, no uploads)." />
+<link rel="icon" href="https://img.icons8.com/fluency/48/toolbox.png">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<style>
+/* Simple Smarttool Hub styling (match your other tools) */
+:root{--bg:#121826;--card:#1e293b;--pri1:#6366f1;--pri2:#0ea5e9;color-scheme:dark}
+body{font-family:Arial, sans-serif;background:var(--bg);color:#fff;margin:0}
+header{background:linear-gradient(90deg,var(--pri1),var(--pri2));padding:14px;display:flex;align-items:center;justify-content:space-between}
+.container{max-width:1000px;margin:20px auto;padding:18px}
+.card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.45)}
+.btn{background:var(--pri1);border:none;padding:10px 14px;border-radius:8px;color:#fff;cursor:pointer}
+label.btn{cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.input, select{background:#0b1220;border:1px solid #1f2937;padding:10px;border-radius:8px;color:#e2e8f0;width:100%}
+.small{font-size:13px;color:#cbd5e1}
+.drop{border:2px dashed #0ea5e9;border-radius:10px;padding:20px;text-align:center;margin:12px 0}
+.progress{height:10px;background:#0b1220;border-radius:999px;overflow:hidden;border:1px solid #1f2937}
+.progress > div{height:100%;width:0;background:linear-gradient(90deg,var(--pri1),var(--pri2))}
+footer{padding:12px;text-align:center;color:#94a3b8;margin-top:18px}
+</style>
+</head>
+<body>
+<header>
+  <div style="display:flex;gap:10px;align-items:center">
+    <img src="https://img.icons8.com/fluency/48/toolbox.png" style="width:36px">
+    <div>
+      <div style="font-weight:700">Smarttool Hub</div>
+      <div style="font-size:13px;color:#dbeafe">Password Protect PDF (Client-side WASM)</div>
+    </div>
+  </div>
+  <div style="font-size:14px"><a href="../../index.html" style="color:#fff;text-decoration:none">All Tools</a></div>
+</header>
+
+<div class="container">
+  <div class="card">
+    <h2 style="margin:0 0 8px">Password Protect PDF</h2>
+    <p class="small">Encrypt a PDF in your browser (AES-256). No file uploads. Works on GitHub Pages.</p>
+
+    <label class="btn"><i class="fa fa-file-arrow-up"></i> Select PDF
+      <input id="fileInput" type="file" accept="application/pdf" style="display:none">
+    </label>
+
+    <div id="dropZone" class="drop">Drag & drop PDF here</div>
+
+    <div style="display:grid;gap:10px;margin-top:12px">
+      <label class="small">User password (required to open)</label>
+      <input id="userPw" class="input" type="password" placeholder="Enter user password (required)">
+      <label class="small">Owner password (optional — permission control)</label>
+      <input id="ownerPw" class="input" type="password" placeholder="Owner password (optional)">
+      <div style="display:flex;gap:10px;align-items:center">
+        <button id="protectBtn" class="btn" disabled><i class="fa fa-lock"></i> Protect PDF</button>
+        <div id="msg" class="small" style="margin-left:6px"></div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;display:none" id="progressWrap">
+      <div class="progress"><div id="progressBar"></div></div>
+      <div id="progressText" class="small" style="margin-top:8px">Preparing…</div>
+    </div>
+
+    <p class="small" style="margin-top:12px;color:#93c5fd">Test PDF (download & upload to try): <a href="sandbox:/mnt/data/demo.pdf" style="color:#fff">demo.pdf</a></p>
+    <p class="small" style="margin-top:6px">Library: qpdf compiled to WASM via jsDelivr. See CDN entry. :contentReference[oaicite:1]{index=1}</p>
+  </div>
+</div>
+
+<footer>© 2025 Smarttool Hub — <a href="../../index.html" style="color:#fff">Back to Home</a></footer>
+
+<!-- qpdf-wasm: jsDelivr package provides qpdf.js + qpdf.wasm -->
+<script>
+/*
+  Using qpdf-wasm (Emscripten CLI style).
+  CDN files:
+    https://cdn.jsdelivr.net/npm/@jspawn/qpdf-wasm@0.0.2/qpdf.js
+    https://cdn.jsdelivr.net/npm/@jspawn/qpdf-wasm@0.0.2/qpdf.wasm
+  We set Module.locateFile so wasm is fetched correctly from CDN.
+*/
+const QPDF_JS = 'https://cdn.jsdelivr.net/npm/@jspawn/qpdf-wasm@0.0.2/qpdf.js';
+const QPDF_WASM = 'https://cdn.jsdelivr.net/npm/@jspawn/qpdf-wasm@0.0.2/qpdf.wasm';
+
+let qpdfModule = null;    // will hold Emscripten Module once ready
+let currentFileArrayBuffer = null;
+let currentFileName = 'input.pdf';
+
+function loadQpdfWasm(){
+  return new Promise((resolve,reject)=>{
+    // Provide Module before loading the script so Emscripten uses it
+    window.Module = {
+      locateFile: (path) => {
+        // ensure the .wasm is loaded from CDN
+        if (path.endsWith('.wasm')) return QPDF_WASM;
+        return path;
+      },
+      noInitialRun: true,
+      onRuntimeInitialized: function() {
+        qpdfModule = Module;
+        resolve(Module);
+      }
+    };
+    const s = document.createElement('script');
+    s.src = QPDF_JS;
+    s.async = true;
+    s.onerror = (e)=> reject(new Error('Failed to load qpdf-wasm script: '+e));
+    document.head.appendChild(s);
+  });
+}
+
+// write file to in-memory FS then call qpdf CLI: qpdf --encrypt user owner 256 -- in out
+async function protectWithQpdf(userPw, ownerPw){
+  if(!qpdfModule) await loadQpdfWasm();
+  const M = qpdfModule;
+  const inName = 'in.pdf';
+  const outName = 'out.pdf';
+
+  // remove previous files if any
+  try{ M.FS.unlink(inName); }catch(e){}
+  try{ M.FS.unlink(outName); }catch(e){}
+
+  // write input
+  const u8 = new Uint8Array(currentFileArrayBuffer);
+  M.FS.writeFile(inName, u8);
+
+  // assemble args
+  // use 256-bit AES
+  const args = ['qpdf', '--encrypt', userPw || '', ownerPw || '', '256', '--', inName, outName];
+
+  // call main
+  // some builds expose callMain; older uses callMain, newer variations may use run or ccalls.
+  // Emscripten CLI builds support Module.callMain(args)
+  try {
+    if (typeof M.callMain === 'function') {
+      M.callMain(args);
+    } else if (typeof M.run === 'function') {
+      // run accepts args on Module arguments; fallback:
+      M.arguments = args;
+      M.run();
+    } else {
+      throw new Error('qpdf-wasm: no callMain/run API found on Module.');
+    }
+  } catch (err) {
+    throw err;
+  }
+
+  // read output
+  try{
+    const outU8 = M.FS.readFile(outName);
+    return outU8.buffer;
+  } catch(e){
+    throw new Error('qpdf-wasm: output not found (maybe encryption failed). '+e);
+  } finally {
+    // cleanup
+    try{ M.FS.unlink(inName); }catch(e){}
+    try{ M.FS.unlink(outName); }catch(e){}
+  }
+}
+
+// UI wiring
+const fileInput = document.getElementById('fileInput');
+const dropZone = document.getElementById('dropZone');
+const protectBtn = document.getElementById('protectBtn');
+const userPwEl = document.getElementById('userPw');
+const ownerPwEl = document.getElementById('ownerPw');
+const msg = document.getElementById('msg');
+const progressWrap = document.getElementById('progressWrap');
+const progressBar = document.getElementById('progressBar');
+const progressText = document.getElementById('progressText');
+
+fileInput.addEventListener('change', e=>{
+  if(e.target.files.length) setFile(e.target.files[0]);
+});
+['dragover','dragenter'].forEach(ev=>dropZone.addEventListener(ev,e=>{ e.preventDefault(); dropZone.style.borderColor='#fff'; }));
+['dragleave','drop'].forEach(ev=>dropZone.addEventListener(ev,e=>{ e.preventDefault(); dropZone.style.borderColor='#0ea5e9'; }));
+dropZone.addEventListener('drop', e=>{
+  if(e.dataTransfer.files.length) setFile(e.dataTransfer.files[0]);
+});
+
+async function setFile(file){
+  if(!file.name.toLowerCase().endsWith('.pdf')) { alert('Only PDF allowed'); return; }
+  currentFileName = file.name;
+  currentFileArrayBuffer = await file.arrayBuffer();
+  msg.textContent = `Loaded: ${file.name} (${Math.round(file.size/1024)} KB)`;
+  protectBtn.disabled = false;
+}
+
+protectBtn.addEventListener('click', async ()=>{
+  const userPw = userPwEl.value;
+  if(!userPw){ alert('Enter a user password (required) to protect the PDF.'); userPwEl.focus(); return; }
+  const ownerPw = ownerPwEl.value || userPw;
+
+  protectBtn.disabled = true;
+  msg.textContent = 'Preparing qpdf-wasm (first load may take a second)…';
+  progressWrap.style.display = 'block';
+  progressBar.style.width = '10%';
+  progressText.textContent = 'Loading WASM…';
+
+  try{
+    await loadQpdfWasm();
+    progressBar.style.width = '30%';
+    progressText.textContent = 'Encrypting…';
+    // run encrypt
+    const outBuf = await protectWithQpdf(userPw, ownerPw);
+    progressBar.style.width = '90%';
+    progressText.textContent = 'Finalizing…';
+
+    // create blob and download
+    const blob = new Blob([outBuf], { type: 'application/pdf' });
+    const name = (currentFileName || 'file').replace(/\.pdf$/i,'') + '_protected.pdf';
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    progressBar.style.width = '100%';
+    progressText.textContent = 'Done — downloaded protected PDF.';
+    msg.textContent = 'Success — protected file downloaded.';
+  }catch(err){
+    console.error('Protect error:', err);
+    alert('Encryption failed: ' + (err.message || err));
+    msg.textContent = 'Error: ' + (err.message || err);
+  }finally{
+    protectBtn.disabled = false;
+    setTimeout(()=>{ progressWrap.style.display = 'none'; progressBar.style.width='0%'; }, 1200);
+  }
+});
+</script>
+</body>
+</html>
