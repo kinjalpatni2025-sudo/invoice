@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Convert PDF to Images — Smarttool Hub</title>
+<meta name="description" content="Convert PDF pages to PNG or JPEG images in the browser. Select pages, adjust quality and scale, preview and download as ZIP. No upload to server."/>
+<meta name="keywords" content="PDF to image, convert PDF, PDF to PNG, PDF to JPEG, convert pdf pages, client-side pdf converter">
+<link rel="icon" href="https://img.icons8.com/fluency/48/toolbox.png">
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+
+<style>
+  :root{
+    --bg:#0f1724; --card:#0b1220; --muted:#9aa8bf; --text:#e6eef8;
+    --pri1:#6366f1; --pri2:#0ea5e9;
+    --outline:rgba(255,255,255,0.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+  header{position:sticky;top:0;z-index:999;background:linear-gradient(90deg,var(--pri1),var(--pri2));padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 6px 20px rgba(0,0,0,.45)}
+  .logo{display:flex;gap:12px;align-items:center}
+  .logo img{width:44px;height:44px;border-radius:8px}
+  header h1{margin:0;font-size:18px}
+  header .right a{background:#fff;color:#0b1220;padding:8px 10px;border-radius:8px;text-decoration:none;font-weight:700}
+
+  .wrap{max-width:1200px;margin:18px auto;padding:12px}
+  .grid{display:grid;grid-template-columns:300px 1fr 320px;gap:12px}
+  .panel{background:var(--card);border:1px solid var(--outline);border-radius:12px;padding:12px}
+  .left{overflow:auto;max-height:70vh}
+  .thumb{display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:8px;background:#fff;color:#000;cursor:pointer}
+  .thumb canvas{width:100%;height:auto;border-radius:6px;display:block}
+  .thumb.selected{outline:2px solid var(--pri2)}
+  .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .btn{background:transparent;border:1px solid var(--outline);color:var(--text);padding:8px 10px;border-radius:8px;cursor:pointer}
+  .btn.primary{background:#fff;color:#071124;font-weight:700}
+  label.inputbtn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:1px dashed var(--outline);padding:8px 10px;border-radius:8px}
+  select,input[type="number"],input[type="text"],input[type="range"]{background:#0b1220;color:var(--text);border:1px solid var(--outline);padding:6px;border-radius:8px}
+  .stage{position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--outline);background:#fff;display:flex;align-items:center;justify-content:center;min-height:520px}
+  #previewImg{max-width:100%;height:auto;display:block}
+  .right{display:flex;flex-direction:column;gap:10px}
+  .muted{color:var(--muted);font-size:13px}
+  .page-select{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  input[type=file]{display:none}
+  .small{padding:6px 8px;font-size:13px}
+  @media (max-width:1024px){ .grid{grid-template-columns:1fr; } .left{max-height:200px} .stage{min-height:420px} .right{order:3} }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <img src="https://img.icons8.com/fluency/48/toolbox.png" alt="logo">
+    <div>
+      <h1>Convert PDF to Image</h1>
+      <div style="font-size:12px;color:#e6f7ffcc">Client-side conversion • No uploads • Fast</div>
+    </div>
+  </div>
+  <div class="right">
+    <a href="../../index.html">← Back to Home</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+    <!-- Left: thumbnails & page selection -->
+    <aside class="panel left">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <strong>Pages</strong>
+        <div class="muted" id="pageCountLabel">0</div>
+      </div>
+
+      <div style="margin-bottom:10px" class="controls">
+        <label class="inputbtn">
+          <i class="fa fa-file-arrow-up"></i> Select PDF
+          <input id="fileInput" type="file" accept="application/pdf">
+        </label>
+        <button id="clearBtn" class="btn small" title="Clear">Clear</button>
+      </div>
+
+      <div style="margin:8px 0" class="muted">Click page thumbnails to preview and mark pages to convert.</div>
+      <div id="thumbnails" style="display:grid;grid-template-columns:1fr;gap:8px"></div>
+
+      <hr style="border:none;border-top:1px solid var(--outline);margin:10px 0">
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <label><input id="checkAll" type="checkbox"> Select all</label>
+        <button id="invertBtn" class="btn small">Invert</button>
+        <button id="selectRangeBtn" class="btn small">Select range</button>
+      </div>
+      <div style="margin-top:8px" class="muted">Selected pages will be converted. Use range to quickly choose pages (e.g. 1-3,5).</div>
+    </aside>
+
+    <!-- Center: preview / options -->
+    <main class="panel" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="controls">
+          <div class="muted">Format</div>
+          <select id="formatSel" style="margin-left:6px">
+            <option value="png">PNG (lossless)</option>
+            <option value="jpeg">JPEG (smaller)</option>
+          </select>
+
+          <div class="muted" style="margin-left:10px">Quality</div>
+          <input id="quality" type="range" min="30" max="100" value="90" style="width:120px;margin-left:6px">
+          <span id="qualityLabel" class="muted">90</span>
+
+          <div class="muted" style="margin-left:12px">Scale</div>
+          <select id="scaleSel" style="margin-left:6px">
+            <option value="1">1× (native)</option>
+            <option value="1.5">1.5×</option>
+            <option value="2">2×</option>
+            <option value="3">3×</option>
+          </select>
+        </div>
+
+        <div class="controls">
+          <button id="convertBtn" class="btn primary"><i class="fa fa-arrow-right-to-bracket"></i> Convert</button>
+          <button id="downloadAllBtn" class="btn small" title="Download all as ZIP"><i class="fa fa-download"></i> Download ZIP</button>
+        </div>
+      </div>
+
+      <div class="stage" id="stage">
+        <div id="placeholder" style="text-align:center;color:#2b3440">
+          <div style="font-size:18px;margin-bottom:8px">Preview</div>
+          <div class="muted">Open a PDF and click a page to preview the image output.</div>
+        </div>
+        <img id="previewImg" class="hidden" alt="preview">
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="muted">Tip: Choose JPEG for smaller files. Increase scale for higher resolution images. Converting many pages may take time.</div>
+        <div class="muted" id="status">Idle</div>
+      </div>
+    </main>
+
+    <!-- Right: actions & single-download -->
+    <aside class="panel right">
+      <h3 style="margin:0 0 8px 0">Actions</h3>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div>
+          <button id="downloadSingleBtn" class="btn small">Download current image</button>
+        </div>
+
+        <div style="margin-top:6px;">
+          <label class="muted">File name pattern</label>
+          <input id="fileName" type="text" value="page-{p}" style="width:100%;margin-top:6px">
+          <div class="muted" style="font-size:12px;margin-top:6px">Use <code>{p}</code> for page number, <code>{n}</code> for total pages.</div>
+        </div>
+
+        <div>
+          <label class="muted">Range (manual)</label>
+          <input id="rangeInput" type="text" placeholder="e.g. 1-3,5" style="width:100%;margin-top:6px">
+          <button id="applyRangeBtn" class="btn small" style="margin-top:6px">Apply range</button>
+        </div>
+
+        <div style="margin-top:12px">
+          <div class="muted">Converted images</div>
+          <div id="convertedList" style="max-height:220px;overflow:auto;margin-top:8px"></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- libs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+<script>
+/*
+  Convert PDF → Image tool (client-side)
+  - pdf.js to render pages to canvas
+  - JSZip + FileSaver for ZIP download
+  - masterBytes clone strategy to avoid detached ArrayBuffer issues on some hosts
+*/
+
+const fileInput = document.getElementById('fileInput');
+const thumbnails = document.getElementById('thumbnails');
+const pageCountLabel = document.getElementById('pageCountLabel');
+const previewImg = document.getElementById('previewImg');
+const placeholder = document.getElementById('placeholder');
+const status = document.getElementById('status');
+
+const formatSel = document.getElementById('formatSel');
+const quality = document.getElementById('quality');
+const qualityLabel = document.getElementById('qualityLabel');
+const scaleSel = document.getElementById('scaleSel');
+
+const checkAll = document.getElementById('checkAll');
+const convertBtn = document.getElementById('convertBtn');
+const downloadAllBtn = document.getElementById('downloadAllBtn');
+const downloadSingleBtn = document.getElementById('downloadSingleBtn');
+const clearBtn = document.getElementById('clearBtn');
+const selectRangeBtn = document.getElementById('selectRangeBtn');
+const invertBtn = document.getElementById('invertBtn');
+const applyRangeBtn = document.getElementById('applyRangeBtn');
+const rangeInput = document.getElementById('rangeInput');
+const fileNameInp = document.getElementById('fileName');
+
+const convertedList = document.getElementById('convertedList');
+
+let pdfDoc = null;
+let masterBytes = null; // keep master copy (Uint8Array)
+let pageCount = 0;
+let currentPage = 1;
+let selectedPages = new Set(); // pages to convert (1-based)
+let thumbnailsData = []; // keep small preview canvases
+let convertedImages = {}; // {page: {dataURL, blob, filename}}
+
+quality.addEventListener('input', ()=> qualityLabel.textContent = quality.value);
+
+// parse range like "1-3,5"
+function parseRange(str){
+  const out = new Set();
+  str.split(',').map(s=>s.trim()).forEach(part=>{
+    if(!part) return;
+    if(part.includes('-')){
+      const [a,b] = part.split('-').map(x=>parseInt(x,10));
+      if(!isNaN(a) && !isNaN(b)){
+        for(let i=Math.max(1,a); i<=Math.min(pageCount,b); i++) out.add(i);
+      }
+    } else {
+      const n = parseInt(part,10);
+      if(!isNaN(n) && n>=1 && n<=pageCount) out.add(n);
+    }
+  });
+  return out;
+}
+
+// load PDF file
+fileInput.addEventListener('change', async (ev)=>{
+  const f = ev.target.files[0];
+  if(!f) return;
+  status.textContent = 'Loading PDF...';
+  try{
+    const ab = await f.arrayBuffer();
+    masterBytes = new Uint8Array(ab); // safe master copy
+    // pass a clone to pdf.js (worker may transfer/detach)
+    const dataForPdfjs = new Uint8Array(masterBytes);
+    pdfDoc = await pdfjsLib.getDocument({data: dataForPdfjs}).promise;
+    pageCount = pdfDoc.numPages;
+    pageCountLabel.textContent = pageCount;
+    currentPage = 1;
+    selectedPages = new Set();
+    thumbnailsData = [];
+    convertedImages = {};
+    convertedList.innerHTML = '';
+    await renderThumbnails();
+    status.textContent = 'PDF loaded';
+  }catch(err){
+    console.error(err);
+    alert('Failed to load PDF: ' + (err.message || err));
+    status.textContent = 'Error loading PDF';
+  }
+});
+
+// render thumbnails
+async function renderThumbnails(){
+  thumbnails.innerHTML = '';
+  for(let p=1;p<=pageCount;p++){
+    const pg = await pdfDoc.getPage(p);
+    const vp = pg.getViewport({scale:0.14});
+    const c = document.createElement('canvas'); c.width = vp.width; c.height = vp.height;
+    await pg.render({canvasContext: c.getContext('2d'), viewport: vp}).promise;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'thumb';
+    wrapper.dataset.p = p;
+    wrapper.appendChild(c);
+
+    const row = document.createElement('div');
+    row.style.display='flex'; row.style.justifyContent='space-between'; row.style.alignItems='center'; row.style.marginTop='6px';
+    const lbl = document.createElement('div'); lbl.textContent = 'Page ' + p; lbl.style.fontWeight='700';
+    const cb = document.createElement('input'); cb.type='checkbox'; cb.dataset.p = p;
+    cb.addEventListener('change', (e)=> {
+      const num = parseInt(e.target.dataset.p,10);
+      if(e.target.checked) selectedPages.add(num); else selectedPages.delete(num);
+    });
+    row.appendChild(lbl); row.appendChild(cb);
+
+    wrapper.appendChild(row);
+
+    wrapper.addEventListener('click', (e)=>{
+      // clicking the card (not the checkbox) opens preview
+      if(e.target.tagName.toLowerCase()==='input') return;
+      previewPage(p);
+      // highlight
+      thumbnails.querySelectorAll('.thumb').forEach(t=>t.classList.remove('selected'));
+      wrapper.classList.add('selected');
+    });
+
+    thumbnails.appendChild(wrapper);
+    thumbnailsData[p] = c; // store reference
+  }
+}
+
+// preview a page as image at chosen format/scale
+async function previewPage(p){
+  if(!pdfDoc) return;
+  currentPage = p;
+  status.textContent = 'Rendering preview...';
+  const scale = parseFloat(scaleSel.value) || 1;
+  const pg = await pdfDoc.getPage(p);
+  const vp = pg.getViewport({scale: (1.25 * scale)}); // base scale for better default preview
+  const tmp = document.createElement('canvas'); tmp.width = vp.width; tmp.height = vp.height;
+  await pg.render({canvasContext: tmp.getContext('2d'), viewport: vp}).promise;
+  const fmt = formatSel.value;
+  let dataURL;
+  if(fmt === 'png') dataURL = tmp.toDataURL('image/png');
+  else dataURL = tmp.toDataURL('image/jpeg', Math.max(0.01, quality.value/100));
+  showPreview(dataURL);
+  status.textContent = 'Preview ready';
+}
+
+// show image in center stage
+function showPreview(dataURL){
+  previewImg.src = dataURL;
+  previewImg.classList.remove('hidden');
+  placeholder.classList.add('hidden');
+}
+
+// Convert selected pages (or all if none selected)
+async function convertSelected(){
+  if(!pdfDoc) return alert('Open a PDF first.');
+  const pagesTo = selectedPages.size ? Array.from(selectedPages).sort((a,b)=>a-b) : Array.from({length: pageCount}, (_,i)=>i+1);
+  if(!pagesTo.length) return alert('No pages selected.');
+  status.textContent = 'Converting ' + pagesTo.length + ' page(s)...';
+  convertedImages = {}; convertedList.innerHTML = '';
+  const fmt = formatSel.value;
+  const qualityVal = Math.max(0.01, quality.value/100);
+  const scale = parseFloat(scaleSel.value) || 1;
+
+  // convert pages sequentially to avoid CPU spikes
+  for(let i=0;i<pagesTo.length;i++){
+    const p = pagesTo[i];
+    await convertPageToImage(p, fmt, qualityVal, scale);
+    status.textContent = `Converted ${i+1}/${pagesTo.length}`;
+  }
+  status.textContent = 'Conversion finished';
+  renderConvertedList();
+}
+
+// Convert a single page to image and store result
+async function convertPageToImage(p, fmt, q, scale){
+  // create a fresh clone for pdf.js? not needed for rendering pages (we already used clone on load),
+  // but safe to reuse pdfDoc pages.
+  const page = await pdfDoc.getPage(p);
+  // choose viewport scale relative to page size
+  const baseScale = 1.5 * scale;
+  const vp = page.getViewport({scale: baseScale});
+  const tmp = document.createElement('canvas'); tmp.width = vp.width; tmp.height = vp.height;
+  const ctx = tmp.getContext('2d');
+  await page.render({canvasContext: ctx, viewport: vp}).promise;
+
+  let dataURL;
+  if(fmt === 'png') dataURL = tmp.toDataURL('image/png');
+  else dataURL = tmp.toDataURL('image/jpeg', q);
+
+  // prepare blob
+  const blob = dataURLToBlob(dataURL);
+  const namePattern = fileNameInp.value || 'page-{p}';
+  const filename = namePattern.replace('{p}', p).replace('{n}', pageCount) + (fmt === 'png' ? '.png' : '.jpg');
+
+  convertedImages[p] = { dataURL, blob, filename };
+}
+
+// helper: dataURL -> Blob
+function dataURLToBlob(dataURL){
+  const parts = dataURL.split(',');
+  const meta = parts[0].match(/:(.*?);/);
+  const mime = meta ? meta[1] : 'image/png';
+  const bin = atob(parts[1]);
+  const len = bin.length;
+  const u8 = new Uint8Array(len);
+  for(let i=0;i<len;i++) u8[i] = bin.charCodeAt(i);
+  return new Blob([u8], {type: mime});
+}
+
+// render list of converted images with single-download
+function renderConvertedList(){
+  convertedList.innerHTML = '';
+  const keys = Object.keys(convertedImages).map(s=>parseInt(s,10)).sort((a,b)=>a-b);
+  if(keys.length === 0){ convertedList.innerHTML = '<div class="muted">No converted images yet</div>'; return; }
+  keys.forEach(p=>{
+    const item = convertedImages[p];
+    const row = document.createElement('div');
+    row.style.display='flex'; row.style.justifyContent='space-between'; row.style.alignItems='center'; row.style.padding='6px 0';
+    const left = document.createElement('div'); left.textContent = 'Page ' + p;
+    const right = document.createElement('div');
+    const dl = document.createElement('button'); dl.className = 'btn small'; dl.textContent = 'Download'; dl.addEventListener('click', ()=> saveAs(item.blob, item.filename));
+    right.appendChild(dl);
+    row.appendChild(left); row.appendChild(right);
+    convertedList.appendChild(row);
+  });
+}
+
+// Download one currently previewed page (if converted)
+downloadSingleBtn.addEventListener('click', ()=>{
+  const p = currentPage;
+  if(convertedImages[p]) saveAs(convertedImages[p].blob, convertedImages[p].filename);
+  else {
+    // quick-convert current page and download
+    (async ()=> {
+      await convertPageToImage(p, formatSel.value, Math.max(0.01, quality.value/100), parseFloat(scaleSel.value));
+      renderConvertedList();
+      saveAs(convertedImages[p].blob, convertedImages[p].filename);
+    })();
+  }
+});
+
+// Download all converted images as ZIP
+downloadAllBtn.addEventListener('click', async ()=>{
+  const keys = Object.keys(convertedImages);
+  if(keys.length === 0) return alert('No converted images. Press Convert first.');
+  status.textContent = 'Preparing ZIP...';
+  const zip = new JSZip();
+  for(const k of keys){
+    const it = convertedImages[k];
+    // ensure blob exists
+    if(!it.blob) continue;
+    zip.file(it.filename, it.blob);
+  }
+  const content = await zip.generateAsync({type:'blob'});
+  saveAs(content, 'images.zip');
+  status.textContent = 'ZIP ready';
+});
+
+// Convert button
+convertBtn.addEventListener('click', async ()=>{
+  await convertSelected();
+});
+
+// utility: show preview when thumbnail clicked
+// (handled in renderThumbnails when click occurs) — but if not converted, render preview raw
+async function previewIfNotConverted(p){
+  if(convertedImages[p]){
+    showPreview(convertedImages[p].dataURL);
+  } else {
+    await previewPage(p);
+  }
+}
+
+// select all toggle
+checkAll.addEventListener('change', (e)=>{
+  if(!pdfDoc) return;
+  if(e.target.checked){
+    for(let i=1;i<=pageCount;i++) selectedPages.add(i);
+    thumbnails.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.checked=true);
+  } else {
+    selectedPages.clear();
+    thumbnails.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.checked=false);
+  }
+});
+
+// invert selection
+invertBtn.addEventListener('click', ()=>{
+  if(!pdfDoc) return;
+  const newSet = new Set();
+  thumbnails.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+    const p = parseInt(cb.dataset.p,10);
+    cb.checked = !cb.checked;
+    if(cb.checked) newSet.add(p);
+  });
+  selectedPages = newSet;
+});
+
+// clear tool
+clearBtn.addEventListener('click', ()=>{
+  pdfDoc = null; masterBytes = null; pageCount = 0; currentPage = 1;
+  thumbnails.innerHTML = ''; previewImg.classList.add('hidden'); placeholder.classList.remove('hidden');
+  pageCountLabel.textContent = '0'; selectedPages.clear(); thumbnailsData=[]; convertedImages={}; convertedList.innerHTML='';
+  fileInput.value='';
+  status.textContent = 'Cleared';
+});
+
+// "Select range" prompt
+selectRangeBtn.addEventListener('click', ()=>{
+  const r = prompt('Enter pages to select (e.g. 1-3,5):','1-' + Math.min(3,pageCount));
+  if(!r) return;
+  const set = parseRange(r);
+  thumbnails.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+    const p = parseInt(cb.dataset.p,10);
+    cb.checked = set.has(p);
+  });
+  selectedPages = set;
+});
+
+// Apply range input from right panel
+applyRangeBtn.addEventListener('click', ()=>{
+  const r = rangeInput.value.trim();
+  if(!r) return alert('Enter a range like 1-3,5');
+  const set = parseRange(r);
+  thumbnails.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+    const p = parseInt(cb.dataset.p,10);
+    cb.checked = set.has(p);
+  });
+  selectedPages = set;
+});
+
+// small helper: saveAs (from FileSaver)
+function saveAs(blob, name){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+}
+
+// helper to convert page index list (unused direct)
+function pagesFromSet(s){
+  return Array.from(s).sort((a,b)=>a-b);
+}
+</script>
+</body>
+</html>
