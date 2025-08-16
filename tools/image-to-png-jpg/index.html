@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Image Convert — PNG / JPG — Smarttool Hub</title>
+<meta name="description" content="Convert images to PNG or JPG in the browser. Batch convert, resize, adjust JPEG quality, preview and download as ZIP. No upload to server."/>
+<meta name="keywords" content="image convert, png to jpg, jpg to png, convert image, batch image convert, client-side"/>
+<link rel="icon" href="https://img.icons8.com/fluency/48/toolbox.png">
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+
+<style>
+:root{
+  --bg:#0f1724; --card:#0b1220; --muted:#9aa8bf; --text:#e6eef8;
+  --pri1:#6366f1; --pri2:#0ea5e9; --accent:#60a5fa;
+  --outline:rgba(255,255,255,0.06);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+header{position:sticky;top:0;z-index:999;background:linear-gradient(90deg,var(--pri1),var(--pri2));padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 6px 20px rgba(0,0,0,.45)}
+.header-left{display:flex;align-items:center;gap:12px}
+.header-left img{width:44px;height:44px;border-radius:8px}
+.header-left h1{margin:0;font-size:18px}
+.header-right a{background:#fff;color:#0b1220;padding:8px 10px;border-radius:8px;text-decoration:none;font-weight:700}
+
+.container{max-width:1200px;margin:18px auto;padding:12px}
+.grid{display:grid;grid-template-columns:360px 1fr 320px;gap:12px}
+.panel{background:var(--card);border:1px solid var(--outline);border-radius:12px;padding:12px}
+.left{overflow:auto;max-height:70vh}
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.label-btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:1px dashed var(--outline);padding:8px 10px;border-radius:8px;background:transparent}
+.btn{background:transparent;border:1px solid var(--outline);color:var(--text);padding:8px 10px;border-radius:8px;cursor:pointer}
+.btn.primary{background:#fff;color:#071124;font-weight:700}
+.small{padding:6px 8px;font-size:13px}
+.muted{color:var(--muted);font-size:13px}
+.dropzone{border:2px dashed var(--outline);border-radius:12px;padding:18px;text-align:center;cursor:pointer;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent)}
+.thumb{display:grid;grid-template-columns:64px 1fr;gap:8px;align-items:center;padding:8px;border-radius:8px;background:#071224}
+.thumb img{width:64px;height:64px;object-fit:cover;border-radius:6px}
+.list{display:flex;flex-direction:column;gap:8px;max-height:44vh;overflow:auto;padding-top:8px}
+.sidebar-actions{display:flex;flex-direction:column;gap:8px}
+.stage{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--outline);background:#fff;display:flex;align-items:center;justify-content:center;min-height:520px}
+#previewImg{max-width:100%;height:auto;display:block}
+.right{display:flex;flex-direction:column;gap:10px}
+.input, select {background:#0b1220;color:var(--text);border:1px solid var(--outline);padding:6px;border-radius:8px;width:100%}
+.note{font-size:13px;color:var(--muted);margin-top:8px}
+@media(max-width:1024px){ .grid{grid-template-columns:1fr; } .left{max-height:160px} .stage{min-height:360px} .right{order:3} }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-left">
+    <img src="https://img.icons8.com/fluency/48/toolbox.png" alt="logo">
+    <div>
+      <h1>Image → PNG / JPG</h1>
+      <div style="font-size:12px;color:#e6f7ffcc">Convert, resize and download images — client-side</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <a href="../../index.html">← Back to Home</a>
+  </div>
+</header>
+
+<div class="container">
+  <div class="grid">
+    <!-- Left: Upload & list -->
+    <aside class="panel left">
+      <strong>Files</strong>
+      <div style="margin-top:8px" class="controls">
+        <label class="label-btn">
+          <i class="fa fa-file-arrow-up"></i> Select Images
+          <input id="fileInput" type="file" accept="image/*" multiple style="display:none">
+        </label>
+        <button id="clearBtn" class="btn small">Clear</button>
+      </div>
+
+      <div style="margin-top:10px" class="dropzone" id="dropzone">
+        <div style="font-size:16px;font-weight:600">Drag & drop images here</div>
+        <div class="muted">PNG, JPG, WebP, GIF (first frame) — batch convert and download</div>
+      </div>
+
+      <div class="note">Tip: Click a thumbnail to preview. Use Rename pattern and format options to control output filenames.</div>
+
+      <div class="list" id="fileList" aria-live="polite"></div>
+    </aside>
+
+    <!-- Center: Preview & options -->
+    <main class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="muted">Output Format</div>
+          <select id="formatSel" class="input" style="width:150px">
+            <option value="png">PNG (lossless)</option>
+            <option value="jpeg">JPEG (smaller)</option>
+          </select>
+
+          <div class="muted" style="margin-left:8px">JPEG Quality</div>
+          <input id="quality" type="range" min="30" max="100" value="90" style="width:120px">
+          <span id="qualityLabel" class="muted">90</span>
+
+          <div class="muted" style="margin-left:8px">Resize</div>
+          <input id="resizeW" type="number" placeholder="Width" class="input" style="width:100px">
+          <input id="resizeH" type="number" placeholder="Height" class="input" style="width:100px">
+          <label style="display:inline-flex;align-items:center;gap:6px"><input id="keepAspect" type="checkbox" checked> Keep aspect</label>
+        </div>
+
+        <div style="display:flex;gap:8px;align-items:center">
+          <button id="convertBtn" class="btn primary"><i class="fa fa-arrow-down-to-file"></i> Convert</button>
+          <button id="downloadAllBtn" class="btn small"><i class="fa fa-download"></i> Download ZIP</button>
+        </div>
+      </div>
+
+      <div class="stage" id="stage">
+        <div id="placeholder" style="text-align:center;color:#2b3440">
+          <div style="font-size:18px;margin-bottom:8px">Preview</div>
+          <div class="muted">Upload images and click a file to preview the converted result.</div>
+        </div>
+        <img id="previewImg" class="hidden" alt="preview">
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+        <div class="muted">Tip: Leave width/height empty to keep original size. Use pattern <code>{n}</code> for numbering in file names (e.g. photo-{n}).</div>
+        <div class="muted" id="status">Idle</div>
+      </div>
+    </main>
+
+    <!-- Right: actions -->
+    <aside class="panel right">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div>
+          <label class="muted">Rename pattern</label>
+          <input id="namePattern" type="text" class="input" value="image-{n}" />
+          <div class="muted" style="font-size:12px;margin-top:6px">Use <code>{n}</code> for index (1-based).</div>
+        </div>
+
+        <div>
+          <label class="muted">Background color (for PNG→JPEG transparency)</label>
+          <input id="bgColor" type="color" value="#ffffff" class="input" />
+        </div>
+
+        <div>
+          <button id="downloadSingleBtn" class="btn small">Download Current</button>
+        </div>
+
+        <div>
+          <strong class="muted">Converted</strong>
+          <div id="convertedList" style="max-height:220px;overflow:auto;margin-top:8px"></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- libs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+<script>
+/* Image → PNG/JPG tool
+   - Client-side only
+   - Batch convert, resize, quality control
+*/
+
+const fileInput = document.getElementById('fileInput');
+const dropzone = document.getElementById('dropzone');
+const fileList = document.getElementById('fileList');
+const previewImg = document.getElementById('previewImg');
+const placeholder = document.getElementById('placeholder');
+const status = document.getElementById('status');
+const formatSel = document.getElementById('formatSel');
+const quality = document.getElementById('quality');
+const qualityLabel = document.getElementById('qualityLabel');
+const resizeW = document.getElementById('resizeW');
+const resizeH = document.getElementById('resizeH');
+const keepAspect = document.getElementById('keepAspect');
+const convertBtn = document.getElementById('convertBtn');
+const downloadAllBtn = document.getElementById('downloadAllBtn');
+const clearBtn = document.getElementById('clearBtn');
+const namePattern = document.getElementById('namePattern');
+const bgColor = document.getElementById('bgColor');
+const convertedList = document.getElementById('convertedList');
+const downloadSingleBtn = document.getElementById('downloadSingleBtn');
+
+let files = []; // {file, url, img, converted: {blob, dataURL, name}}
+let currentIndex = -1;
+
+quality.addEventListener('input', ()=> qualityLabel.textContent = quality.value);
+
+// Helpers
+function bytesToBlob(b, type) { return new Blob([b], {type}); }
+function dataURLToBlob(dataURL){
+  const parts = dataURL.split(',');
+  const meta = parts[0].match(/:(.*?);/);
+  const mime = meta ? meta[1] : 'image/png';
+  const bin = atob(parts[1]);
+  const len = bin.length;
+  const u8 = new Uint8Array(len);
+  for(let i=0;i<len;i++) u8[i] = bin.charCodeAt(i);
+  return new Blob([u8], {type: mime});
+}
+function getExt(fmt){ return fmt === 'png' ? '.png' : '.jpg'; }
+function sanitizeName(s){ return s.replace(/[^a-z0-9\-_.]/gi,'_'); }
+
+// Load files from input or drop
+fileInput.addEventListener('change', (e)=> handleFiles(e.target.files));
+dropzone.addEventListener('dragover', (e)=>{ e.preventDefault(); dropzone.style.borderColor = 'var(--pri2)'; });
+dropzone.addEventListener('dragleave', ()=>{ dropzone.style.borderColor = 'var(--outline)'; });
+dropzone.addEventListener('drop', (e)=>{ e.preventDefault(); dropzone.style.borderColor = 'var(--outline)'; handleFiles(e.dataTransfer.files); });
+dropzone.addEventListener('click', ()=> fileInput.click());
+
+function handleFiles(fileListParam){
+  const incoming = Array.from(fileListParam).filter(f=>f.type.startsWith('image/'));
+  if(incoming.length === 0) return alert('No supported image files found.');
+  status.textContent = 'Loading images...';
+  const startIndex = files.length;
+  incoming.forEach((file, idx)=>{
+    const url = URL.createObjectURL(file);
+    const obj = { file, url, img: null, converted: null };
+    files.push(obj);
+    // create thumb entry; load image for preview
+    const wrapper = document.createElement('div'); wrapper.className='thumb';
+    const imgEl = document.createElement('img'); imgEl.src = url;
+    const info = document.createElement('div'); info.innerHTML = `<div style="font-weight:700">${file.name}</div><div class="muted">${Math.round(file.size/1024)} KB</div>`;
+    wrapper.appendChild(imgEl); wrapper.appendChild(info);
+    const idxGlobal = startIndex + idx;
+    wrapper.addEventListener('click', ()=> { showPreview(idxGlobal); highlightThumb(idxGlobal); });
+    fileList.appendChild(wrapper);
+    // store node reference on files array later when loaded
+    obj.element = wrapper;
+    // pre-load image to get dimensions
+    const im = new Image();
+    im.onload = ()=> { obj.img = im; };
+    im.src = url;
+  });
+  status.textContent = `${files.length} file(s) ready`;
+}
+
+// highlight selected thumb
+function highlightThumb(i){
+  fileList.querySelectorAll('.thumb').forEach((el,idx)=> el.classList.toggle('selected', idx === i));
+}
+
+// show preview (original image)
+function showPreview(i){
+  if(i < 0 || i >= files.length) return;
+  currentIndex = i;
+  const obj = files[i];
+  previewImg.src = obj.url;
+  previewImg.classList.remove('hidden');
+  placeholder.classList.add('hidden');
+  status.textContent = `Previewing ${obj.file.name}`;
+}
+
+// Convert single image (returns {blob, dataURL, name})
+async function convertImageAtIndex(i){
+  const obj = files[i];
+  if(!obj) throw new Error('No such file');
+  const fmt = formatSel.value;
+  const qualityVal = Math.max(0.01, quality.value/100);
+  // create canvas with requested size
+  const img = await ensureImageLoaded(obj);
+  // determine target size
+  let targetW = parseInt(resizeW.value) || img.width;
+  let targetH = parseInt(resizeH.value) || img.height;
+  if(!resizeW.value && !resizeH.value){ targetW = img.width; targetH = img.height; }
+  else if(keepAspect.checked){
+    if(resizeW.value && !resizeH.value){ targetH = Math.round((img.height / img.width) * targetW); }
+    else if(!resizeW.value && resizeH.value){ targetW = Math.round((img.width / img.height) * targetH); }
+    else {
+      // both provided: fit within while preserving aspect
+      const ratio = Math.min(targetW / img.width, targetH / img.height);
+      targetW = Math.round(img.width * ratio);
+      targetH = Math.round(img.height * ratio);
+    }
+  }
+  // draw to canvas
+  const canvas = document.createElement('canvas'); canvas.width = targetW; canvas.height = targetH;
+  const ctx = canvas.getContext('2d');
+  // if converting to JPEG, fill background
+  if(fmt === 'jpeg'){
+    ctx.fillStyle = bgColor.value || '#ffffff';
+    ctx.fillRect(0,0,targetW,targetH);
+  } else {
+    // preserve transparency for PNG
+    ctx.clearRect(0,0,targetW,targetH);
+  }
+  ctx.drawImage(img, 0, 0, targetW, targetH);
+  let dataURL;
+  if(fmt === 'png') dataURL = canvas.toDataURL('image/png');
+  else dataURL = canvas.toDataURL('image/jpeg', qualityVal);
+  const blob = dataURLToBlob(dataURL);
+  const ext = getExt(fmt);
+  const base = namePattern.value || 'image-{n}';
+  const idx = i+1;
+  const name = sanitizeName(base.replace('{n}', idx)) + ext;
+  obj.converted = { blob, dataURL, name };
+  return obj.converted;
+}
+
+function ensureImageLoaded(obj){
+  return new Promise((res,rej)=>{
+    if(obj.img && obj.img.complete) return res(obj.img);
+    const im = new Image();
+    im.onload = ()=> { obj.img = im; res(im); };
+    im.onerror = rej;
+    im.src = obj.url;
+  });
+}
+
+// Convert all selected (all files by default)
+convertBtn.addEventListener('click', async ()=>{
+  if(files.length === 0) return alert('Add images first.');
+  status.textContent = 'Converting...';
+  convertedList.innerHTML = '';
+  for(let i=0;i<files.length;i++){
+    try{
+      await convertImageAtIndex(i);
+      renderConvertedItem(i);
+      status.textContent = `Converted ${i+1}/${files.length}`;
+    }catch(err){
+      console.error('Convert failed', err);
+    }
+  }
+  status.textContent = 'Conversion complete';
+});
+
+// render converted item in sidebar
+function renderConvertedItem(i){
+  const it = files[i];
+  if(!it || !it.converted) return;
+  const row = document.createElement('div');
+  row.style.display='flex'; row.style.justifyContent='space-between'; row.style.alignItems='center'; row.style.padding='6px 0';
+  const left = document.createElement('div'); left.textContent = it.converted.name;
+  const right = document.createElement('div');
+  const dl = document.createElement('button'); dl.className='btn small'; dl.textContent='Download'; dl.addEventListener('click', ()=> saveAs(it.converted.blob, it.converted.name));
+  right.appendChild(dl);
+  row.appendChild(left); row.appendChild(right);
+  convertedList.appendChild(row);
+}
+
+// Download all as ZIP
+downloadAllBtn.addEventListener('click', async ()=>{
+  if(files.length === 0) return alert('Add images first.');
+  // ensure all converted
+  const toConvert = files.filter(f=>!f.converted).map((_,i)=>i);
+  if(toConvert.length){
+    status.textContent = 'Converting remaining images...';
+    for(const i of toConvert) await convertImageAtIndex(i);
+    status.textContent = 'All converted';
+  }
+  status.textContent = 'Preparing ZIP...';
+  const zip = new JSZip();
+  files.forEach(f=>{
+    if(f.converted && f.converted.blob){
+      zip.file(f.converted.name, f.converted.blob);
+    }
+  });
+  const content = await zip.generateAsync({type:'blob'});
+  saveAs(content, 'images.zip');
+  status.textContent = 'ZIP ready';
+});
+
+// Download currently previewed
+downloadSingleBtn.addEventListener('click', async ()=>{
+  if(currentIndex < 0) return alert('Select a file first.');
+  const f = files[currentIndex];
+  if(!f.converted) await convertImageAtIndex(currentIndex);
+  saveAs(f.converted.blob, f.converted.name);
+});
+
+// Clear
+clearBtn.addEventListener('click', ()=>{
+  files.forEach(f=> URL.revokeObjectURL(f.url));
+  files = []; currentIndex = -1;
+  fileList.innerHTML = ''; convertedList.innerHTML = ''; previewImg.classList.add('hidden'); placeholder.classList.remove('hidden');
+  status.textContent = 'Cleared';
+  fileInput.value = '';
+});
+
+// Utility saveAs wrapper using FileSaver if available
+function saveAs(blob, filename){
+  if(window.saveAs) return window.saveAs(blob, filename);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=> URL.revokeObjectURL(a.href), 2000);
+}
+
+// Small UX: click first file when added
+const observer = new MutationObserver(()=> {
+  if(files.length && currentIndex === -1){
+    showPreview(0); highlightThumb(0);
+  }
+});
+observer.observe(fileList, {childList:true});
+
+// Accessibility: keyboard support for downloadAll (Ctrl+Enter)
+document.addEventListener('keydown', (e)=> { if(e.ctrlKey && e.key === 'Enter') downloadAllBtn.click(); });
+
+</script>
+</body>
+</html>
