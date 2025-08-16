@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>PDF Editor — Smarttool Hub (GitHub Pages ready)</title>
-<meta name="description" content="Edit PDF in browser — add text, draw, highlight, insert images, download. Works on GitHub Pages."/>
+<title>PDF Editor — Smarttool Hub (Fixed)</title>
+<meta name="description" content="Edit PDF in your browser: add text, draw, highlight, insert images, and download. Works on GitHub Pages."/>
 <link rel="icon" href="https://img.icons8.com/fluency/48/toolbox.png"/>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 <style>
-  :root{--bg:#071124;--card:#0f1724;--muted:#9aa8bf;--accent:#60a5fa}
+  :root{--bg:#071124;--card:#0f1724;--muted:#9aa8bf}
   body{margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);color:#e6eef8}
   header{position:sticky;top:0;z-index:999;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:linear-gradient(90deg,#2563eb,#06b6d4)}
   header .left{display:flex;gap:12px;align-items:center}
@@ -18,14 +18,15 @@
   .container{max-width:980px;margin:18px auto;padding:12px}
   .card{background:var(--card);padding:14px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.5)}
   .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
-  .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;padding:8px 10px;border-radius:8px;cursor:pointer}
+  .btn{background:transparent;border:1px solid rgba(255,255,255,0.08);color:inherit;padding:8px 10px;border-radius:8px;cursor:pointer}
   .btn.primary{background:#fff;color:#071124;font-weight:700}
   .small{padding:6px 8px;font-size:13px}
-  .canvas-wrap{position:relative;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.04);margin-top:12px;background:#fff}
+  .canvas-wrap{position:relative;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);margin-top:12px;background:#fff}
   canvas{display:block;width:100%}
   #annotLayer{position:absolute;left:0;top:0;pointer-events:none}
-  .text-box{position:absolute;padding:6px 8px;background:rgba(0,0,0,0.5);color:#fff;border-radius:6px;border:1px dashed rgba(255,255,255,0.08);cursor:move;pointer-events:auto;min-width:48px;white-space:pre-wrap;overflow:hidden}
-  .text-box[contenteditable="true"]{outline:2px dashed rgba(255,255,255,0.12)}
+  .text-box{position:absolute;padding:6px 8px;background:rgba(0,0,0,0.5);color:#fff;border-radius:6px;border:1px dashed rgba(255,255,255,0.12);cursor:move;pointer-events:auto;min-width:48px;white-space:pre-wrap;overflow:hidden}
+  .text-box[contenteditable="true"]{outline:2px dashed rgba(255,255,255,0.25)}
+  .text-box.selected{box-shadow:0 0 0 2px #60a5fa}
   .img-handle{position:absolute;width:12px;height:12px;background:#fff;border-radius:2px;right:-6px;bottom:-6px;border:1px solid rgba(0,0,0,0.2);cursor:se-resize;pointer-events:auto}
   .thumbs{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap}
   .muted{color:var(--muted);font-size:13px}
@@ -40,7 +41,7 @@
     <img src="https://img.icons8.com/fluency/48/toolbox.png" alt="logo"/>
     <div>
       <h1>Smarttool Hub — PDF Editor</h1>
-      <div style="font-size:12px;color:#e6f7ff90">Works on GitHub Pages</div>
+      <div style="font-size:12px;color:#e6f7ff90">GitHub Pages friendly</div>
     </div>
   </div>
   <div class="right">
@@ -57,28 +58,28 @@
       </label>
 
       <div style="display:flex;gap:6px;align-items:center">
-        <button id="textBtn" class="btn small"><i class="fa fa-font"></i> Text</button>
-        <button id="drawBtn" class="btn small"><i class="fa fa-pencil"></i> Draw</button>
-        <button id="highlightBtn" class="btn small"><i class="fa fa-highlighter"></i> Highlight</button>
-        <label class="btn small">
+        <button id="textBtn" class="btn small" title="Add text"><i class="fa fa-font"></i> Text</button>
+        <button id="drawBtn" class="btn small" title="Freehand draw"><i class="fa fa-pencil"></i> Draw</button>
+        <button id="highlightBtn" class="btn small" title="Highlighter"><i class="fa fa-highlighter"></i> Highlight</button>
+        <label class="btn small" title="Insert image">
           <i class="fa fa-image"></i> Image
           <input id="imgInput" type="file" accept="image/*">
         </label>
       </div>
 
-      <select id="fontSelect" style="padding:6px;border-radius:6px;background:#071124;color:#fff">
+      <select id="fontSelect" style="padding:6px;border-radius:6px;background:#071124;color:#fff" title="Font for new/selected text">
         <option>Arial</option><option>Times New Roman</option><option>Courier New</option><option>Georgia</option><option>Verdana</option>
       </select>
 
-      <select id="sizeSel" title="Font/Brush size">
-        <option value="12">12</option><option value="16" selected>16</option><option value="20">20</option><option value="28">28</option>
+      <select id="sizeSel" title="Font size / Brush size">
+        <option value="12">12</option><option value="16" selected>16</option><option value="20">20</option><option value="28">28</option><option value="36">36</option>
       </select>
 
-      <input id="colorInp" type="color" value="#ff4757" title="Color" style="margin-left:6px">
+      <input id="colorInp" type="color" value="#ff4757" title="Text/Brush color" style="margin-left:6px">
 
       <div class="right" style="margin-left:auto">
         <button id="prevBtn" class="btn small"><i class="fa fa-chevron-left"></i></button>
-        <div id="pageIndicator" style="padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:6px">0 / 0</div>
+        <div id="pageIndicator" style="padding:6px 10px;background:rgba(255,255,255,0.06);border-radius:6px">0 / 0</div>
         <button id="nextBtn" class="btn small"><i class="fa fa-chevron-right"></i></button>
         <button id="downloadBtn" class="btn primary small" style="margin-left:8px"><i class="fa fa-download"></i> Download</button>
       </div>
@@ -91,7 +92,7 @@
     </div>
 
     <div class="thumbs muted" id="thumbsArea">Pages: none</div>
-    <div style="margin-top:8px" class="muted">Tip: Select "Text" then click on page to add. Double-click a text box to edit. Drag elements to move. Images have bottom-right handle to resize.</div>
+    <div style="margin-top:8px" class="muted">Tip: Text ઉમેરવા "Text" પસંદ કરો અને પેજ પર click કરો. Text box પર double-click → edit. Click → select, toolbar થી font/size/color બદલાય.</div>
   </div>
 </div>
 
@@ -100,10 +101,7 @@
 <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 
 <script>
-/* Reliable, GitHub Pages-friendly PDF editor
-   - Uses pdf.js (CDN) and pdf-lib
-   - Per-page annotations saved in localStorage (keyed by file name if present)
-*/
+/* --- Fixed, GitHub Pages-friendly PDF editor --- */
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -130,10 +128,11 @@ const downloadBtn = document.getElementById('downloadBtn');
 const ctxPdf = pdfCanvas.getContext('2d');
 const ctxAnnot = annotCanvas.getContext('2d');
 
-let pdfDoc = null, fileBytes = null, pageCount = 0, currentPage = 1, scale = 1.3;
+let pdfDoc = null, fileBytesU8 = null, pageCount = 0, currentPage = 1, scale = 1.3;
 let mode = 'draw'; // draw, highlight, text
 let drawColor = colorInp.value, drawSize = parseInt(sizeSel.value,10);
-let annotations = {}; // pageNum -> { drawingsDataURL, texts: [], images: [] }
+let annotations = {}; // pageNum -> { drawingsDataURL, texts:[], images:[] }
+let selectedTextBox = null; // <- for toolbar edits
 const STORAGE_PREFIX = 'simple_pdf_editor_v1_';
 
 // helpers
@@ -146,49 +145,33 @@ function setCanvasSize(w,h){
   annotLayer.style.height = pdfCanvas.height + 'px';
   canvasWrap.style.height = pdfCanvas.height + 'px';
 }
-
-function saveAnnotationsToLocal(key){
-  try{
-    const out = JSON.stringify(annotations);
-    if(key) localStorage.setItem(STORAGE_PREFIX + key, out);
-    else localStorage.setItem(STORAGE_PREFIX + 'autosave', out);
-  }catch(e){ console.warn('save failed', e); }
-}
-
-function loadAnnotationsFromLocal(key){
-  try{
-    const raw = key ? localStorage.getItem(STORAGE_PREFIX + key) : localStorage.getItem(STORAGE_PREFIX + 'autosave');
-    if(!raw) return {};
-    return JSON.parse(raw);
-  }catch(e){ return {}; }
-}
-
 function genId(p='id'){ return p + '_' + Math.random().toString(36).slice(2,9); }
+function hexToRgba(hex,a=1){ const h=hex.replace('#',''); const n=parseInt(h,16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; }
+function saveToLocal(key,obj){ try{ localStorage.setItem(STORAGE_PREFIX+key, JSON.stringify(obj)); }catch(e){} }
+function loadFromLocal(key){ try{ const r=localStorage.getItem(STORAGE_PREFIX+key); return r?JSON.parse(r):null; }catch(e){ return null; } }
 
-// PDF load
+// PDF load (store as Uint8Array to avoid detach)
 fileInput.addEventListener('change', async (e)=>{
   const f = e.target.files[0];
   if(!f) return;
   const nameKey = f.name || 'file';
   try{
-    fileBytes = await f.arrayBuffer();
-    pdfDoc = await pdfjsLib.getDocument({data: fileBytes}).promise;
-    pageCount = pdfDoc.numPages;
-    currentPage = 1;
-    // try load saved annotations for this filename
-    annotations = loadAnnotationsFromLocal(nameKey);
-    if(!annotations || Object.keys(annotations).length === 0) annotations = {}; // reset if empty
+    const ab = await f.arrayBuffer();
+    fileBytesU8 = new Uint8Array(ab); // keep as U8 for safe reuse
+    pdfDoc = await pdfjsLib.getDocument({data: fileBytesU8}).promise;
+    pageCount = pdfDoc.numPages; currentPage = 1;
+
+    annotations = loadFromLocal(nameKey) || {};
     await renderThumbnails();
     await renderPage(currentPage);
-    // also autosave mapping of filename for later use
-    localStorage.setItem(STORAGE_PREFIX + 'last_filename', nameKey);
+    saveToLocal('last_filename', nameKey);
   }catch(err){
     console.error(err);
     alert('Failed to load PDF: ' + (err.message || err));
   }
 });
 
-// render thumbnails (small)
+// thumbs
 async function renderThumbnails(){
   thumbsArea.textContent = '';
   for(let p=1;p<=pageCount;p++){
@@ -196,10 +179,7 @@ async function renderThumbnails(){
     const vp = pg.getViewport({scale:0.12});
     const c = document.createElement('canvas'); c.width = vp.width; c.height = vp.height;
     await pg.render({canvasContext: c.getContext('2d'), viewport: vp}).promise;
-    c.style.marginRight = '6px';
-    c.style.border = '1px solid rgba(255,255,255,0.05)';
-    c.style.borderRadius = '4px';
-    c.style.cursor = 'pointer';
+    c.style.marginRight = '6px'; c.style.border='1px solid rgba(255,255,255,0.05)'; c.style.borderRadius='4px'; c.style.cursor='pointer';
     c.onclick = ()=>{ saveCurrentAnnotations(); currentPage = p; renderPage(p); };
     thumbsArea.appendChild(c);
   }
@@ -208,6 +188,10 @@ async function renderThumbnails(){
 // render page
 async function renderPage(p){
   if(!pdfDoc) return;
+  // clear selection state
+  selectedTextBox = null;
+  annotLayer.querySelectorAll('.text-box').forEach(el=>el.classList.remove('selected'));
+
   const page = await pdfDoc.getPage(p);
   const vp0 = page.getViewport({scale:1});
   const containerW = Math.min(920, window.innerWidth - 80);
@@ -215,6 +199,7 @@ async function renderPage(p){
   const viewport = page.getViewport({scale: targetScale});
   setCanvasSize(viewport.width, viewport.height);
   await page.render({canvasContext: ctxPdf, viewport}).promise;
+
   // load annotations
   ctxAnnot.clearRect(0,0,annotCanvas.width,annotCanvas.height);
   annotLayer.innerHTML = '';
@@ -231,27 +216,21 @@ async function renderPage(p){
   pageIndicator.textContent = `${p} / ${pageCount}`;
 }
 
-// Drawing handlers
+// drawing & highlight (highlight size comes from drawSize)
 let isDrawing = false;
 annotCanvas.addEventListener('pointerdown', (ev)=>{
-  if(!pdfDoc) return;
-  if(mode === 'text') return;
+  if(!pdfDoc || mode==='text') return;
   const rect = annotCanvas.getBoundingClientRect();
   const x = (ev.clientX - rect.left) * (annotCanvas.width / rect.width);
   const y = (ev.clientY - rect.top) * (annotCanvas.height / rect.height);
-  if(mode === 'draw' || mode === 'highlight'){
-    if(mode === 'draw'){
-      ctxAnnot.beginPath();
-      ctxAnnot.lineWidth = drawSize;
-      ctxAnnot.lineCap = 'round';
-      ctxAnnot.strokeStyle = drawColor;
-      ctxAnnot.moveTo(x,y);
-      isDrawing = true;
-    } else {
-      ctxAnnot.fillStyle = hexToRgba(drawColor, 0.35);
-      ctxAnnot.fillRect(x - drawSize*4, y - drawSize*2, drawSize*20, drawSize*4);
-      saveDrawingToPage(currentPage);
-    }
+  if(mode === 'draw'){
+    ctxAnnot.beginPath(); ctxAnnot.lineWidth = drawSize; ctxAnnot.lineCap = 'round'; ctxAnnot.strokeStyle = drawColor;
+    ctxAnnot.moveTo(x,y); isDrawing = true;
+  } else if(mode === 'highlight'){
+    ctxAnnot.fillStyle = hexToRgba(drawColor, 0.35);
+    // width/height proportional to drawSize
+    ctxAnnot.fillRect(x - drawSize*2, y - drawSize, drawSize*10, drawSize*2);
+    saveDrawingToPage(currentPage);
   }
 });
 annotCanvas.addEventListener('pointermove', (ev)=>{
@@ -259,43 +238,46 @@ annotCanvas.addEventListener('pointermove', (ev)=>{
   const rect = annotCanvas.getBoundingClientRect();
   const x = (ev.clientX - rect.left) * (annotCanvas.width / rect.width);
   const y = (ev.clientY - rect.top) * (annotCanvas.height / rect.height);
-  ctxAnnot.lineTo(x,y);
-  ctxAnnot.stroke();
+  ctxAnnot.lineTo(x,y); ctxAnnot.stroke();
 });
 annotCanvas.addEventListener('pointerup', ()=>{ if(isDrawing){ ctxAnnot.closePath(); isDrawing=false; saveDrawingToPage(currentPage); }});
 
-// save drawing layer as dataURL to annotations
+// save drawing layer
 function saveDrawingToPage(page){
   annotations[page] = annotations[page] || {drawingsDataURL:null, texts:[], images:[]};
   annotations[page].drawingsDataURL = annotCanvas.toDataURL();
-  const key = localStorage.getItem(STORAGE_PREFIX + 'last_filename') || 'autosave';
-  saveAnnotationsToLocal(key);
+  const key = loadFromLocal('last_filename') || 'autosave';
+  saveToLocal(key, annotations);
 }
 
-// text mode: click canvasWrap to add text
+// text add
 canvasWrap.addEventListener('click', (ev)=>{
-  if(!pdfDoc) return;
-  if(mode !== 'text') return;
-  // get coords relative to annotCanvas
+  if(!pdfDoc || mode!=='text') return;
   const rect = annotCanvas.getBoundingClientRect();
   const x = (ev.clientX - rect.left) * (annotCanvas.width / rect.width);
   const y = (ev.clientY - rect.top) * (annotCanvas.height / rect.height);
   const wRel = 0.28, hRel = 0.08;
-  const txt = { id: genId('t'), x: x/annotCanvas.width, y: y/annotCanvas.height, w: wRel, h: hRel, html: 'Type...', fontSize: parseInt(sizeSel.value,10), color: colorInp.value, fontFamily: fontSelect.value };
+  const txt = {
+    id: genId('t'),
+    x: x/annotCanvas.width, y: y/annotCanvas.height, w: wRel, h: hRel,
+    html: 'Type...',
+    fontSize: parseInt(sizeSel.value,10),
+    color: colorInp.value,
+    fontFamily: fontSelect.value
+  };
   annotations[currentPage] = annotations[currentPage] || {drawingsDataURL:null, texts:[], images:[]};
-  annotations[currentPage].texts = annotations[currentPage].texts || [];
-  annotations[currentPage].texts.push(txt);
+  (annotations[currentPage].texts ||= []).push(txt);
   createTextDiv(txt);
-  saveAnnotationsToLocal(localStorage.getItem(STORAGE_PREFIX + 'last_filename') || 'autosave');
+  saveToLocal(loadFromLocal('last_filename') || 'autosave', annotations);
 });
 
-// create text div DOM
+// create text DOM (with selection + toolbar binding)
 function createTextDiv(t){
   const div = document.createElement('div');
   div.className = 'text-box';
   div.dataset.id = t.id;
   div.style.left = (t.x * annotCanvas.width) + 'px';
-  div.style.top = (t.y * annotCanvas.height) + 'px';
+  div.style.top  = (t.y * annotCanvas.height) + 'px';
   div.style.width = (t.w * annotCanvas.width) + 'px';
   div.style.height = (t.h * annotCanvas.height) + 'px';
   div.style.fontSize = (t.fontSize || 16) + 'px';
@@ -303,52 +285,97 @@ function createTextDiv(t){
   div.style.color = t.color || '#fff';
   div.innerHTML = t.html || '';
   annotLayer.appendChild(div);
-  makeElementDraggable(div);
-  // double-click to edit
-  div.addEventListener('dblclick', (e)=> {
+
+  // select
+  div.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    annotLayer.querySelectorAll('.text-box').forEach(el=>el.classList.remove('selected'));
+    div.classList.add('selected');
+    selectedTextBox = div;
+    // sync toolbar to selected text
+    fontSelect.value = (t.fontFamily || 'Arial');
+    sizeSel.value = (t.fontSize || 16);
+    colorInp.value = toHex(div.style.color || '#ffffff');
+  });
+
+  // drag
+  makeDraggable(div, ()=> saveTextDivToAnnotations(div));
+
+  // edit on dblclick
+  div.addEventListener('dblclick', (e)=>{
     e.stopPropagation();
     div.contentEditable = 'true';
     div.focus();
-    // on blur save
-    const onBlur = ()=> {
+    const onBlur = ()=>{
       div.contentEditable = 'false';
       saveTextDivToAnnotations(div);
       div.removeEventListener('blur', onBlur);
-      saveAnnotationsToLocal(localStorage.getItem(STORAGE_PREFIX + 'last_filename') || 'autosave');
+      saveToLocal(loadFromLocal('last_filename') || 'autosave', annotations);
     };
     div.addEventListener('blur', onBlur);
   });
-  // click selects for styling (optional)
-  div.addEventListener('click', (e)=> {
-    e.stopPropagation();
-    // show simple editor: update font/selectors
-    // apply immediate changes when user changes controls
-    // we will not show separate UI here, user can double-click to edit text
-  });
 }
 
-// save text div back to annotations
 function saveTextDivToAnnotations(div){
   const page = currentPage;
   const wrap = annotLayer.getBoundingClientRect(), rect = div.getBoundingClientRect();
   const x = (rect.left - wrap.left) / annotCanvas.width;
-  const y = (rect.top - wrap.top) / annotCanvas.height;
-  const w = rect.width / annotCanvas.width;
+  const y = (rect.top  - wrap.top ) / annotCanvas.height;
+  const w = rect.width  / annotCanvas.width;
   const h = rect.height / annotCanvas.height;
-  const fontSize = parseInt(window.getComputedStyle(div).fontSize,10) || 16;
-  const fontFamily = window.getComputedStyle(div).fontFamily || 'Arial';
-  const color = window.getComputedStyle(div).color || '#ffffff';
+  const fontSize = parseInt(getComputedStyle(div).fontSize,10) || 16;
+  const fontFamily = getComputedStyle(div).fontFamily || 'Arial';
+  const color = rgbToHex(getComputedStyle(div).color || '#ffffff');
   const html = div.innerHTML;
+  const id = div.dataset.id;
   annotations[page] = annotations[page] || {drawingsDataURL:null, texts:[], images:[]};
   const arr = annotations[page].texts || [];
-  const existing = arr.find(xe => xe.id === div.dataset.id);
-  const obj = { id: div.dataset.id, x, y, w, h, html, fontSize, color, fontFamily };
+  const existing = arr.find(xe => xe.id === id);
+  const obj = { id, x, y, w, h, html, fontSize, color, fontFamily };
   if(existing) Object.assign(existing, obj); else arr.push(obj);
   annotations[page].texts = arr;
 }
 
-// simple draggable for text and images
-function makeElementDraggable(el){
+function toHex(any){ // best-effort when element has hex already
+  if(/^#/.test(any)) return any;
+  return rgbToHex(any);
+}
+function rgbToHex(rgb){
+  const m = (rgb||'').match(/\d+/g);
+  if(!m) return '#ffffff';
+  const r = (+m[0]).toString(16).padStart(2,'0');
+  const g = (+m[1]).toString(16).padStart(2,'0');
+  const b = (+m[2]).toString(16).padStart(2,'0');
+  return '#' + r + g + b;
+}
+
+// toolbar → update selected text live
+fontSelect.addEventListener('change', ()=>{
+  if(selectedTextBox){
+    selectedTextBox.style.fontFamily = fontSelect.value;
+    saveTextDivToAnnotations(selectedTextBox);
+    saveToLocal(loadFromLocal('last_filename') || 'autosave', annotations);
+  }
+});
+sizeSel.addEventListener('change', ()=>{
+  drawSize = parseInt(sizeSel.value,10); // affects draw/highlighter
+  if(selectedTextBox){
+    selectedTextBox.style.fontSize = sizeSel.value + 'px';
+    saveTextDivToAnnotations(selectedTextBox);
+    saveToLocal(loadFromLocal('last_filename') || 'autosave', annotations);
+  }
+});
+colorInp.addEventListener('change', ()=>{
+  drawColor = colorInp.value; // draw/highlighter color
+  if(selectedTextBox){
+    selectedTextBox.style.color = colorInp.value;
+    saveTextDivToAnnotations(selectedTextBox);
+    saveToLocal(loadFromLocal('last_filename') || 'autosave', annotations);
+  }
+});
+
+// simple draggable
+function makeDraggable(el, onEnd){
   el.style.touchAction = 'none';
   el.onpointerdown = function(e){
     e.preventDefault();
@@ -358,33 +385,30 @@ function makeElementDraggable(el){
     function move(ev){
       const dx = ev.clientX - startX, dy = ev.clientY - startY;
       el.style.left = (origLeft + dx) + 'px';
-      el.style.top = (origTop + dy) + 'px';
+      el.style.top  = (origTop  + dy) + 'px';
     }
-    function up(ev){
+    function up(){
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', up);
-      // save pos
-      if(el.tagName.toLowerCase() === 'div') saveTextDivToAnnotations(el);
-      else saveImageElToAnnotations(el);
-      saveAnnotationsToLocal(localStorage.getItem(STORAGE_PREFIX + 'last_filename') || 'autosave');
+      if(onEnd) onEnd();
+      saveToLocal(loadFromLocal('last_filename') || 'autosave', annotations);
     }
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up);
   };
 }
 
-// Image insert and simple resize handle
+// Image insert + resize handle
 imgInput.addEventListener('change', (e)=>{
   const f = e.target.files[0]; if(!f) return;
   const reader = new FileReader();
-  reader.onload = ()=> {
+  reader.onload = ()=>{
     const data = reader.result;
     const imgObj = { id: genId('i'), x:0.12, y:0.12, w:0.5, h:0.4, dataURL: data };
     annotations[currentPage] = annotations[currentPage] || {drawingsDataURL:null, texts:[], images:[]};
-    annotations[currentPage].images = annotations[currentPage].images || [];
-    annotations[currentPage].images.push(imgObj);
+    (annotations[currentPage].images ||= []).push(imgObj);
     createImageEl(imgObj);
-    saveAnnotationsToLocal(localStorage.getItem(STORAGE_PREFIX + 'last_filename') || 'autosave');
+    saveToLocal(loadFromLocal('last_filename') || 'autosave', annotations);
   };
   reader.readAsDataURL(f);
   e.target.value = '';
@@ -396,64 +420,49 @@ function createImageEl(it){
   img.dataset.id = it.id;
   img.style.position = 'absolute';
   img.style.left = (it.x * annotCanvas.width) + 'px';
-  img.style.top = (it.y * annotCanvas.height) + 'px';
+  img.style.top  = (it.y * annotCanvas.height) + 'px';
   img.style.width = (it.w * annotCanvas.width) + 'px';
-  img.style.height = (it.h * annotCanvas.height) + 'px';
-  img.style.cursor = 'move';
-  img.style.pointerEvents = 'auto';
-  // handle for resize
+  img.style.height= (it.h * annotCanvas.height) + 'px';
+  img.style.pointerEvents='auto'; img.style.cursor='move';
+
   const wrap = document.createElement('div');
-  wrap.style.position = 'absolute';
-  wrap.style.left = img.style.left;
-  wrap.style.top = img.style.top;
-  wrap.style.width = img.style.width;
-  wrap.style.height = img.style.height;
-  wrap.style.pointerEvents = 'auto';
+  wrap.style.position='absolute';
+  wrap.style.left=img.style.left; wrap.style.top=img.style.top;
+  wrap.style.width=img.style.width; wrap.style.height=img.style.height;
   wrap.appendChild(img);
 
-  const handle = document.createElement('div');
-  handle.className = 'img-handle';
-  wrap.appendChild(handle);
-
+  const handle = document.createElement('div'); handle.className='img-handle'; wrap.appendChild(handle);
   annotLayer.appendChild(wrap);
 
-  // drag wrap
-  makeElementDraggable(wrap);
-  // resize via handle
+  makeDraggable(wrap, ()=> saveImageBack(wrap));
   handle.onpointerdown = function(e){
     e.stopPropagation(); e.preventDefault();
     const startX = e.clientX, startY = e.clientY;
     const startW = wrap.getBoundingClientRect().width, startH = wrap.getBoundingClientRect().height;
     function move(ev){
       const dx = ev.clientX - startX, dy = ev.clientY - startY;
-      const newW = Math.max(20, startW + dx), newH = Math.max(20, startH + dy);
-      wrap.style.width = newW + 'px';
-      wrap.style.height = newH + 'px';
-      img.style.width = newW + 'px'; img.style.height = newH + 'px';
+      const nw = Math.max(20, startW + dx), nh = Math.max(20, startH + dy);
+      wrap.style.width = nw+'px'; wrap.style.height = nh+'px';
+      img.style.width = nw+'px'; img.style.height = nh+'px';
     }
-    function up(ev){
+    function up(){
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', up);
-      saveImageElToAnnotations(wrap);
-      saveAnnotationsToLocal(localStorage.getItem(STORAGE_PREFIX + 'last_filename') || 'autosave');
+      saveImageBack(wrap);
+      saveToLocal(loadFromLocal('last_filename') || 'autosave', annotations);
     }
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up);
   };
-  // save initial
-  saveImageElToAnnotations(wrap);
+  saveImageBack(wrap);
 }
-
-// save image element back to annotations
-function saveImageElToAnnotations(wrapOrImg){
-  // wrapOrImg may be wrap div (we used wrap), with child img
+function saveImageBack(wrap){
   const wrapRect = annotLayer.getBoundingClientRect();
-  const el = wrapOrImg.tagName && wrapOrImg.tagName.toLowerCase()==='div' ? wrapOrImg : wrapOrImg.parentElement;
-  const img = el.querySelector('img');
+  const img = wrap.querySelector('img');
   const rect = img.getBoundingClientRect();
   const x = (rect.left - wrapRect.left) / annotCanvas.width;
-  const y = (rect.top - wrapRect.top) / annotCanvas.height;
-  const w = rect.width / annotCanvas.width;
+  const y = (rect.top  - wrapRect.top ) / annotCanvas.height;
+  const w = rect.width  / annotCanvas.width;
   const h = rect.height / annotCanvas.height;
   const id = img.dataset.id;
   annotations[currentPage] = annotations[currentPage] || {drawingsDataURL:null, texts:[], images:[]};
@@ -464,25 +473,19 @@ function saveImageElToAnnotations(wrapOrImg){
   annotations[currentPage].images = arr;
 }
 
-// page nav
+// nav
 prevBtn.addEventListener('click', ()=>{ if(currentPage>1){ saveCurrentAnnotations(); currentPage--; renderPage(currentPage); }});
-nextBtn.addEventListener('click', ()=>{ if(currentPage < pageCount){ saveCurrentAnnotations(); currentPage++; renderPage(currentPage); }});
-
-// save current annotations snapshots
+nextBtn.addEventListener('click', ()=>{ if(currentPage<pageCount){ saveCurrentAnnotations(); currentPage++; renderPage(currentPage); }});
 function saveCurrentAnnotations(){
   saveDrawingToPage(currentPage);
-  // save DOM texts/images
-  document.querySelectorAll('.text-box').forEach(tb => saveTextDivToAnnotations(tb));
-  // images: wrap divs in annotLayer
-  annotLayer.querySelectorAll('div').forEach(wrap => {
-    if(wrap.querySelector && wrap.querySelector('img')) saveImageElToAnnotations(wrap);
-  });
-  saveAnnotationsToLocal(localStorage.getItem(STORAGE_PREFIX + 'last_filename') || 'autosave');
+  annotLayer.querySelectorAll('.text-box').forEach(tb=> saveTextDivToAnnotations(tb));
+  annotLayer.querySelectorAll('div').forEach(w=>{ if(w.querySelector && w.querySelector('img')) saveImageBack(w); });
+  saveToLocal(loadFromLocal('last_filename') || 'autosave', annotations);
 }
 
-// download flattened PDF
+// ---- Export FIX: always clone bytes to avoid detached ArrayBuffer ----
 downloadBtn.addEventListener('click', async ()=>{
-  if(!pdfDoc || !fileBytes) return alert('Load a PDF first');
+  if(!pdfDoc || !fileBytesU8) return alert('Load a PDF first');
   saveCurrentAnnotations();
   downloadBtn.disabled = true; downloadBtn.textContent = 'Preparing...';
   try{
@@ -493,46 +496,43 @@ downloadBtn.addEventListener('click', async ()=>{
     a.download = 'edited.pdf';
     document.body.appendChild(a); a.click(); a.remove();
   }catch(e){
-    console.error(e); alert('Export failed: '+e);
+    console.error(e); alert('Export failed: ' + e);
   }finally{
     downloadBtn.disabled = false; downloadBtn.textContent = 'Download';
   }
 });
 
 async function exportFlattenedPdf(){
-  const srcPdf = await PDFLib.PDFDocument.load(fileBytes);
+  // ✅ clone bytes so original buffer never gets detached
+  const fresh = new Uint8Array(fileBytesU8); 
+  const srcPdf = await PDFLib.PDFDocument.load(fresh);
   const outPdf = await PDFLib.PDFDocument.create();
   const copied = await outPdf.copyPages(srcPdf, srcPdf.getPageIndices());
   for(let i=0;i<copied.length;i++){
-    const page = copied[i];
-    outPdf.addPage(page);
-    const ann = annotations[i+1];
-    if(!ann) continue;
+    const page = copied[i]; outPdf.addPage(page);
+    const ann = annotations[i+1]; if(!ann) continue;
     const { width, height } = page.getSize();
-    // build overlay canvas scaled to page size
-    const tmp = document.createElement('canvas'); tmp.width = width; tmp.height = height;
+
+    const tmp = document.createElement('canvas'); tmp.width=width; tmp.height=height;
     const tctx = tmp.getContext('2d');
-    // drawings
+
     if(ann.drawingsDataURL){
       const d = new Image();
-      await new Promise((res, rej)=>{ d.onload = res; d.onerror = rej; d.src = ann.drawingsDataURL; });
-      tctx.drawImage(d, 0, 0, width, height);
+      await new Promise((res,rej)=>{ d.onload=res; d.onerror=rej; d.src=ann.drawingsDataURL; });
+      tctx.drawImage(d,0,0,width,height);
     }
-    // images
     for(const im of (ann.images||[])){
       const ii = new Image();
-      await new Promise((res,rej)=>{ ii.onload=res; ii.onerror=rej; ii.src = im.dataURL; });
-      tctx.drawImage(ii, im.x * width, im.y * height, im.w * width, im.h * height);
+      await new Promise((res,rej)=>{ ii.onload=res; ii.onerror=rej; ii.src=im.dataURL; });
+      tctx.drawImage(ii, im.x*width, im.y*height, im.w*width, im.h*height);
     }
-    // texts
     for(const tx of (ann.texts||[])){
       const fontSz = tx.fontSize || 16;
       tctx.font = `${fontSz}px ${tx.fontFamily || 'Arial'}`;
-      const textContent = (tx.html || '').replace(/<[^>]+>/g,'') || ' ';
+      const textContent = (tx.html||'').replace(/<[^>]+>/g,'') || ' ';
       tctx.fillStyle = tx.color || '#ffffff';
-      tctx.fillText(textContent, tx.x * width + 4, tx.y * height + fontSz + 4);
+      tctx.fillText(textContent, tx.x*width + 4, tx.y*height + fontSz + 4);
     }
-    // embed overlay
     const png = tmp.toDataURL('image/png');
     const pngBytes = await (await fetch(png)).arrayBuffer();
     const embedded = await outPdf.embedPng(pngBytes);
@@ -541,42 +541,18 @@ async function exportFlattenedPdf(){
   return outPdf.save();
 }
 
-// helpers
-function hexToRgba(hex, a=1){ const h=hex.replace('#',''); const n=parseInt(h,16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; }
-
-// load autosave on start if exists
-(async function init(){
-  const last = localStorage.getItem(STORAGE_PREFIX + 'last_filename');
-  if(last){
-    const loaded = loadAnnotationsFromLocal(last);
-    if(loaded && Object.keys(loaded).length) {
-      // keep annotations loaded; but no PDF bytes => user must re-open same file to render
-      annotations = loaded;
-    }
-  }
-  // default mode
+// init + responsive
+(function init(){
   setMode('draw');
 })();
+let resizeTimer=null;
+window.addEventListener('resize', ()=>{ if(!pdfDoc) return; clearTimeout(resizeTimer); resizeTimer=setTimeout(()=>renderPage(currentPage),200); });
 
-// UI mode switches
-textBtn.addEventListener('click', ()=> setMode('text'));
-drawBtn.addEventListener('click', ()=> setMode('draw'));
-highlightBtn.addEventListener('click', ()=> setMode('highlight'));
-sizeSel.addEventListener('change', ()=> drawSize = parseInt(sizeSel.value,10));
-colorInp.addEventListener('change', ()=> drawColor = colorInp.value);
-fontSelect.addEventListener('change', ()=> {/* selection for future new text */});
-
-// helpful window resize: re-render current page (keeps sizes in sync)
-let resizeTimer = null;
-window.addEventListener('resize', ()=> {
-  if(!pdfDoc) return;
-  clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(()=> renderPage(currentPage), 200);
-});
-
-function setMode(m){ mode = m; if(m === 'draw' || m === 'highlight'){ annotCanvas.style.pointerEvents='auto'; annotLayer.style.pointerEvents='none'; } else { annotCanvas.style.pointerEvents='none'; annotLayer.style.pointerEvents='auto'; } }
-
-// small utility to read annotations key by filename; not perfect but fine for local use
+function setMode(m){
+  mode = m;
+  if(m==='text'){ annotCanvas.style.pointerEvents='none'; annotLayer.style.pointerEvents='auto'; }
+  else { annotCanvas.style.pointerEvents='auto'; annotLayer.style.pointerEvents='none'; }
+}
 </script>
 </body>
 </html>
