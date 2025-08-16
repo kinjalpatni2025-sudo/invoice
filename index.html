@@ -1,569 +1,78 @@
-<!--
-  SmartTool Hub - Landing Page (single-file)
-  Save as: index.html
-  Works on: GitHub Pages, Hostinger, any static host
--->
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>SmartTool Hub — Free Online Tools (33+)</title>
-  <meta name="description" content="SmartTool Hub offers 33+ free browser-based PDF, Image, Text and Utility tools. No upload to server — everything runs in your browser." />
-  <link rel="icon" href="https://img.icons8.com/fluency/48/toolbox.png" type="image/png" />
-  <!-- Font Awesome for icons (optional) -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>SmartTool Hub — Preview Mock</title>
+  <link rel="stylesheet" href="https://unpkg.com/lucide-static@latest/font/lucide.css"/>
   <style>
-    :root{
-      --bg:#0b1220; --card:#0f1724; --muted:#94a3b8; --accent:#06b6d4; --primary:#1d4ed8;
-      --glass: rgba(255,255,255,0.04);
-      --maxw:1200px;
-      --radius:12px;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    body {
+      margin:0; font-family:Inter, sans-serif;
+      background:linear-gradient(180deg,#0f172a,#1e293b);
+      color:#f8fafc; padding:40px;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;background:linear-gradient(180deg,var(--bg),#071022);
-      color:#e6eef8;line-height:1.4;
-      -webkit-font-smoothing:antialiased;padding-bottom:40px;
+    .grid {
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:20px; max-width:900px; margin:auto;
     }
-    .wrap{max-width:var(--maxw);margin:0 auto;padding:18px;}
-    header{
-      display:flex;align-items:center;gap:18px;justify-content:space-between;
-      position:sticky;top:0;z-index:50;padding:12px;background:linear-gradient(90deg, rgba(29,78,216,0.12), rgba(6,182,212,0.06));
-      border-radius:14px;margin:10px 18px 22px 18px;backdrop-filter: blur(6px);
-      box-shadow:0 6px 18px rgba(2,6,23,0.6);
+    .card {
+      background:rgba(255,255,255,0.04);
+      border-radius:16px; padding:20px;
+      display:flex; flex-direction:column; gap:12px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.4);
+      transition:all .25s;
+      cursor:pointer;
+      position:relative;
     }
-    .brand{display:flex;align-items:center;gap:12px}
-    .brand img{width:44px;height:44px;border-radius:8px}
-    .brand h1{font-size:1.05rem;margin:0}
-    .tag{color:var(--muted);font-size:0.82rem;margin-top:4px}
-    .searchbar{flex:1;max-width:560px;display:flex;align-items:center;gap:8px}
-    .searchbar input{
-      width:100%;padding:10px 14px;border-radius:999px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit;
-      outline:none;font-size:0.95rem;
+    .card:hover {
+      transform:translateY(-6px);
+      box-shadow:0 12px 30px rgba(99,102,241,0.35);
     }
-    .searchbar button{background:transparent;border:none;color:var(--muted);cursor:pointer;padding:8px;border-radius:8px}
-    nav{display:flex;gap:12px;align-items:center}
-    nav a{color:var(--muted);text-decoration:none;font-size:0.92rem}
-    /* Hero */
-    .hero{display:grid;grid-template-columns:1fr;gap:18px;align-items:center;margin-bottom:22px;padding:28px;border-radius:18px;background:linear-gradient(90deg, rgba(29,78,216,0.06), rgba(6,182,212,0.03));box-shadow:0 8px 32px rgba(2,6,23,0.55);}
-    .hero-left h2{font-size:1.6rem;margin:0 0 6px 0}
-    .hero-left p{color:var(--muted);margin:0 0 14px 0}
-    .cta{display:flex;gap:12px;flex-wrap:wrap}
-    .btn{padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
-    .btn-primary{background:linear-gradient(90deg,var(--primary),var(--accent));color:white;box-shadow:0 8px 20px rgba(13,42,148,0.24)}
-    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
-    .hero-right{display:flex;flex-direction:column;gap:10px;align-items:flex-end}
-    .kpi{display:flex;gap:12px}
-    .kpi div{background:rgba(255,255,255,0.02);padding:10px;border-radius:10px;min-width:110px;text-align:center}
-    .kpi strong{display:block;font-size:1.05rem}
-    /* categories */
-    .categories{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0}
-    .cat{background:rgba(255,255,255,0.02);padding:12px 14px;border-radius:10px;cursor:pointer;font-weight:600;color:var(--muted);display:flex;gap:10px;align-items:center}
-    .cat.active{background:linear-gradient(90deg, rgba(29,78,216,0.12), rgba(6,182,212,0.06));color:#eaf6ff}
-    /* grid */
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-top:10px}
-    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:14px;transition:transform .18s,box-shadow .18s;cursor:pointer;display:flex;flex-direction:column;gap:10px;min-height:112px;position:relative;border:1px solid rgba(255,255,255,0.02)}
-    .card:hover{transform:translateY(-6px);box-shadow:0 20px 40px rgba(2,6,23,0.6)}
-    .card .icon{font-size:22px;background:rgba(255,255,255,0.02);width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center}
-    .card h3{margin:0;font-size:1rem}
-    .card p{margin:0;color:var(--muted);font-size:0.88rem}
-    .card a{color:inherit;text-decoration:none;display:block;height:100%}
-    /* tooltip desc on hover (desktop) */
-    .desc-tip{position:absolute;left:14px;right:14px;bottom:12px;background:rgba(2,6,23,0.9);color:#dbeafe;padding:8px;border-radius:8px;font-size:0.82rem;display:none;box-shadow:0 8px 20px rgba(2,6,23,0.65)}
-    .card:focus-within .desc-tip, .card:hover .desc-tip{display:block}
-    /* how it works */
-    .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:24px}
-    .step{background:rgba(255,255,255,0.02);padding:14px;border-radius:10px;text-align:center}
-    .step .num{font-size:1.4rem;font-weight:700;color:var(--accent)}
-    .blog{margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
-    .post{background:rgba(255,255,255,0.02);padding:12px;border-radius:10px}
-    footer{margin-top:30px;padding:18px;border-radius:12px;background:linear-gradient(90deg, rgba(2,6,23,0.6), rgba(2,6,23,0.55));color:var(--muted)}
-    .footer-row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:center}
-    .social{display:flex;gap:10px}
-    .pill{background:rgba(255,255,255,0.02);padding:6px 10px;border-radius:999px;font-size:0.85rem;color:var(--muted)}
-    /* responsive tweaks */
-    @media (min-width:900px){
-      .hero{grid-template-columns:1fr 320px}
-      .hero-left h2{font-size:2rem}
+    .icon-wrap {
+      width:50px; height:50px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      color:white; font-size:24px;
     }
+    .pdf {background:linear-gradient(135deg,#f43f5e,#ef4444);} /* red-pink */
+    .image {background:linear-gradient(135deg,#6366f1,#3b82f6);} /* indigo-blue */
+    .text {background:linear-gradient(135deg,#14b8a6,#06b6d4);} /* teal */
+    .qr {background:linear-gradient(135deg,#9333ea,#6366f1);} /* violet */
+    h3 {margin:0; font-size:1.05rem;}
+    p {margin:0; font-size:0.9rem; color:#cbd5e1;}
   </style>
 </head>
 <body>
-  <header class="wrap" role="banner" aria-label="Main header">
-    <div class="brand" aria-hidden="false">
-      <img src="https://img.icons8.com/fluency/48/toolbox.png" alt="SmartTool Hub logo">
-      <div>
-        <h1>SmartTool Hub</h1>
-        <div class="tag">Powerful, free & browser-based tools — instant results</div>
-      </div>
+  <h2 style="text-align:center;margin-bottom:28px;">🚀 SmartTool Hub — Premium Preview</h2>
+  <div class="grid">
+
+    <!-- PDF Tool -->
+    <div class="card">
+      <div class="icon-wrap pdf"><i class="lucide-file-text"></i></div>
+      <h3>Merge Multiple PDFs</h3>
+      <p>Combine multiple PDF files into one seamless document.</p>
     </div>
 
-    <div class="searchbar" role="search" aria-label="Search tools">
-      <input id="searchInput" type="search" placeholder="Search tools (eg. PDF, image, QR)..." aria-label="Search tools" oninput="filterTools()" />
-      <button onclick="clearSearch()" title="Clear"><i class="fa fa-times"></i></button>
+    <!-- Image Tool -->
+    <div class="card">
+      <div class="icon-wrap image"><i class="lucide-image"></i></div>
+      <h3>Image to PNG/JPG</h3>
+      <p>Convert any image into PNG or JPG format instantly.</p>
     </div>
 
-    <nav>
-      <a href="#tools">Tools</a>
-      <a href="#how">How it Works</a>
-      <a href="#blog">Guides</a>
-    </nav>
-  </header>
-
-  <main class="wrap" id="main">
-    <!-- HERO -->
-    <section class="hero" aria-labelledby="hero-title">
-      <div class="hero-left">
-        <h2 id="hero-title">SmartTool Hub — 33+ Free Online Tools</h2>
-        <p>PDF, Image, Text & Utility tools — all run inside your browser. No upload to server, fast and private.</p>
-        <div class="cta">
-          <button class="btn btn-primary" onclick="scrollToSection('tools')">Try Tools Now</button>
-          <button class="btn btn-ghost" onclick="scrollToSection('how')">How it Works</button>
-          <span class="pill">No signup • Runs in browser • 100% Free</span>
-        </div>
-      </div>
-      <div class="hero-right" aria-hidden="true">
-        <div class="kpi">
-          <div><strong>33</strong><span class="tag">Tools</span></div>
-          <div><strong>Browser</strong><span class="tag">Based</span></div>
-          <div><strong>Privacy</strong><span class="tag">Local-only</span></div>
-        </div>
-        <div style="margin-top:8px;color:var(--muted);font-size:0.9rem;text-align:right">
-          Use the search or choose a category to find a tool quickly.
-        </div>
-      </div>
-    </section>
-
-    <!-- CATEGORIES -->
-    <section aria-label="Categories">
-      <div class="categories" id="categories">
-        <div class="cat active" data-cat="all" onclick="selectCategory('all')"><i class="fa-solid fa-th-large"></i> All</div>
-        <div class="cat" data-cat="pdf" onclick="selectCategory('pdf')"><i class="fa-solid fa-file-pdf"></i> PDF Tools</div>
-        <div class="cat" data-cat="image" onclick="selectCategory('image')"><i class="fa-solid fa-image"></i> Image Tools</div>
-        <div class="cat" data-cat="text" onclick="selectCategory('text')"><i class="fa-solid fa-font"></i> Text & URL</div>
-        <div class="cat" data-cat="data" onclick="selectCategory('data')"><i class="fa-solid fa-table"></i> Data Tools</div>
-        <div class="cat" data-cat="qr" onclick="selectCategory('qr')"><i class="fa-solid fa-qrcode"></i> QR & Color</div>
-      </div>
-    </section>
-
-    <!-- TOOLS GRID -->
-    <section id="tools" aria-labelledby="tools-title">
-      <h3 id="tools-title" style="margin:8px 0 10px 0">Top Tools</h3>
-      <div class="grid" id="toolGrid">
-        <!-- Each card: update href to your tools path if needed -->
-        <!-- 1 -->
-        <article class="card" data-cat="image pdf" tabindex="0">
-          <a href="tools/image-to-pdf/index.html" aria-label="Image to PDF Converter">
-            <div class="icon"><i class="fa-solid fa-file-arrow-down"></i></div>
-            <h3>Image to PDF Converter</h3>
-            <p>Convert images into a high-quality PDF instantly.</p>
-            <div class="desc-tip">Quickly convert JPEG, PNG or other images into a single PDF file — drag & drop supported.</div>
-          </a>
-        </article>
-
-        <!-- 2 -->
-        <article class="card" data-cat="pdf" tabindex="0">
-          <a href="tools/pdf-merge/index.html" aria-label="Merge Multiple PDFs">
-            <div class="icon"><i class="fa-solid fa-object-group"></i></div>
-            <h3>Merge Multiple PDFs</h3>
-            <p>Combine multiple PDF files into one seamless document.</p>
-            <div class="desc-tip">Merge two or more PDFs locally in your browser. Reorder before merging.</div>
-          </a>
-        </article>
-
-        <!-- 3 -->
-        <article class="card" data-cat="pdf" tabindex="0">
-          <a href="tools/pdf-split/index.html" aria-label="Split PDF Pages">
-            <div class="icon"><i class="fa-solid fa-scissors"></i></div>
-            <h3>Split PDF Pages</h3>
-            <p>Extract or split PDF pages easily.</p>
-            <div class="desc-tip">Split a PDF into single pages or extract a custom page range quickly.</div>
-          </a>
-        </article>
-
-        <!-- 4 -->
-        <article class="card" data-cat="pdf" tabindex="0">
-          <a href="tools/pdf-compress/index.html" aria-label="Compress PDF Size">
-            <div class="icon"><i class="fa-solid fa-file-zipper"></i></div>
-            <h3>Compress PDF Size</h3>
-            <p>Reduce PDF file size without losing quality.</p>
-            <div class="desc-tip">Optimize images and remove redundant objects to shrink file size.</div>
-          </a>
-        </article>
-
-        <!-- 5 -->
-        <article class="card" data-cat="pdf" tabindex="0">
-          <a href="tools/pdf-rotate/index.html" aria-label="Rotate PDF Pages">
-            <div class="icon"><i class="fa-solid fa-rotate"></i></div>
-            <h3>Rotate PDF Pages</h3>
-            <p>Rotate PDF pages to the correct orientation.</p>
-            <div class="desc-tip">Rotate single or multiple pages clockwise/anticlockwise as needed.</div>
-          </a>
-        </article>
-
-        <!-- 6 -->
-        <article class="card" data-cat="pdf" tabindex="0">
-          <a href="tools/pdf-unlock/index.html" aria-label="Unlock Protected PDF">
-            <div class="icon"><i class="fa-solid fa-lock-open"></i></div>
-            <h3>Unlock Protected PDF</h3>
-            <p>Remove password restrictions from PDF files.</p>
-            <div class="desc-tip">If you know the password, remove it to enable editing and printing.</div>
-          </a>
-        </article>
-
-        <!-- 7 -->
-        <article class="card" data-cat="pdf" tabindex="0">
-          <a href="tools/pdf-password/index.html" aria-label="Password Protect PDF">
-            <div class="icon"><i class="fa-solid fa-lock"></i></div>
-            <h3>Password Protect PDF</h3>
-            <p>Secure your PDF with a strong password.</p>
-            <div class="desc-tip">Add owner/user passwords and set permissions for printing or editing.</div>
-          </a>
-        </article>
-
-        <!-- 8 -->
-        <article class="card" data-cat="pdf" tabindex="0">
-          <a href="tools/pdf-edit/index.html" aria-label="Edit PDF Online">
-            <div class="icon"><i class="fa-solid fa-pen-to-square"></i></div>
-            <h3>Edit PDF Online</h3>
-            <p>Add text, shapes, or highlights directly on PDF.</p>
-            <div class="desc-tip">Annotate, draw, add text or shapes — then download the edited PDF.</div>
-          </a>
-        </article>
-
-        <!-- 9 -->
-        <article class="card" data-cat="pdf image" tabindex="0">
-          <a href="tools/pdf-to-image/index.html" aria-label="Convert PDF to Image">
-            <div class="icon"><i class="fa-solid fa-image"></i></div>
-            <h3>Convert PDF to Image</h3>
-            <p>Turn PDF pages into high-resolution images.</p>
-            <div class="desc-tip">Export each PDF page as PNG or JPG for easy sharing.</div>
-          </a>
-        </article>
-
-        <!-- 10 -->
-        <article class="card" data-cat="image" tabindex="0">
-          <a href="tools/image-to-png-jpg/index.html" aria-label="Image to PNG/JPG">
-            <div class="icon"><i class="fa-solid fa-images"></i></div>
-            <h3>Image to PNG/JPG</h3>
-            <p>Convert any image into PNG or JPG format.</p>
-            <div class="desc-tip">Switch formats while preserving reasonable quality and sizing.</div>
-          </a>
-        </article>
-
-        <!-- 11 -->
-        <article class="card" data-cat="image" tabindex="0">
-          <a href="tools/jpg-to-png/index.html" aria-label="JPG to PNG Converter">
-            <div class="icon"><i class="fa-solid fa-image"></i></div>
-            <h3>JPG to PNG Converter</h3>
-            <p>Convert JPG files into PNG format instantly.</p>
-            <div class="desc-tip">Keep transparency support by converting to PNG when needed.</div>
-          </a>
-        </article>
-
-        <!-- 12 -->
-        <article class="card" data-cat="image" tabindex="0">
-          <a href="tools/png-to-jpg/index.html" aria-label="PNG to JPG Converter">
-            <div class="icon"><i class="fa-solid fa-image"></i></div>
-            <h3>PNG to JPG Converter</h3>
-            <p>Convert PNG files into JPG format quickly.</p>
-            <div class="desc-tip">Reduce file size or remove transparency by converting to JPG.</div>
-          </a>
-        </article>
-
-        <!-- 13 -->
-        <article class="card" data-cat="image" tabindex="0">
-          <a href="tools/image-resize/index.html" aria-label="Resize Image Dimensions">
-            <div class="icon"><i class="fa-solid fa-up-right-and-down-left-from-center"></i></div>
-            <h3>Resize Image Dimensions</h3>
-            <p>Adjust image width and height easily.</p>
-            <div class="desc-tip">Resize by pixels or percentage; preserve aspect ratio option available.</div>
-          </a>
-        </article>
-
-        <!-- 14 -->
-        <article class="card" data-cat="image" tabindex="0">
-          <a href="tools/image-crop/index.html" aria-label="Crop Image Tool">
-            <div class="icon"><i class="fa-solid fa-crop"></i></div>
-            <h3>Crop Image Tool</h3>
-            <p>Cut out unwanted areas from your image.</p>
-            <div class="desc-tip">Freeform or preset aspect ratios for quick cropping.</div>
-          </a>
-        </article>
-
-        <!-- 15 -->
-        <article class="card" data-cat="image" tabindex="0">
-          <a href="tools/image-flip-rotate/index.html" aria-label="Flip or Rotate Image">
-            <div class="icon"><i class="fa-solid fa-repeat"></i></div>
-            <h3>Flip or Rotate Image</h3>
-            <p>Rotate or mirror any image in seconds.</p>
-            <div class="desc-tip">Rotate 90°, 180° or mirror horizontally/vertically.</div>
-          </a>
-        </article>
-
-        <!-- 16 -->
-        <article class="card" data-cat="image" tabindex="0">
-          <a href="tools/image-watermark/index.html" aria-label="Add Watermark to Image">
-            <div class="icon"><i class="fa-solid fa-droplet"></i></div>
-            <h3>Add Watermark to Image</h3>
-            <p>Protect your photos with custom watermarks.</p>
-            <div class="desc-tip">Add text or image watermark, adjust opacity and position.</div>
-          </a>
-        </article>
-
-        <!-- 17 -->
-        <article class="card" data-cat="pdf" tabindex="0">
-          <a href="tools/pdf-watermark/index.html" aria-label="Add Watermark to PDF">
-            <div class="icon"><i class="fa-solid fa-droplet"></i></div>
-            <h3>Add Watermark to PDF</h3>
-            <p>Stamp text or image watermarks on PDFs.</p>
-            <div class="desc-tip">Apply watermark to all pages or selected ranges.</div>
-          </a>
-        </article>
-
-        <!-- 18 -->
-        <article class="card" data-cat="pdf" tabindex="0">
-          <a href="tools/pdf-reorder/index.html" aria-label="Reorder PDF Pages">
-            <div class="icon"><i class="fa-solid fa-sort"></i></div>
-            <h3>Reorder PDF Pages</h3>
-            <p>Rearrange PDF pages in your desired order.</p>
-            <div class="desc-tip">Drag & drop pages to reorder before saving the new PDF.</div>
-          </a>
-        </article>
-
-        <!-- 19 -->
-        <article class="card" data-cat="pdf" tabindex="0">
-          <a href="tools/pdf-delete/index.html" aria-label="Delete PDF Pages">
-            <div class="icon"><i class="fa-solid fa-trash-can"></i></div>
-            <h3>Delete PDF Pages</h3>
-            <p>Remove unnecessary pages from PDFs.</p>
-            <div class="desc-tip">Select pages to delete and download the trimmed PDF.</div>
-          </a>
-        </article>
-
-        <!-- 20 -->
-        <article class="card" data-cat="pdf" tabindex="0">
-          <a href="tools/html-to-pdf/index.html" aria-label="Convert HTML to PDF">
-            <div class="icon"><i class="fa-solid fa-code"></i></div>
-            <h3>Convert HTML to PDF</h3>
-            <p>Save any webpage or HTML code as PDF.</p>
-            <div class="desc-tip">Paste HTML or provide URL to generate a PDF copy of the page.</div>
-          </a>
-        </article>
-
-        <!-- 21 -->
-        <article class="card" data-cat="pdf text" tabindex="0">
-          <a href="tools/text-to-pdf/index.html" aria-label="Text to PDF Converter">
-            <div class="icon"><i class="fa-solid fa-file-lines"></i></div>
-            <h3>Text to PDF Converter</h3>
-            <p>Create a PDF file from plain text instantly.</p>
-            <div class="desc-tip">Paste text and export as a clean PDF — simple and fast.</div>
-          </a>
-        </article>
-
-        <!-- 22 -->
-        <article class="card" data-cat="qr" tabindex="0">
-          <a href="tools/color-picker/index.html" aria-label="Color Picker Tool">
-            <div class="icon"><i class="fa-solid fa-eye-dropper"></i></div>
-            <h3>Color Picker Tool</h3>
-            <p>Pick and copy color codes from anywhere.</p>
-            <div class="desc-tip">Get HEX/RGB values and copy with one click.</div>
-          </a>
-        </article>
-
-        <!-- 23 -->
-        <article class="card" data-cat="qr" tabindex="0">
-          <a href="tools/qr-generator/index.html" aria-label="QR Code Generator">
-            <div class="icon"><i class="fa-solid fa-qrcode"></i></div>
-            <h3>QR Code Generator</h3>
-            <p>Generate custom QR codes instantly.</p>
-            <div class="desc-tip">Create QR for URLs, text, phone number or WiFi — download PNG/SVG.</div>
-          </a>
-        </article>
-
-        <!-- 24 -->
-        <article class="card" data-cat="qr" tabindex="0">
-          <a href="tools/qr-scanner/index.html" aria-label="QR Code Scanner">
-            <div class="icon"><i class="fa-solid fa-camera"></i></div>
-            <h3>QR Code Scanner</h3>
-            <p>Scan and decode QR codes using your browser.</p>
-            <div class="desc-tip">Use your webcam or upload an image to scan QR codes locally.</div>
-          </a>
-        </article>
-
-        <!-- 25 -->
-        <article class="card" data-cat="data text" tabindex="0">
-          <a href="tools/base64/index.html" aria-label="Base64 Encode Decode">
-            <div class="icon"><i class="fa-solid fa-code"></i></div>
-            <h3>Base64 Encode/Decode</h3>
-            <p>Encode or decode Base64 strings.</p>
-            <div class="desc-tip">Quickly convert binary-safe Base64 strings in your browser.</div>
-          </a>
-        </article>
-
-        <!-- 26 -->
-        <article class="card" data-cat="text" tabindex="0">
-          <a href="tools/url-encode-decode/index.html" aria-label="URL Encode Decode">
-            <div class="icon"><i class="fa-solid fa-code"></i></div>
-            <h3>URL Encode/Decode</h3>
-            <p>Safely encode or decode website URLs.</p>
-            <div class="desc-tip">Encode special characters for safe transmission in URLs.</div>
-          </a>
-        </article>
-
-        <!-- 27 -->
-        <article class="card" data-cat="text" tabindex="0">
-          <a href="tools/case-converter/index.html" aria-label="Case Converter">
-            <div class="icon"><i class="fa-solid fa-font"></i></div>
-            <h3>Case Converter</h3>
-            <p>Change text to UPPERCASE, lowercase, or Title Case.</p>
-            <div class="desc-tip">Quick conversions for copy/paste workflows and formatting.</div>
-          </a>
-        </article>
-
-        <!-- 28 -->
-        <article class="card" data-cat="text" tabindex="0">
-          <a href="tools/word-char-counter/index.html" aria-label="Word and Character Counter">
-            <div class="icon"><i class="fa-solid fa-file-alt"></i></div>
-            <h3>Word and Character Counter</h3>
-            <p>Count words, characters, and spaces instantly.</p>
-            <div class="desc-tip">Includes counts for words, characters, sentences and estimated reading time.</div>
-          </a>
-        </article>
-
-        <!-- 29 -->
-        <article class="card" data-cat="text" tabindex="0">
-          <a href="tools/online-notepad/index.html" aria-label="Online Notepad">
-            <div class="icon"><i class="fa-solid fa-note-sticky"></i></div>
-            <h3>Online Notepad</h3>
-            <p>Write and save notes directly in your browser.</p>
-            <div class="desc-tip">Auto-save to local storage so your notes persist on the same device.</div>
-          </a>
-        </article>
-
-        <!-- 30 -->
-        <article class="card" data-cat="data" tabindex="0">
-          <a href="tools/json-formatter/index.html" aria-label="JSON Formatter">
-            <div class="icon"><i class="fa-solid fa-code"></i></div>
-            <h3>JSON Formatter and Validator</h3>
-            <p>Format and validate JSON data easily.</p>
-            <div class="desc-tip">Pretty-print JSON and find syntax errors quickly.</div>
-          </a>
-        </article>
-
-        <!-- 31 -->
-        <article class="card" data-cat="data" tabindex="0">
-          <a href="tools/csv-to-json/index.html" aria-label="CSV to JSON">
-            <div class="icon"><i class="fa-solid fa-table"></i></div>
-            <h3>CSV to JSON Converter</h3>
-            <p>Convert CSV files into JSON format.</p>
-            <div class="desc-tip">Upload CSV or paste CSV text and get JSON output instantly.</div>
-          </a>
-        </article>
-
-        <!-- 32 -->
-        <article class="card" data-cat="data" tabindex="0">
-          <a href="tools/json-to-csv/index.html" aria-label="JSON to CSV">
-            <div class="icon"><i class="fa-solid fa-table"></i></div>
-            <h3>JSON to CSV Converter</h3>
-            <p>Convert JSON data into CSV format.</p>
-            <div class="desc-tip">Transform JSON arrays into spreadsheet-ready CSV files.</div>
-          </a>
-        </article>
-
-        <!-- 33 -->
-        <article class="card" data-cat="image" tabindex="0">
-          <a href="tools/image-effects/index.html" aria-label="Image Filter Effects">
-            <div class="icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
-            <h3>Image Filter Effects</h3>
-            <p>Apply filters and effects to images online.</p>
-            <div class="desc-tip">Use presets like grayscale, blur, sepia or create custom filters.</div>
-          </a>
-        </article>
-      </div>
-    </section>
-
-    <!-- HOW IT WORKS -->
-    <section id="how" aria-labelledby="how-title" style="margin-top:18px">
-      <h3 id="how-title">How it Works</h3>
-      <div class="how">
-        <div class="step"><div class="num">1</div><strong>Pick a tool</strong><div style="color:var(--muted)">Choose from PDF, Image, Text or Data utilities.</div></div>
-        <div class="step"><div class="num">2</div><strong>Use locally</strong><div style="color:var(--muted)">Upload or paste — everything runs in your browser.</div></div>
-        <div class="step"><div class="num">3</div><strong>Download result</strong><div style="color:var(--muted)">Get finished file instantly — no server upload.</div></div>
-      </div>
-    </section>
-
-    <!-- BLOG / GUIDES -->
-    <section id="blog" aria-labelledby="blog-title" style="margin-top:18px">
-      <h3 id="blog-title">Guides & Tips (coming soon)</h3>
-      <div class="blog">
-        <article class="post"><h4>How to compress PDF without losing quality</h4><p style="color:var(--muted)">Step-by-step tips to keep clarity while reducing file size.</p></article>
-        <article class="post"><h4>Best image formats for web</h4><p style="color:var(--muted)">When to use PNG, JPG or WebP for best results.</p></article>
-        <article class="post"><h4>Protect PDFs with passwords</h4><p style="color:var(--muted)">A quick primer on PDF permissions and security.</p></article>
-      </div>
-    </section>
-
-  </main>
-
-  <footer class="wrap" role="contentinfo">
-    <div class="footer-row">
-      <div>© 2025 SmartTool Hub — All tools run in your browser. <a href="#" style="color:var(--accent);text-decoration:none">Privacy Policy</a></div>
-      <div class="social" aria-hidden="true">
-        <a class="pill" href="https://github.com/" target="_blank" rel="noreferrer">GitHub</a>
-        <a class="pill" href="#" target="_blank" rel="noreferrer">Twitter</a>
-        <a class="pill" href="#" target="_blank" rel="noreferrer">Contact</a>
-      </div>
+    <!-- Text Tool -->
+    <div class="card">
+      <div class="icon-wrap text"><i class="lucide-type"></i></div>
+      <h3>Case Converter</h3>
+      <p>Change text to UPPERCASE, lowercase, or Title Case.</p>
     </div>
-  </footer>
 
-  <script>
-    // Basic filtering by category + search
-    const toolGrid = document.getElementById('toolGrid');
-    const cards = Array.from(toolGrid.querySelectorAll('.card'));
-    const cats = document.querySelectorAll('.cat');
+    <!-- QR Tool -->
+    <div class="card">
+      <div class="icon-wrap qr"><i class="lucide-qr-code"></i></div>
+      <h3>QR Code Generator</h3>
+      <p>Generate custom QR codes instantly for links or text.</p>
+    </div>
 
-    function selectCategory(cat){
-      cats.forEach(c=>c.classList.toggle('active', c.dataset.cat === cat));
-      filterTools();
-    }
-
-    function filterTools(){
-      const q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
-      const activeCat = Array.from(cats).find(c=>c.classList.contains('active'))?.dataset.cat || 'all';
-
-      cards.forEach(card=>{
-        const txt = (card.innerText || '').toLowerCase();
-        const cats = (card.dataset.cat || '').split(' ');
-        const matchesCat = (activeCat === 'all') || cats.includes(activeCat);
-        const matchesQuery = !q || txt.includes(q);
-        card.style.display = (matchesCat && matchesQuery) ? 'block' : 'none';
-      });
-    }
-
-    function clearSearch(){
-      document.getElementById('searchInput').value = '';
-      filterTools();
-    }
-
-    function scrollToSection(id){
-      const el = document.getElementById(id);
-      if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
-    }
-
-    // Make enter key in search focus first visible result
-    document.getElementById('searchInput').addEventListener('keydown', function(e){
-      if(e.key === 'Enter'){
-        e.preventDefault();
-        const first = cards.find(c => c.style.display !== 'none');
-        if(first) first.querySelector('a').click();
-      }
-    });
-
-    // Initial filter
-    filterTools();
-  </script>
+  </div>
 </body>
 </html>
