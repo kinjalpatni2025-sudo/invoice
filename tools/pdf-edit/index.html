@@ -3,45 +3,70 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>PDF Editor — Smarttool Hub (Fixed)</title>
-<meta name="description" content="Edit PDF in your browser: add text, draw, highlight, insert images, and download. Works on GitHub Pages."/>
-<link rel="icon" href="https://img.icons8.com/fluency/48/toolbox.png"/>
+<title>Edit PDF — Smarttool Hub</title>
+<meta name="description" content="Edit PDF online like iLovePDF: add text, images, shapes, draw, highlight, rotate, and download — all in your browser."/>
+<link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/toolbox.png"/>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+
 <style>
-  :root{--bg:#071124;--card:#0f1724;--muted:#9aa8bf}
-  body{margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);color:#e6eef8}
-  header{position:sticky;top:0;z-index:999;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:linear-gradient(90deg,#2563eb,#06b6d4)}
-  header .left{display:flex;gap:12px;align-items:center}
-  header img{width:36px;height:36px;border-radius:8px}
-  header h1{margin:0;font-size:17px}
-  .container{max-width:980px;margin:18px auto;padding:12px}
-  .card{background:var(--card);padding:14px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.5)}
-  .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
-  .btn{background:transparent;border:1px solid rgba(255,255,255,0.08);color:inherit;padding:8px 10px;border-radius:8px;cursor:pointer}
-  .btn.primary{background:#fff;color:#071124;font-weight:700}
-  .small{padding:6px 8px;font-size:13px}
-  .canvas-wrap{position:relative;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);margin-top:12px;background:#fff}
+  :root{
+    --bg:#121826; --card:#1e293b; --muted:#94a3b8; --text:#fff;
+    --pri1:#6366f1; --pri2:#0ea5e9; --warn:#ef4444;
+    --outline:rgba(255,255,255,0.10);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Arial, sans-serif;background:var(--bg);color:var(--text)}
+  a{color:inherit;text-decoration:none}
+  header{position:sticky;top:0;z-index:1000;background:linear-gradient(90deg,var(--pri1),var(--pri2));
+    padding:10px 14px;box-shadow:0 4px 12px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:space-between}
+  header .logo{display:flex;align-items:center;gap:10px}
+  header .logo img{width:40px;height:40px;border-radius:8px}
+  header h1{margin:0;font-size:18px}
+  header .right a.btn{background:#fff;color:#0b1220;padding:8px 10px;border-radius:8px;font-weight:700}
+
+  .shell{display:grid;grid-template-columns:260px 1fr;gap:12px;max-width:1200px;margin:16px auto;padding:0 12px}
+  .panel{background:var(--card);border:1px solid var(--outline);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+  .left{padding:10px;overflow:auto;max-height:calc(100vh - 120px)}
+  .left h3{margin:4px 6px 10px;font-weight:600;font-size:14px;color:var(--muted)}
+  .thumb{border:1px solid var(--outline);border-radius:8px;overflow:hidden;cursor:pointer;background:#fff}
+  .thumb canvas{display:block;width:100%}
+  .thumb.active{outline:2px solid var(--pri2)}
+  .thumbs{display:grid;grid-template-columns:1fr;gap:10px}
+  .left .tools-mini{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+  .mini{border:1px solid var(--outline);background:transparent;color:#fff;border-radius:8px;padding:6px 8px;cursor:pointer;font-size:12px}
+
+  .editor{padding:10px}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--outline);padding:10px}
+  .btn{border:1px solid var(--outline);background:transparent;color:#fff;padding:8px 10px;border-radius:8px;cursor:pointer}
+  .btn.primary{background:#fff;color:#0b1220;font-weight:700}
+  .btn.danger{background:var(--warn);border-color:var(--warn)}
+  .sep{width:1px;height:28px;background:var(--outline);margin:0 4px}
+  select,input[type="color"]{background:#0b1220;color:#fff;border:1px solid var(--outline);border-radius:8px;padding:6px}
+  .stage-wrap{position:relative;margin:12px;border:1px solid var(--outline);border-radius:12px;background:#fff;overflow:hidden}
   canvas{display:block;width:100%}
   #annotLayer{position:absolute;left:0;top:0;pointer-events:none}
-  .text-box{position:absolute;padding:6px 8px;background:rgba(0,0,0,0.5);color:#fff;border-radius:6px;border:1px dashed rgba(255,255,255,0.12);cursor:move;pointer-events:auto;min-width:48px;white-space:pre-wrap;overflow:hidden}
-  .text-box[contenteditable="true"]{outline:2px dashed rgba(255,255,255,0.25)}
-  .text-box.selected{box-shadow:0 0 0 2px #60a5fa}
-  .img-handle{position:absolute;width:12px;height:12px;background:#fff;border-radius:2px;right:-6px;bottom:-6px;border:1px solid rgba(0,0,0,0.2);cursor:se-resize;pointer-events:auto}
-  .thumbs{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap}
-  .muted{color:var(--muted);font-size:13px}
-  input[type="file"]{display:none}
-  .right{margin-left:auto;display:flex;gap:8px}
-  @media (max-width:720px){ .container{padding:8px} header h1{font-size:15px} }
+
+  .text-box{position:absolute;min-width:60px;min-height:32px;padding:6px 8px;background:transparent;border:1px dashed rgba(0,0,0,.15);
+    color:#111;cursor:move;pointer-events:auto;white-space:pre-wrap;overflow:hidden}
+  .text-box.selected{outline:2px solid var(--pri2)}
+  .handle{position:absolute;width:12px;height:12px;background:#fff;border:1px solid #0003;border-radius:2px}
+  .h-se{right:-7px;bottom:-7px;cursor:se-resize}
+  .h-rot{left:-7px;top:-7px;cursor:grab;border-color:#60a5fa}
+
+  .shape{position:absolute;pointer-events:auto;border:1px dashed #0002}
+  .shape.selected{outline:2px solid var(--pri2)}
+  .muted{color:var(--muted);font-size:12px;margin:8px 12px}
+  .hidden{display:none}
 </style>
 </head>
 <body>
 <header>
-  <div class="left">
+  <div class="logo">
     <img src="https://img.icons8.com/fluency/48/toolbox.png" alt="logo"/>
     <div>
-      <h1>Smarttool Hub — PDF Editor</h1>
-      <div style="font-size:12px;color:#e6f7ff90">GitHub Pages friendly</div>
+      <h1>Edit PDF — Smarttool Hub</h1>
+      <div style="font-size:12px;color:#e6f7ffcc">iLovePDF-style editor, works on GitHub Pages</div>
     </div>
   </div>
   <div class="right">
@@ -49,510 +74,549 @@
   </div>
 </header>
 
-<div class="container">
-  <div class="card">
-    <div class="toolbar">
-      <label class="btn">
+<div class="shell">
+  <!-- Left: thumbnails + quick actions -->
+  <aside class="panel left">
+    <h3>Pages</h3>
+    <div id="thumbs" class="thumbs"><div class="muted">Open a PDF to see pages.</div></div>
+    <div class="tools-mini">
+      <label class="mini">
         <i class="fa fa-file-arrow-up"></i> Open PDF
-        <input id="fileInput" type="file" accept="application/pdf">
+        <input id="fileInput" type="file" accept="application/pdf" class="hidden">
+      </label>
+      <button id="rotateBtn" class="mini" title="Rotate 90°"><i class="fa fa-rotate-right"></i> Rotate</button>
+      <button id="zoomIn" class="mini"><i class="fa fa-magnifying-glass-plus"></i></button>
+      <button id="zoomOut" class="mini"><i class="fa fa-magnifying-glass-minus"></i></button>
+    </div>
+  </aside>
+
+  <!-- Right: editor -->
+  <section class="panel editor">
+    <div class="toolbar">
+      <button id="toolSelect" class="btn"><i class="fa fa-arrow-pointer"></i></button>
+      <button id="toolText" class="btn"><i class="fa fa-font"></i> Text</button>
+      <button id="toolDraw" class="btn"><i class="fa fa-pencil"></i> Draw</button>
+      <button id="toolHigh" class="btn"><i class="fa fa-highlighter"></i> Highlight</button>
+      <button id="toolRect" class="btn"><i class="fa fa-square"></i> Rect</button>
+      <button id="toolEllipse" class="btn"><i class="fa fa-circle"></i> Ellipse</button>
+      <label class="btn">
+        <i class="fa fa-image"></i> Image
+        <input id="imgInput" type="file" accept="image/*" class="hidden">
       </label>
 
-      <div style="display:flex;gap:6px;align-items:center">
-        <button id="textBtn" class="btn small" title="Add text"><i class="fa fa-font"></i> Text</button>
-        <button id="drawBtn" class="btn small" title="Freehand draw"><i class="fa fa-pencil"></i> Draw</button>
-        <button id="highlightBtn" class="btn small" title="Highlighter"><i class="fa fa-highlighter"></i> Highlight</button>
-        <label class="btn small" title="Insert image">
-          <i class="fa fa-image"></i> Image
-          <input id="imgInput" type="file" accept="image/*">
-        </label>
-      </div>
+      <div class="sep"></div>
 
-      <select id="fontSelect" style="padding:6px;border-radius:6px;background:#071124;color:#fff" title="Font for new/selected text">
-        <option>Arial</option><option>Times New Roman</option><option>Courier New</option><option>Georgia</option><option>Verdana</option>
+      <select id="fontSel" title="Font"><option>Arial</option><option>Times New Roman</option><option>Courier New</option><option>Georgia</option><option>Verdana</option></select>
+      <select id="sizeSel" title="Font/Brush size">
+        <option>12</option><option selected>16</option><option>20</option><option>28</option><option>36</option><option>48</option>
       </select>
+      <input id="colorSel" type="color" value="#111111" title="Text/Stroke/Brush color">
+      <input id="fillSel"  type="color" value="#ffd54d" title="Fill color (shapes)">
+      <input id="opSel"    type="range" min="10" max="100" value="70" title="Opacity (shapes)" style="width:110px">
 
-      <select id="sizeSel" title="Font size / Brush size">
-        <option value="12">12</option><option value="16" selected>16</option><option value="20">20</option><option value="28">28</option><option value="36">36</option>
-      </select>
+      <button id="boldBtn" class="btn" title="Bold"><b>B</b></button>
+      <button id="italicBtn" class="btn" title="Italic"><i>I</i></button>
+      <button id="underBtn" class="btn" title="Underline"><u>U</u></button>
 
-      <input id="colorInp" type="color" value="#ff4757" title="Text/Brush color" style="margin-left:6px">
+      <div class="sep"></div>
+      <button id="undoBtn" class="btn"><i class="fa fa-rotate-left"></i> Undo</button>
+      <button id="redoBtn" class="btn"><i class="fa fa-rotate-right"></i> Redo</button>
+      <div class="sep"></div>
+      <div id="pageInfo" class="btn" style="pointer-events:none">0 / 0</div>
+      <button id="prevBtn" class="btn"><i class="fa fa-chevron-left"></i></button>
+      <button id="nextBtn" class="btn"><i class="fa fa-chevron-right"></i></button>
 
-      <div class="right" style="margin-left:auto">
-        <button id="prevBtn" class="btn small"><i class="fa fa-chevron-left"></i></button>
-        <div id="pageIndicator" style="padding:6px 10px;background:rgba(255,255,255,0.06);border-radius:6px">0 / 0</div>
-        <button id="nextBtn" class="btn small"><i class="fa fa-chevron-right"></i></button>
-        <button id="downloadBtn" class="btn primary small" style="margin-left:8px"><i class="fa fa-download"></i> Download</button>
-      </div>
+      <div class="sep"></div>
+      <button id="downloadBtn" class="btn primary"><i class="fa fa-download"></i> Download</button>
     </div>
 
-    <div class="canvas-wrap" id="canvasWrap">
+    <div class="stage-wrap" id="stageWrap">
       <canvas id="pdfCanvas"></canvas>
-      <canvas id="annotCanvas" style="position:absolute;left:0;top:0;pointer-events:auto"></canvas>
-      <div id="annotLayer" style="position:absolute;left:0;top:0;pointer-events:none"></div>
+      <canvas id="drawCanvas" style="position:absolute;left:0;top:0;pointer-events:auto"></canvas>
+      <div id="annotLayer"></div>
     </div>
 
-    <div class="thumbs muted" id="thumbsArea">Pages: none</div>
-    <div style="margin-top:8px" class="muted">Tip: Text ઉમેરવા "Text" પસંદ કરો અને પેજ પર click કરો. Text box પર double-click → edit. Click → select, toolbar થી font/size/color બદલાય.</div>
-  </div>
+    <div class="muted">Tip: Text/Shape/Image add કર્યા પછી click કરીને select કરો. Dragથી move, corner handleથી resize. Double-click text → edit. Controls થી color/size/bold/italic/underline બદલો. Undo/Redo available.</div>
+  </section>
 </div>
 
 <!-- libs -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
 <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 
 <script>
-/* --- Fixed, GitHub Pages-friendly PDF editor --- */
+/* ================== State ================== */
+const els = {
+  file: qs('#fileInput'), img: qs('#imgInput'),
+  thumbs: qs('#thumbs'),
+  pdfCanvas: qs('#pdfCanvas'), drawCanvas: qs('#drawCanvas'), layer: qs('#annotLayer'), wrap: qs('#stageWrap'),
+  // tools
+  toolSelect: qs('#toolSelect'), toolText: qs('#toolText'), toolDraw: qs('#toolDraw'), toolHigh: qs('#toolHigh'),
+  toolRect: qs('#toolRect'), toolEllipse: qs('#toolEllipse'),
+  fontSel: qs('#fontSel'), sizeSel: qs('#sizeSel'), colorSel: qs('#colorSel'), fillSel: qs('#fillSel'), opSel: qs('#opSel'),
+  bold: qs('#boldBtn'), italic: qs('#italicBtn'), under: qs('#underBtn'),
+  undo: qs('#undoBtn'), redo: qs('#redoBtn'),
+  prev: qs('#prevBtn'), next: qs('#nextBtn'), info: qs('#pageInfo'),
+  zoomIn: qs('#zoomIn'), zoomOut: qs('#zoomOut'), rotate: qs('#rotateBtn'),
+  download: qs('#downloadBtn')
+};
+const ctxPDF = els.pdfCanvas.getContext('2d');
+const ctxDraw = els.drawCanvas.getContext('2d');
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+let pdfDoc=null, pageCount=0, page=1, zoom=1.0, rotation=0;
+let bytesU8=null;        // original file (Uint8Array) — safe for cloning
+let scaleBase=1.3;       // base scale for fit
+let mode='select';       // select | text | draw | high | rect | ellipse
+let brushSize=+els.sizeSel.value, strokeColor=els.colorSel.value;
+let fillColor=els.fillSel.value, shapeOpacity=+els.opSel.value/100;
 
-const fileInput = document.getElementById('fileInput');
-const imgInput = document.getElementById('imgInput');
-const pdfCanvas = document.getElementById('pdfCanvas');
-const annotCanvas = document.getElementById('annotCanvas');
-const annotLayer = document.getElementById('annotLayer');
-const canvasWrap = document.getElementById('canvasWrap');
-const thumbsArea = document.getElementById('thumbsArea');
+let annotations = {};    // pageNum => {drawDataURL, items:[...]}, items: text|image|shape
+let selectedEl = null;   // currently selected DOM node
+let history = []; let future = []; // undo/redo
 
-const textBtn = document.getElementById('textBtn');
-const drawBtn = document.getElementById('drawBtn');
-const highlightBtn = document.getElementById('highlightBtn');
-const fontSelect = document.getElementById('fontSelect');
-const sizeSel = document.getElementById('sizeSel');
-const colorInp = document.getElementById('colorInp');
+function qs(s){return document.querySelector(s)}
+function hexToRgba(hex,a){const n=parseInt(hex.replace('#',''),16);return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`}
+function cloneU8(u8){return new Uint8Array(u8)} // avoid detached buffer
 
-const prevBtn = document.getElementById('prevBtn');
-const nextBtn = document.getElementById('nextBtn');
-const pageIndicator = document.getElementById('pageIndicator');
-const downloadBtn = document.getElementById('downloadBtn');
-
-const ctxPdf = pdfCanvas.getContext('2d');
-const ctxAnnot = annotCanvas.getContext('2d');
-
-let pdfDoc = null, fileBytesU8 = null, pageCount = 0, currentPage = 1, scale = 1.3;
-let mode = 'draw'; // draw, highlight, text
-let drawColor = colorInp.value, drawSize = parseInt(sizeSel.value,10);
-let annotations = {}; // pageNum -> { drawingsDataURL, texts:[], images:[] }
-let selectedTextBox = null; // <- for toolbar edits
-const STORAGE_PREFIX = 'simple_pdf_editor_v1_';
-
-// helpers
-function setCanvasSize(w,h){
-  pdfCanvas.width=w; pdfCanvas.height=h;
-  annotCanvas.width=w; annotCanvas.height=h;
-  annotCanvas.style.width = pdfCanvas.width + 'px';
-  annotCanvas.style.height = pdfCanvas.height + 'px';
-  annotLayer.style.width = pdfCanvas.width + 'px';
-  annotLayer.style.height = pdfCanvas.height + 'px';
-  canvasWrap.style.height = pdfCanvas.height + 'px';
-}
-function genId(p='id'){ return p + '_' + Math.random().toString(36).slice(2,9); }
-function hexToRgba(hex,a=1){ const h=hex.replace('#',''); const n=parseInt(h,16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; }
-function saveToLocal(key,obj){ try{ localStorage.setItem(STORAGE_PREFIX+key, JSON.stringify(obj)); }catch(e){} }
-function loadFromLocal(key){ try{ const r=localStorage.getItem(STORAGE_PREFIX+key); return r?JSON.parse(r):null; }catch(e){ return null; } }
-
-// PDF load (store as Uint8Array to avoid detach)
-fileInput.addEventListener('change', async (e)=>{
-  const f = e.target.files[0];
-  if(!f) return;
-  const nameKey = f.name || 'file';
-  try{
-    const ab = await f.arrayBuffer();
-    fileBytesU8 = new Uint8Array(ab); // keep as U8 for safe reuse
-    pdfDoc = await pdfjsLib.getDocument({data: fileBytesU8}).promise;
-    pageCount = pdfDoc.numPages; currentPage = 1;
-
-    annotations = loadFromLocal(nameKey) || {};
-    await renderThumbnails();
-    await renderPage(currentPage);
-    saveToLocal('last_filename', nameKey);
-  }catch(err){
-    console.error(err);
-    alert('Failed to load PDF: ' + (err.message || err));
-  }
+/* ================== Load PDF ================== */
+els.file.addEventListener('change', async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const ab=await f.arrayBuffer(); bytesU8=new Uint8Array(ab);
+  pdfDoc = await pdfjsLib.getDocument({data: bytesU8}).promise;
+  pageCount = pdfDoc.numPages; page=1; zoom=1; rotation=0;
+  annotations = {}; history=[]; future=[];
+  await renderThumbs(); await renderPage();
 });
 
-// thumbs
-async function renderThumbnails(){
-  thumbsArea.textContent = '';
+async function renderThumbs(){
+  els.thumbs.innerHTML='';
   for(let p=1;p<=pageCount;p++){
-    const pg = await pdfDoc.getPage(p);
-    const vp = pg.getViewport({scale:0.12});
-    const c = document.createElement('canvas'); c.width = vp.width; c.height = vp.height;
-    await pg.render({canvasContext: c.getContext('2d'), viewport: vp}).promise;
-    c.style.marginRight = '6px'; c.style.border='1px solid rgba(255,255,255,0.05)'; c.style.borderRadius='4px'; c.style.cursor='pointer';
-    c.onclick = ()=>{ saveCurrentAnnotations(); currentPage = p; renderPage(p); };
-    thumbsArea.appendChild(c);
+    const c=document.createElement('div'); c.className='thumb'; c.dataset.p=p;
+    const cv=document.createElement('canvas'); c.appendChild(cv);
+    const ctx=cv.getContext('2d');
+    const pg=await pdfDoc.getPage(p);
+    const vp=pg.getViewport({scale:.2,rotation});
+    cv.width=vp.width; cv.height=vp.height;
+    await pg.render({canvasContext:ctx,viewport:vp}).promise;
+    c.addEventListener('click', async ()=>{saveSnapshot(); page=p; await renderPage(); markThumb()});
+    els.thumbs.appendChild(c);
   }
+  markThumb();
+}
+function markThumb(){
+  els.thumbs.querySelectorAll('.thumb').forEach(t=>t.classList.toggle('active', +t.dataset.p===page));
 }
 
-// render page
-async function renderPage(p){
-  if(!pdfDoc) return;
-  // clear selection state
-  selectedTextBox = null;
-  annotLayer.querySelectorAll('.text-box').forEach(el=>el.classList.remove('selected'));
+/* ================== Render Page ================== */
+async function renderPage(){
+  const pg=await pdfDoc.getPage(page);
+  const baseVP=pg.getViewport({scale:1,rotation});
+  const maxW=Math.min(980, window.innerWidth-320);
+  const fitted=(maxW/baseVP.width)*scaleBase*zoom;
+  const vp=pg.getViewport({scale:fitted,rotation});
+  els.pdfCanvas.width=vp.width; els.pdfCanvas.height=vp.height;
+  els.drawCanvas.width=vp.width; els.drawCanvas.height=vp.height;
+  els.wrap.style.height=vp.height+'px';
+  await pg.render({canvasContext:ctxPDF,viewport:vp}).promise;
 
-  const page = await pdfDoc.getPage(p);
-  const vp0 = page.getViewport({scale:1});
-  const containerW = Math.min(920, window.innerWidth - 80);
-  const targetScale = (containerW / vp0.width) * (scale/1.3);
-  const viewport = page.getViewport({scale: targetScale});
-  setCanvasSize(viewport.width, viewport.height);
-  await page.render({canvasContext: ctxPdf, viewport}).promise;
-
-  // load annotations
-  ctxAnnot.clearRect(0,0,annotCanvas.width,annotCanvas.height);
-  annotLayer.innerHTML = '';
-  const ann = annotations[p];
-  if(ann && ann.drawingsDataURL){
-    const img = new Image();
-    img.onload = ()=> ctxAnnot.drawImage(img,0,0,annotCanvas.width,annotCanvas.height);
-    img.src = ann.drawingsDataURL;
-  }
-  if(ann){
-    (ann.texts||[]).forEach(t => createTextDiv(t));
-    (ann.images||[]).forEach(i => createImageEl(i));
-  }
-  pageIndicator.textContent = `${p} / ${pageCount}`;
+  // draw layer
+  ctxDraw.clearRect(0,0,els.drawCanvas.width,els.drawCanvas.height);
+  els.layer.innerHTML='';
+  const ann=annotations[page];
+  if(ann?.drawDataURL){ const img=new Image(); img.onload=()=>ctxDraw.drawImage(img,0,0,els.drawCanvas.width,els.drawCanvas.height); img.src=ann.drawDataURL; }
+  if(ann?.items){ ann.items.forEach(createItemEl); }
+  els.info.textContent=`${page} / ${pageCount}`;
 }
 
-// drawing & highlight (highlight size comes from drawSize)
-let isDrawing = false;
-annotCanvas.addEventListener('pointerdown', (ev)=>{
-  if(!pdfDoc || mode==='text') return;
-  const rect = annotCanvas.getBoundingClientRect();
-  const x = (ev.clientX - rect.left) * (annotCanvas.width / rect.width);
-  const y = (ev.clientY - rect.top) * (annotCanvas.height / rect.height);
-  if(mode === 'draw'){
-    ctxAnnot.beginPath(); ctxAnnot.lineWidth = drawSize; ctxAnnot.lineCap = 'round'; ctxAnnot.strokeStyle = drawColor;
-    ctxAnnot.moveTo(x,y); isDrawing = true;
-  } else if(mode === 'highlight'){
-    ctxAnnot.fillStyle = hexToRgba(drawColor, 0.35);
-    // width/height proportional to drawSize
-    ctxAnnot.fillRect(x - drawSize*2, y - drawSize, drawSize*10, drawSize*2);
-    saveDrawingToPage(currentPage);
-  }
-});
-annotCanvas.addEventListener('pointermove', (ev)=>{
-  if(!isDrawing) return;
-  const rect = annotCanvas.getBoundingClientRect();
-  const x = (ev.clientX - rect.left) * (annotCanvas.width / rect.width);
-  const y = (ev.clientY - rect.top) * (annotCanvas.height / rect.height);
-  ctxAnnot.lineTo(x,y); ctxAnnot.stroke();
-});
-annotCanvas.addEventListener('pointerup', ()=>{ if(isDrawing){ ctxAnnot.closePath(); isDrawing=false; saveDrawingToPage(currentPage); }});
-
-// save drawing layer
-function saveDrawingToPage(page){
-  annotations[page] = annotations[page] || {drawingsDataURL:null, texts:[], images:[]};
-  annotations[page].drawingsDataURL = annotCanvas.toDataURL();
-  const key = loadFromLocal('last_filename') || 'autosave';
-  saveToLocal(key, annotations);
-}
-
-// text add
-canvasWrap.addEventListener('click', (ev)=>{
-  if(!pdfDoc || mode!=='text') return;
-  const rect = annotCanvas.getBoundingClientRect();
-  const x = (ev.clientX - rect.left) * (annotCanvas.width / rect.width);
-  const y = (ev.clientY - rect.top) * (annotCanvas.height / rect.height);
-  const wRel = 0.28, hRel = 0.08;
-  const txt = {
-    id: genId('t'),
-    x: x/annotCanvas.width, y: y/annotCanvas.height, w: wRel, h: hRel,
-    html: 'Type...',
-    fontSize: parseInt(sizeSel.value,10),
-    color: colorInp.value,
-    fontFamily: fontSelect.value
-  };
-  annotations[currentPage] = annotations[currentPage] || {drawingsDataURL:null, texts:[], images:[]};
-  (annotations[currentPage].texts ||= []).push(txt);
-  createTextDiv(txt);
-  saveToLocal(loadFromLocal('last_filename') || 'autosave', annotations);
-});
-
-// create text DOM (with selection + toolbar binding)
-function createTextDiv(t){
-  const div = document.createElement('div');
-  div.className = 'text-box';
-  div.dataset.id = t.id;
-  div.style.left = (t.x * annotCanvas.width) + 'px';
-  div.style.top  = (t.y * annotCanvas.height) + 'px';
-  div.style.width = (t.w * annotCanvas.width) + 'px';
-  div.style.height = (t.h * annotCanvas.height) + 'px';
-  div.style.fontSize = (t.fontSize || 16) + 'px';
-  div.style.fontFamily = t.fontFamily || 'Arial';
-  div.style.color = t.color || '#fff';
-  div.innerHTML = t.html || '';
-  annotLayer.appendChild(div);
-
-  // select
-  div.addEventListener('click', (e)=>{
-    e.stopPropagation();
-    annotLayer.querySelectorAll('.text-box').forEach(el=>el.classList.remove('selected'));
-    div.classList.add('selected');
-    selectedTextBox = div;
-    // sync toolbar to selected text
-    fontSelect.value = (t.fontFamily || 'Arial');
-    sizeSel.value = (t.fontSize || 16);
-    colorInp.value = toHex(div.style.color || '#ffffff');
-  });
-
-  // drag
-  makeDraggable(div, ()=> saveTextDivToAnnotations(div));
-
-  // edit on dblclick
-  div.addEventListener('dblclick', (e)=>{
-    e.stopPropagation();
-    div.contentEditable = 'true';
-    div.focus();
-    const onBlur = ()=>{
-      div.contentEditable = 'false';
-      saveTextDivToAnnotations(div);
-      div.removeEventListener('blur', onBlur);
-      saveToLocal(loadFromLocal('last_filename') || 'autosave', annotations);
-    };
-    div.addEventListener('blur', onBlur);
-  });
-}
-
-function saveTextDivToAnnotations(div){
-  const page = currentPage;
-  const wrap = annotLayer.getBoundingClientRect(), rect = div.getBoundingClientRect();
-  const x = (rect.left - wrap.left) / annotCanvas.width;
-  const y = (rect.top  - wrap.top ) / annotCanvas.height;
-  const w = rect.width  / annotCanvas.width;
-  const h = rect.height / annotCanvas.height;
-  const fontSize = parseInt(getComputedStyle(div).fontSize,10) || 16;
-  const fontFamily = getComputedStyle(div).fontFamily || 'Arial';
-  const color = rgbToHex(getComputedStyle(div).color || '#ffffff');
-  const html = div.innerHTML;
-  const id = div.dataset.id;
-  annotations[page] = annotations[page] || {drawingsDataURL:null, texts:[], images:[]};
-  const arr = annotations[page].texts || [];
-  const existing = arr.find(xe => xe.id === id);
-  const obj = { id, x, y, w, h, html, fontSize, color, fontFamily };
-  if(existing) Object.assign(existing, obj); else arr.push(obj);
-  annotations[page].texts = arr;
-}
-
-function toHex(any){ // best-effort when element has hex already
-  if(/^#/.test(any)) return any;
-  return rgbToHex(any);
-}
-function rgbToHex(rgb){
-  const m = (rgb||'').match(/\d+/g);
-  if(!m) return '#ffffff';
-  const r = (+m[0]).toString(16).padStart(2,'0');
-  const g = (+m[1]).toString(16).padStart(2,'0');
-  const b = (+m[2]).toString(16).padStart(2,'0');
-  return '#' + r + g + b;
-}
-
-// toolbar → update selected text live
-fontSelect.addEventListener('change', ()=>{
-  if(selectedTextBox){
-    selectedTextBox.style.fontFamily = fontSelect.value;
-    saveTextDivToAnnotations(selectedTextBox);
-    saveToLocal(loadFromLocal('last_filename') || 'autosave', annotations);
-  }
-});
-sizeSel.addEventListener('change', ()=>{
-  drawSize = parseInt(sizeSel.value,10); // affects draw/highlighter
-  if(selectedTextBox){
-    selectedTextBox.style.fontSize = sizeSel.value + 'px';
-    saveTextDivToAnnotations(selectedTextBox);
-    saveToLocal(loadFromLocal('last_filename') || 'autosave', annotations);
-  }
-});
-colorInp.addEventListener('change', ()=>{
-  drawColor = colorInp.value; // draw/highlighter color
-  if(selectedTextBox){
-    selectedTextBox.style.color = colorInp.value;
-    saveTextDivToAnnotations(selectedTextBox);
-    saveToLocal(loadFromLocal('last_filename') || 'autosave', annotations);
-  }
-});
-
-// simple draggable
-function makeDraggable(el, onEnd){
-  el.style.touchAction = 'none';
-  el.onpointerdown = function(e){
-    e.preventDefault();
-    const startX = e.clientX, startY = e.clientY;
-    const rect = el.getBoundingClientRect(), wrapRect = annotLayer.getBoundingClientRect();
-    const origLeft = rect.left - wrapRect.left, origTop = rect.top - wrapRect.top;
-    function move(ev){
-      const dx = ev.clientX - startX, dy = ev.clientY - startY;
-      el.style.left = (origLeft + dx) + 'px';
-      el.style.top  = (origTop  + dy) + 'px';
-    }
-    function up(){
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-      if(onEnd) onEnd();
-      saveToLocal(loadFromLocal('last_filename') || 'autosave', annotations);
-    }
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
-  };
-}
-
-// Image insert + resize handle
-imgInput.addEventListener('change', (e)=>{
-  const f = e.target.files[0]; if(!f) return;
-  const reader = new FileReader();
-  reader.onload = ()=>{
-    const data = reader.result;
-    const imgObj = { id: genId('i'), x:0.12, y:0.12, w:0.5, h:0.4, dataURL: data };
-    annotations[currentPage] = annotations[currentPage] || {drawingsDataURL:null, texts:[], images:[]};
-    (annotations[currentPage].images ||= []).push(imgObj);
-    createImageEl(imgObj);
-    saveToLocal(loadFromLocal('last_filename') || 'autosave', annotations);
-  };
-  reader.readAsDataURL(f);
-  e.target.value = '';
-});
-
-function createImageEl(it){
-  const img = new Image();
-  img.src = it.dataURL;
-  img.dataset.id = it.id;
-  img.style.position = 'absolute';
-  img.style.left = (it.x * annotCanvas.width) + 'px';
-  img.style.top  = (it.y * annotCanvas.height) + 'px';
-  img.style.width = (it.w * annotCanvas.width) + 'px';
-  img.style.height= (it.h * annotCanvas.height) + 'px';
-  img.style.pointerEvents='auto'; img.style.cursor='move';
-
-  const wrap = document.createElement('div');
-  wrap.style.position='absolute';
-  wrap.style.left=img.style.left; wrap.style.top=img.style.top;
-  wrap.style.width=img.style.width; wrap.style.height=img.style.height;
-  wrap.appendChild(img);
-
-  const handle = document.createElement('div'); handle.className='img-handle'; wrap.appendChild(handle);
-  annotLayer.appendChild(wrap);
-
-  makeDraggable(wrap, ()=> saveImageBack(wrap));
-  handle.onpointerdown = function(e){
-    e.stopPropagation(); e.preventDefault();
-    const startX = e.clientX, startY = e.clientY;
-    const startW = wrap.getBoundingClientRect().width, startH = wrap.getBoundingClientRect().height;
-    function move(ev){
-      const dx = ev.clientX - startX, dy = ev.clientY - startY;
-      const nw = Math.max(20, startW + dx), nh = Math.max(20, startH + dy);
-      wrap.style.width = nw+'px'; wrap.style.height = nh+'px';
-      img.style.width = nw+'px'; img.style.height = nh+'px';
-    }
-    function up(){
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-      saveImageBack(wrap);
-      saveToLocal(loadFromLocal('last_filename') || 'autosave', annotations);
-    }
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
-  };
-  saveImageBack(wrap);
-}
-function saveImageBack(wrap){
-  const wrapRect = annotLayer.getBoundingClientRect();
-  const img = wrap.querySelector('img');
-  const rect = img.getBoundingClientRect();
-  const x = (rect.left - wrapRect.left) / annotCanvas.width;
-  const y = (rect.top  - wrapRect.top ) / annotCanvas.height;
-  const w = rect.width  / annotCanvas.width;
-  const h = rect.height / annotCanvas.height;
-  const id = img.dataset.id;
-  annotations[currentPage] = annotations[currentPage] || {drawingsDataURL:null, texts:[], images:[]};
-  const arr = annotations[currentPage].images || [];
-  const existing = arr.find(ii=>ii.id===id);
-  const obj = { id, x, y, w, h, dataURL: img.src };
-  if(existing) Object.assign(existing, obj); else arr.push(obj);
-  annotations[currentPage].images = arr;
-}
-
-// nav
-prevBtn.addEventListener('click', ()=>{ if(currentPage>1){ saveCurrentAnnotations(); currentPage--; renderPage(currentPage); }});
-nextBtn.addEventListener('click', ()=>{ if(currentPage<pageCount){ saveCurrentAnnotations(); currentPage++; renderPage(currentPage); }});
-function saveCurrentAnnotations(){
-  saveDrawingToPage(currentPage);
-  annotLayer.querySelectorAll('.text-box').forEach(tb=> saveTextDivToAnnotations(tb));
-  annotLayer.querySelectorAll('div').forEach(w=>{ if(w.querySelector && w.querySelector('img')) saveImageBack(w); });
-  saveToLocal(loadFromLocal('last_filename') || 'autosave', annotations);
-}
-
-// ---- Export FIX: always clone bytes to avoid detached ArrayBuffer ----
-downloadBtn.addEventListener('click', async ()=>{
-  if(!pdfDoc || !fileBytesU8) return alert('Load a PDF first');
-  saveCurrentAnnotations();
-  downloadBtn.disabled = true; downloadBtn.textContent = 'Preparing...';
-  try{
-    const out = await exportFlattenedPdf();
-    const blob = new Blob([out], {type:'application/pdf'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'edited.pdf';
-    document.body.appendChild(a); a.click(); a.remove();
-  }catch(e){
-    console.error(e); alert('Export failed: ' + e);
-  }finally{
-    downloadBtn.disabled = false; downloadBtn.textContent = 'Download';
-  }
-});
-
-async function exportFlattenedPdf(){
-  // ✅ clone bytes so original buffer never gets detached
-  const fresh = new Uint8Array(fileBytesU8); 
-  const srcPdf = await PDFLib.PDFDocument.load(fresh);
-  const outPdf = await PDFLib.PDFDocument.create();
-  const copied = await outPdf.copyPages(srcPdf, srcPdf.getPageIndices());
-  for(let i=0;i<copied.length;i++){
-    const page = copied[i]; outPdf.addPage(page);
-    const ann = annotations[i+1]; if(!ann) continue;
-    const { width, height } = page.getSize();
-
-    const tmp = document.createElement('canvas'); tmp.width=width; tmp.height=height;
-    const tctx = tmp.getContext('2d');
-
-    if(ann.drawingsDataURL){
-      const d = new Image();
-      await new Promise((res,rej)=>{ d.onload=res; d.onerror=rej; d.src=ann.drawingsDataURL; });
-      tctx.drawImage(d,0,0,width,height);
-    }
-    for(const im of (ann.images||[])){
-      const ii = new Image();
-      await new Promise((res,rej)=>{ ii.onload=res; ii.onerror=rej; ii.src=im.dataURL; });
-      tctx.drawImage(ii, im.x*width, im.y*height, im.w*width, im.h*height);
-    }
-    for(const tx of (ann.texts||[])){
-      const fontSz = tx.fontSize || 16;
-      tctx.font = `${fontSz}px ${tx.fontFamily || 'Arial'}`;
-      const textContent = (tx.html||'').replace(/<[^>]+>/g,'') || ' ';
-      tctx.fillStyle = tx.color || '#ffffff';
-      tctx.fillText(textContent, tx.x*width + 4, tx.y*height + fontSz + 4);
-    }
-    const png = tmp.toDataURL('image/png');
-    const pngBytes = await (await fetch(png)).arrayBuffer();
-    const embedded = await outPdf.embedPng(pngBytes);
-    page.drawImage(embedded, {x:0,y:0,width,height});
-  }
-  return outPdf.save();
-}
-
-// init + responsive
-(function init(){
-  setMode('draw');
-})();
-let resizeTimer=null;
-window.addEventListener('resize', ()=>{ if(!pdfDoc) return; clearTimeout(resizeTimer); resizeTimer=setTimeout(()=>renderPage(currentPage),200); });
-
+/* ================== Tools: Modes ================== */
 function setMode(m){
-  mode = m;
-  if(m==='text'){ annotCanvas.style.pointerEvents='none'; annotLayer.style.pointerEvents='auto'; }
-  else { annotCanvas.style.pointerEvents='auto'; annotLayer.style.pointerEvents='none'; }
+  mode=m;
+  const pointerOnLayer = (m==='text'||m==='rect'||m==='ellipse');
+  els.drawCanvas.style.pointerEvents = (m==='draw'||m==='high')?'auto':'none';
+  els.layer.style.pointerEvents = pointerOnLayer?'auto':'none';
+  if(selectedEl) selectNone();
 }
+els.toolSelect.onclick = ()=> setMode('select');
+els.toolText.onclick   = ()=> setMode('text');
+els.toolDraw.onclick   = ()=> setMode('draw');
+els.toolHigh.onclick   = ()=> setMode('high');
+els.toolRect.onclick   = ()=> setMode('rect');
+els.toolEllipse.onclick= ()=> setMode('ellipse');
+
+/* ================== Draw & Highlight ================== */
+let isDrawing=false;
+els.drawCanvas.addEventListener('pointerdown', e=>{
+  if(mode!=='draw' && mode!=='high') return;
+  const {x,y}=canvasPos(e,els.drawCanvas);
+  if(mode==='draw'){
+    ctxDraw.beginPath(); ctxDraw.strokeStyle=strokeColor; ctxDraw.lineCap='round'; ctxDraw.lineWidth=brushSize;
+    ctxDraw.moveTo(x,y); isDrawing=true;
+  }else{
+    // highlight block respecting brushSize
+    ctxDraw.fillStyle=hexToRgba(strokeColor, .35);
+    ctxDraw.fillRect(x-brushSize*2, y-brushSize, brushSize*10, brushSize*2);
+    saveDrawLayer();
+  }
+});
+els.drawCanvas.addEventListener('pointermove', e=>{
+  if(!isDrawing) return;
+  const {x,y}=canvasPos(e,els.drawCanvas);
+  ctxDraw.lineTo(x,y); ctxDraw.stroke();
+});
+els.drawCanvas.addEventListener('pointerup', ()=>{
+  if(isDrawing){ ctxDraw.closePath(); isDrawing=false; saveDrawLayer(); }
+});
+function saveDrawLayer(){
+  annotations[page] ??= {drawDataURL:null, items:[]};
+  annotations[page].drawDataURL = els.drawCanvas.toDataURL();
+  pushHistory();
+}
+
+/* ================== Add Text / Shapes / Image ================== */
+els.wrap.addEventListener('click', e=>{
+  if(!pdfDoc) return;
+  if(mode==='text'){
+    const {x,y}=layerPos(e);
+    const node = makeText({
+      x, y, w:200, h:40,
+      font: els.fontSel.value, size: +els.sizeSel.value,
+      color: els.colorSel.value, bold:false, italic:false, underline:false,
+      html: 'Type...'
+    });
+    select(node);
+    pushHistory();
+  }
+  if(mode==='rect' || mode==='ellipse'){
+    const {x,y}=layerPos(e);
+    const node = makeShape({
+      kind: mode, x, y, w:180, h:100,
+      stroke: els.colorSel.value, fill: els.fillSel.value, alpha: +els.opSel.value/100
+    });
+    select(node);
+    pushHistory();
+  }
+});
+els.img.addEventListener('change', e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    const node = makeImage({x:30,y:30,w:240,h:150, dataURL:r.result});
+    select(node); pushHistory();
+  };
+  r.readAsDataURL(f); e.target.value='';
+});
+
+/* ----- Node factories ----- */
+function makeText(t){
+  annotations[page] ??= {drawDataURL:null, items:[]};
+  t.id = 't_'+Math.random().toString(36).slice(2,9);
+  annotations[page].items.push({type:'text',...t});
+  return createItemEl({type:'text',...t});
+}
+function makeShape(s){
+  annotations[page] ??= {drawDataURL:null, items:[]};
+  s.id='s_'+Math.random().toString(36).slice(2,9);
+  annotations[page].items.push({type:'shape',...s});
+  return createItemEl({type:'shape',...s});
+}
+function makeImage(i){
+  annotations[page] ??= {drawDataURL:null, items:[]};
+  i.id='i_'+Math.random().toString(36).slice(2,9);
+  annotations[page].items.push({type:'image',...i});
+  return createItemEl({type:'image',...i});
+}
+
+/* ----- Create DOM element for item ----- */
+function createItemEl(item){
+  if(item.type==='text'){
+    const d=document.createElement('div'); d.className='text-box'; d.dataset.id=item.id;
+    applyTextStyle(d,item);
+    d.style.left=item.x+'px'; d.style.top=item.y+'px'; d.style.width=item.w+'px'; d.style.height=item.h+'px';
+    d.innerHTML=item.html;
+    els.layer.appendChild(d);
+    attachSelectable(d, 'text');
+    d.ondblclick = ()=>{
+      d.contentEditable='true'; d.focus();
+      const blur=()=>{ d.contentEditable='false'; saveTextBack(d); d.removeEventListener('blur',blur); pushHistory(); };
+      d.addEventListener('blur',blur);
+    };
+    return d;
+  }
+  if(item.type==='shape'){
+    const d=document.createElement('div'); d.className='shape'; d.dataset.id=item.id; d.dataset.kind=item.kind;
+    d.style.left=item.x+'px'; d.style.top=item.y+'px'; d.style.width=item.w+'px'; d.style.height=item.h+'px';
+    d.style.background = item.kind==='rect' ? hexToRgba(item.fill, item.alpha) : 'transparent';
+    d.style.border = `2px solid ${item.stroke}`;
+    d.style.borderRadius = item.kind==='ellipse' ? '50%':'6px';
+    d.style.pointerEvents='auto';
+    els.layer.appendChild(d);
+    attachSelectable(d, 'shape');
+    return d;
+  }
+  if(item.type==='image'){
+    const wrap=document.createElement('div'); wrap.className='shape'; wrap.dataset.id=item.id; wrap.dataset.kind='image';
+    wrap.style.left=item.x+'px'; wrap.style.top=item.y+'px'; wrap.style.width=item.w+'px'; wrap.style.height=item.h+'px';
+    const img=new Image(); img.src=item.dataURL; img.style.width='100%'; img.style.height='100%'; img.draggable=false;
+    wrap.appendChild(img); els.layer.appendChild(wrap);
+    attachSelectable(wrap, 'image');
+    return wrap;
+  }
+}
+
+/* ----- Selection, drag, resize, style ----- */
+function attachSelectable(node, kind){
+  node.style.position='absolute'; node.style.pointerEvents='auto';
+  node.addEventListener('pointerdown',e=>{
+    if(e.target.classList.contains('handle')) return;
+    select(node);
+    startDrag(node,e);
+  });
+  // resize handle
+  const h=document.createElement('div'); h.className='handle h-se'; node.appendChild(h);
+  h.addEventListener('pointerdown', e=>{
+    e.stopPropagation();
+    startResize(node,e);
+  });
+  // tiny rotate handle only for shape/image to mimic iLovePDF vibe
+  if(kind!=='text'){
+    const r=document.createElement('div'); r.className='handle h-rot'; node.appendChild(r);
+    r.addEventListener('pointerdown', e=>{
+      e.stopPropagation(); startRotate(node,e);
+    });
+  }
+}
+function select(node){
+  selectNone();
+  selectedEl=node; node.classList.add('selected');
+  // sync toolbar for text
+  const it = findItem(node.dataset.id);
+  if(!it) return;
+  if(it.type==='text'){
+    els.fontSel.value = it.font;
+    els.sizeSel.value = it.size;
+    els.colorSel.value = it.color;
+    setBtnState(els.bold, it.bold); setBtnState(els.italic, it.italic); setBtnState(els.under, it.underline);
+  }
+}
+function selectNone(){
+  if(selectedEl){ selectedEl.classList.remove('selected'); selectedEl=null; }
+}
+function setBtnState(btn,on){ btn.style.background = on?'#ffffff':'transparent'; btn.style.color=on?'#0b1220':'#fff'; }
+
+/* Drag */
+function startDrag(node,e){
+  e.preventDefault();
+  const start={x:e.clientX,y:e.clientY};
+  const rect=node.getBoundingClientRect(), wrap=els.layer.getBoundingClientRect();
+  const o={l:rect.left-wrap.left,t:rect.top-wrap.top};
+  const move=ev=>{
+    const dx=ev.clientX-start.x, dy=ev.clientY-start.y;
+    node.style.left=(o.l+dx)+'px'; node.style.top=(o.t+dy)+'px';
+  };
+  const up=()=>{
+    window.removeEventListener('pointermove',move);
+    window.removeEventListener('pointerup',up);
+    saveNodeBack(node); pushHistory();
+  };
+  window.addEventListener('pointermove',move);
+  window.addEventListener('pointerup',up);
+}
+/* Resize */
+function startResize(node,e){
+  e.preventDefault();
+  const start={x:e.clientX,y:e.clientY};
+  const r0=node.getBoundingClientRect();
+  const move=ev=>{
+    const dx=ev.clientX-start.x, dy=ev.clientY-start.y;
+    node.style.width=Math.max(20,r0.width+dx)+'px';
+    node.style.height=Math.max(20,r0.height+dy)+'px';
+  };
+  const up=()=>{
+    window.removeEventListener('pointermove',move);
+    window.removeEventListener('pointerup',up);
+    saveNodeBack(node); pushHistory();
+  };
+  window.addEventListener('pointermove',move);
+  window.addEventListener('pointerup',up);
+}
+/* Rotate (visual only; applied on export as part of image) */
+function startRotate(node,e){
+  e.preventDefault();
+  const center = elCenter(node);
+  const startA = angle(center, {x:e.clientX,y:e.clientY});
+  const move=ev=>{
+    const a = angle(center,{x:ev.clientX,y:ev.clientY}) - startA;
+    node.style.transform = `rotate(${a}rad)`;
+    node.dataset.rot = a;
+  };
+  const up=()=>{
+    window.removeEventListener('pointermove',move);
+    window.removeEventListener('pointerup',up);
+    saveNodeBack(node); pushHistory();
+  };
+  window.addEventListener('pointermove',move);
+  window.addEventListener('pointerup',up);
+}
+function elCenter(el){const r=el.getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2}}
+function angle(c,p){return Math.atan2(p.y-c.y,p.x-c.x)}
+
+/* Apply/save styles */
+function applyTextStyle(d,t){
+  d.style.fontFamily=t.font; d.style.fontSize=t.size+'px'; d.style.color=t.color;
+  d.style.fontWeight=t.bold?'700':'400';
+  d.style.fontStyle=t.italic?'italic':'normal';
+  d.style.textDecoration=t.underline?'underline':'none';
+}
+function saveTextBack(div){
+  const it = findItem(div.dataset.id); if(!it) return;
+  Object.assign(it, {
+    x:px(div.style.left), y:px(div.style.top), w:px(div.style.width), h:px(div.style.height),
+    font: getComputedStyle(div).fontFamily,
+    size: parseInt(getComputedStyle(div).fontSize,10),
+    color: rgbToHex(getComputedStyle(div).color),
+    bold: getComputedStyle(div).fontWeight >= '600',
+    italic: getComputedStyle(div).fontStyle==='italic',
+    underline: getComputedStyle(div).textDecoration.includes('underline'),
+    html: div.innerHTML
+  });
+}
+function saveNodeBack(node){
+  const it=findItem(node.dataset.id); if(!it) return;
+  it.x = px(node.style.left); it.y=px(node.style.top);
+  it.w = px(node.style.width); it.h=px(node.style.height);
+  if(node.dataset.rot) it.rot = +node.dataset.rot;
+}
+
+/* toolbar bindings */
+els.fontSel.onchange = ()=>{ if(selectedEl){ const it=findItem(selectedEl.dataset.id); if(it?.type==='text'){ it.font=els.fontSel.value; applyTextStyle(selectedEl,it); pushHistory(); }}}
+els.sizeSel.onchange = ()=>{ brushSize=+els.sizeSel.value; if(selectedEl){ const it=findItem(selectedEl.dataset.id); if(it?.type==='text'){ it.size=+els.sizeSel.value; applyTextStyle(selectedEl,it); pushHistory(); }}}
+els.colorSel.onchange = ()=>{ strokeColor=els.colorSel.value; if(selectedEl){ const it=findItem(selectedEl.dataset.id); if(it?.type==='text'){ it.color=els.colorSel.value; applyTextStyle(selectedEl,it); pushHistory(); }}}
+els.fillSel.onchange  = ()=>{ if(selectedEl){ const it=findItem(selectedEl.dataset.id); if(it?.type==='shape'){ it.fill=els.fillSel.value; selectedEl.style.background = it.kind==='rect'?hexToRgba(it.fill,it.alpha):'transparent'; pushHistory(); }}}
+els.opSel.oninput     = ()=>{ shapeOpacity=+els.opSel.value/100; if(selectedEl){ const it=findItem(selectedEl.dataset.id); if(it?.type==='shape'){ it.alpha=shapeOpacity; selectedEl.style.background = it.kind==='rect'?hexToRgba(it.fill,it.alpha):'transparent'; }}}
+
+els.bold.onclick = ()=> toggleTextStyle('bold');
+els.italic.onclick = ()=> toggleTextStyle('italic');
+els.under.onclick = ()=> toggleTextStyle('underline');
+function toggleTextStyle(key){
+  if(!selectedEl) return; const it=findItem(selectedEl.dataset.id); if(!it || it.type!=='text') return;
+  it[key]=!it[key]; applyTextStyle(selectedEl,it); setBtnState(els[key==='bold'?'bold':'italic'?(key==='italic'?'italic':'under'):'under'], it[key]); pushHistory();
+}
+
+/* ================== Page nav, zoom, rotate ================== */
+els.prev.onclick= async ()=>{ if(page>1){ saveSnapshot(); page--; await renderPage(); markThumb(); }}
+els.next.onclick= async ()=>{ if(page<pageCount){ saveSnapshot(); page++; await renderPage(); markThumb(); }}
+els.zoomIn.onclick= async ()=>{ zoom*=1.2; await renderPage(); }
+els.zoomOut.onclick= async ()=>{ zoom/=1.2; await renderPage(); }
+els.rotate.onclick= async ()=>{ rotation=(rotation+90)%360; await renderThumbs(); await renderPage(); }
+
+/* ================== Undo/Redo ================== */
+function snapshot(){ return JSON.stringify(annotations); }
+function restore(s){ annotations = JSON.parse(s); }
+function pushHistory(){ history.push(snapshot()); if(history.length>50) history.shift(); future.length=0; }
+function saveSnapshot(){ pushHistory(); }
+els.undo.onclick= async ()=>{ if(history.length){ future.push(snapshot()); restore(history.pop()); await renderPage(); } }
+els.redo.onclick= async ()=>{ if(future.length){ history.push(snapshot()); restore(future.pop()); await renderPage(); } }
+
+/* ================== Helpers ================== */
+function px(v){ return Math.round(parseFloat(v||'0')); }
+function rgbToHex(rgb){ const m=(rgb||'').match(/\d+/g)||[0,0,0]; const h=(n)=>(+n).toString(16).padStart(2,'0'); return `#${h(m[0])}${h(m[1])}${h(m[2])}`; }
+function canvasPos(e,canvas){ const r=canvas.getBoundingClientRect(); return { x:(e.clientX-r.left)*(canvas.width/r.width), y:(e.clientY-r.top)*(canvas.height/r.height) } }
+function layerPos(e){ const r=els.layer.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top } }
+function findItem(id){ const arr=annotations[page]?.items||[]; return arr.find(x=>x.id===id); }
+
+/* ================== Export (flatten & download) ================== */
+els.download.addEventListener('click', async ()=>{
+  if(!pdfDoc || !bytesU8) return alert('Open a PDF first');
+  try{
+    els.download.disabled=true; els.download.textContent='Preparing...';
+    const out=await exportPdf();
+    const blob=new Blob([out],{type:'application/pdf'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='edited.pdf'; a.click();
+  }catch(err){ console.error(err); alert('Export failed: '+err); }
+  finally{ els.download.disabled=false; els.download.textContent='Download'; }
+});
+
+async function exportPdf(){
+  // Always clone bytes to avoid "detached ArrayBuffer" on some browsers/hosts
+  const fresh = cloneU8(bytesU8);
+  const src = await PDFLib.PDFDocument.load(fresh);
+  const out = await PDFLib.PDFDocument.create();
+  const pages = await out.copyPages(src, src.getPageIndices());
+  for(let i=0;i<pages.length;i++){
+    const p=pages[i]; out.addPage(p);
+    const {width,height}=p.getSize();
+
+    // paint overlay onto temp canvas
+    const tmp=document.createElement('canvas'); tmp.width=width; tmp.height=height;
+    const t=tmp.getContext('2d');
+
+    // drawings
+    const ann = annotations[i+1];
+    if(ann?.drawDataURL){
+      const im=new Image(); await new Promise((res,rej)=>{ im.onload=res; im.onerror=rej; im.src=ann.drawDataURL; });
+      t.drawImage(im,0,0,width,height);
+    }
+    // items
+    for(const it of (ann?.items||[])){
+      if(it.type==='image'){
+        const im=new Image(); await new Promise((res,rej)=>{ im.onload=res; im.onerror=rej; im.src=it.dataURL; });
+        drawTransformed(t, it, ()=> t.drawImage(im, it.x, it.y, it.w, it.h) );
+      }else if(it.type==='shape'){
+        t.save(); if(it.rot){ t.translate(it.x+it.w/2, it.y+it.h/2); t.rotate(it.rot); t.translate(-(it.x+it.w/2), -(it.y+it.h/2)); }
+        if(it.kind==='rect'){
+          t.fillStyle = hexToRgba(it.fill||'#ffd54d', it.alpha??0.7);
+          t.fillRect(it.x,it.y,it.w,it.h);
+          t.lineWidth=2; t.strokeStyle=it.stroke||'#111'; t.strokeRect(it.x,it.y,it.w,it.h);
+        }else{
+          // ellipse
+          t.beginPath();
+          t.ellipse(it.x+it.w/2,it.y+it.h/2,it.w/2,it.h/2,0,0,Math.PI*2);
+          t.fillStyle = hexToRgba(it.fill||'#ffd54d', it.alpha??0.7); t.fill();
+          t.lineWidth=2; t.strokeStyle=it.stroke||'#111'; t.stroke();
+        }
+        t.restore();
+      }else if(it.type==='text'){
+        t.save();
+        if(it.rot){ t.translate(it.x+it.w/2, it.y+it.h/2); t.rotate(it.rot); t.translate(-(it.x+it.w/2), -(it.y+it.h/2)); }
+        const weight = it.bold?'700':'400', style = it.italic?'italic':'normal', deco = it.underline? 'underline':'none';
+        t.font = `${style} ${weight} ${it.size||16}px ${it.font||'Arial'}`;
+        t.fillStyle = it.color||'#111';
+        // single-line baseline
+        const text = (it.html||'').replace(/<[^>]+>/g,'');
+        t.fillText(text, it.x+4, it.y+(it.size||16)+4);
+        if(deco==='underline'){
+          const w = t.measureText(text).width;
+          t.fillRect(it.x+4, it.y+(it.size||16)+8, w, 2);
+        }
+        t.restore();
+      }
+    }
+
+    // embed overlay
+    const dataURL = tmp.toDataURL('image/png');
+    const pngBytes = await (await fetch(dataURL)).arrayBuffer();
+    const img = await out.embedPng(pngBytes);
+    p.drawImage(img,{x:0,y:0,width,height});
+  }
+  return out.save();
+}
+function drawTransformed(ctx, it, drawFn){
+  ctx.save();
+  if(it.rot){ ctx.translate(it.x+it.w/2, it.y+it.h/2); ctx.rotate(it.rot); ctx.translate(-(it.x+it.w/2), -(it.y+it.h/2)); }
+  drawFn();
+  ctx.restore();
+}
+
+/* ================== Responsive ================== */
+let timer=null; window.addEventListener('resize',()=>{ if(!pdfDoc)return; clearTimeout(timer); timer=setTimeout(renderPage,200); });
+
+/* ================== Init ================== */
+setMode('select');
+
+/* ================ small utils ================ */
+function createHandle(el,cls){ const h=document.createElement('div'); h.className='handle '+cls; el.appendChild(h); return h; }
+
 </script>
 </body>
 </html>
