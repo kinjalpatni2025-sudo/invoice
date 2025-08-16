@@ -1,0 +1,121 @@
+<!-- tools/tool.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="tool-title">Smart Tool</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: #007bff;
+            color: #fff;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+        main {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        #tool-content {
+            padding: 20px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #333;
+        }
+        #tool-content p {
+            margin-bottom: 20px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: #007bff;
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .back-link:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 id="tool-name">Tool Name</h1>
+    </header>
+
+    <main id="tool-content">
+        <!-- Tool-specific content dynamically load થશે -->
+    </main>
+
+    <div style="text-align:center; margin: 20px;">
+        <a href="../index.html" class="back-link">← Back to Tools</a>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const tool = params.get('tool');
+
+        const toolData = {
+            "image-to-pdf": {name: "Image to PDF", description: "Convert images to PDF easily."},
+            "pdf-merge": {name: "PDF Merge", description: "Merge multiple PDFs into one."},
+            "pdf-split": {name: "PDF Split", description: "Split PDF pages into separate files."},
+            "pdf-compress": {name: "PDF Compress", description: "Reduce PDF file size without losing quality."},
+            "pdf-rotate": {name: "PDF Rotate", description: "Rotate PDF pages clockwise or counterclockwise."},
+            "pdf-unlock": {name: "PDF Unlock", description: "Remove password protection from PDF files."},
+            "pdf-password": {name: "PDF Password", description: "Add password protection to PDF files."},
+            "pdf-edit": {name: "PDF Edit", description: "Edit PDF text and images easily."},
+            "pdf-to-image": {name: "PDF to Image", description: "Convert PDF pages to JPG or PNG images."},
+            "image-to-png-jpg": {name: "Image Converter", description: "Convert images between PNG and JPG formats."},
+            "jpg-to-pdf": {name: "JPG to PDF", description: "Convert JPG images into PDF files."},
+            "pdf-watermark": {name: "PDF Watermark", description: "Add watermark text or image to PDFs."},
+            "pdf-header-footer": {name: "PDF Header & Footer", description: "Add custom headers or footers to PDFs."},
+            "pdf-split-range": {name: "PDF Split by Range", description: "Split PDFs by specific page ranges."},
+            "pdf-merge-range": {name: "PDF Merge by Range", description: "Merge selected page ranges from PDFs."},
+            "pdf-sign": {name: "PDF Sign", description: "Sign PDF documents digitally."},
+            "pdf-ocr": {name: "PDF OCR", description: "Convert scanned PDFs into searchable text."},
+            "pdf-repair": {name: "PDF Repair", description: "Fix corrupted or damaged PDF files."},
+            "pdf-properties": {name: "PDF Properties", description: "Edit PDF metadata like title, author, and subject."},
+            "pdf-numbers": {name: "PDF Page Numbers", description: "Add page numbers to PDF files."},
+            "pdf-background": {name: "PDF Background", description: "Add background colors or images to PDFs."},
+            "pdf-extract": {name: "PDF Extract", description: "Extract pages or images from PDF files."},
+            "pdf-compare": {name: "PDF Compare", description: "Compare two PDF files for differences."},
+            "pdf-flatten": {name: "PDF Flatten", description: "Flatten PDF form fields to static content."},
+            "pdf-reorder": {name: "PDF Reorder", description: "Rearrange pages in PDF files easily."},
+            "pdf-split-odd-even": {name: "PDF Split Odd/Even", description: "Split PDFs into odd and even pages."},
+            "pdf-optimize": {name: "PDF Optimize", description: "Optimize PDF for web or print."},
+            "pdf-merge-images": {name: "Merge Images to PDF", description: "Convert multiple images into a single PDF."},
+            "pdf-html-convert": {name: "HTML to PDF", description: "Convert web pages or HTML files into PDFs."},
+            "pdf-ebook": {name: "PDF eBook Maker", description: "Create eBooks in PDF format."},
+            "pdf-translate": {name: "PDF Translate", description: "Translate PDF text to another language."},
+            "pdf-annotate": {name: "PDF Annotate", description: "Add highlights, comments, or shapes to PDFs."},
+            "pdf-reorder-auto": {name: "PDF Auto Reorder", description: "Automatically reorder PDF pages."}
+        };
+
+        if(toolData[tool]) {
+            document.getElementById("tool-title").innerText = toolData[tool].name;
+            document.getElementById("tool-name").innerText = toolData[tool].name;
+            document.getElementById("tool-content").innerHTML = `<p>${toolData[tool].description}</p>`;
+        } else {
+            document.getElementById("tool-content").innerHTML = "<p>Tool not found.</p>";
+        }
+    </script>
+</body>
+</html>
