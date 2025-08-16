@@ -4,13 +4,79 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>SmartTool Hub — Free Online Tools</title>
+  <meta name="description" content="SmartTool Hub offers free browser-based PDF, Image, Text, Data and Utility tools. No upload to server — everything runs in your browser instantly." />
+  <meta name="keywords" content="online pdf tools, free pdf merge, image converter, text utilities, qr code generator, json formatter, csv converter, pdf editor, image resize" />
+  <meta name="author" content="SmartTool Hub" />
+  <link rel="icon" href="https://img.icons8.com/fluency/48/toolbox.png" type="image/png" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root{
+      --bg1:#0f172a;--bg2:#1e293b;--text:#e2e8f0;--muted:#94a3b8;
+      --pdf1:#f43f5e;--pdf2:#be123c;--img1:#6366f1;--img2:#9333ea;
+      --txt1:#3b82f6;--txt2:#2563eb;--data1:#10b981;--data2:#059669;
+      --qr1:#14b8a6;--qr2:#06b6d4;--all1:#64748b;--all2:#334155;
+    }
+    body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(180deg,var(--bg1),var(--bg2));color:var(--text)}
+    a{text-decoration:none;color:inherit}
+    header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;position:sticky;top:0;background:rgba(15,23,42,0.85);backdrop-filter:blur(8px)}
+    .brand{display:flex;align-items:center;gap:10px}
+    .brand img{width:40px;height:40px}
+    .brand h1{margin:0;font-size:1.2rem}
+    nav a{margin-left:16px;color:var(--muted);font-size:0.9rem}
+    .searchbar{flex:1;max-width:420px;margin-left:20px}
+    .searchbar input{width:100%;padding:10px 16px;border-radius:999px;border:2px solid var(--img1);background:#ffffff;color:#000;font-weight:500}
+    .searchbar input::placeholder{color:#6b7280}
+    .hero{padding:60px 20px;text-align:center;background:linear-gradient(135deg,var(--img1),var(--qr2))}
+    .hero h2{font-size:2rem;margin:0 0 10px;color:white}
+    .hero p{color:#e0f2fe;margin:0 0 16px}
+    .btn{padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer}
+    .btn-primary{background:linear-gradient(90deg,var(--img1),var(--qr2));color:white;border:none}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.2);color:white}
+    .categories{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:30px 0}
+    .cat{padding:10px 18px;border-radius:999px;background:#1e293b;color:var(--text);cursor:pointer;display:flex;align-items:center;font-size:1rem;font-weight:500;transition:0.3s}
+    .cat i{margin-right:8px;font-size:1.1rem}
+    .cat.active{background:linear-gradient(90deg,var(--img1),var(--qr2));color:white}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;padding:0 20px;max-width:1200px;margin:0 auto}
+    .card{background:#1e293b;border-radius:14px;padding:16px;transition:0.3s}
+    .card:hover{transform:translateY(-5px);box-shadow:0 12px 30px rgba(0,0,0,0.5)}
+    .icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:white;font-size:22px;margin-bottom:10px}
+    .card h3{margin:0 0 6px;font-size:1rem}
+    .card p{margin:0;font-size:0.85rem;color:var(--muted)}
+    .pdf .icon{background:linear-gradient(135deg,var(--pdf1),var(--pdf2))}
+    .image .icon{background:linear-gradient(135deg,var(--img1),var(--img2))}
+    .text .icon{background:linear-gradient(135deg,var(--txt1),var(--txt2))}
+    .data .icon{background:linear-gradient(135deg,var(--data1),var(--data2))}
+    .qr .icon{background:linear-gradient(135deg,var(--qr1),var(--qr2))}
+    .all .icon{background:linear-gradient(135deg,var(--all1),var(--all2))}
+    footer{margin-top:40px;text-align:center;padding:20px;color:var(--muted);font-size:0.85rem;background:#0f172a}
+  </style>
 </head>
 <body>
+  <!-- HEADER -->
   <header>
-    <h1>SmartTool Hub</h1>
-    <input id="searchInput" type="search" placeholder="Search tools..." oninput="filterTools()">
+    <div class="brand">
+      <img src="https://img.icons8.com/fluency/48/toolbox.png" alt="logo">
+      <h1>SmartTool Hub</h1>
+    </div>
+    <div class="searchbar">
+      <input id="searchInput" type="search" placeholder="Search tools..." oninput="filterTools()">
+    </div>
+    <nav>
+      <a href="#tools">Tools</a>
+      <a href="#how">How it Works</a>
+      <a href="#contact">Contact</a>
+    </nav>
   </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <h2>Free Online Tools</h2>
+    <p>PDF, Image, Text & Utility tools — fast, free, browser-based.</p>
+    <button class="btn btn-primary" onclick="document.getElementById('tools').scrollIntoView({behavior:'smooth'})">Explore Tools</button>
+    <button class="btn btn-ghost" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">How it Works</button>
+  </section>
+
+  <!-- CATEGORIES -->
   <div class="categories">
     <div class="cat active" data-cat="all" onclick="selectCategory('all')"><i class="fa-solid fa-layer-group"></i> All</div>
     <div class="cat" data-cat="pdf" onclick="selectCategory('pdf')"><i class="fa-solid fa-file-pdf"></i> PDF</div>
@@ -19,15 +85,90 @@
     <div class="cat" data-cat="data" onclick="selectCategory('data')"><i class="fa-solid fa-database"></i> Data</div>
     <div class="cat" data-cat="qr" onclick="selectCategory('qr')"><i class="fa-solid fa-qrcode"></i> QR & Color</div>
   </div>
-  <section id="tools" class="grid">
-    <!-- Example -->
-    <a class="card pdf" data-cat="pdf" href="tools/tool.html?tool=pdf-merge">
-      <div class="icon"><i class="fa-solid fa-file-pdf"></i></div>
-      <h3>Merge PDF</h3>
-      <p>Combine multiple PDF files into one.</p>
-    </a>
 
-    <!-- ✅ બધા 33 tools cards અહીં છે (મેં પહેલેથી mapping કરી દીધું હતું). -->
+  <!-- TOOLS GRID -->
+  <section id="tools" class="grid">
+    <!-- Example cards (PDF tools) -->
+    <a class="card pdf" data-cat="pdf" href="#"><div class="icon"><i class="fa-solid fa-file-pdf"></i></div><h3>Merge PDF</h3><p>Combine multiple PDF files into one.</p></a>
+    <a class="card pdf" data-cat="pdf" href="#"><div class="icon"><i class="fa-solid fa-file-pdf"></i></div><h3>Split PDF</h3><p>Split PDF into separate pages.</p></a>
+    <a class="card pdf" data-cat="pdf" href="#"><div class="icon"><i class="fa-solid fa-lock-open"></i></div><h3>Unlock PDF</h3><p>Remove password from PDF.</p></a>
+    <a class="card pdf" data-cat="pdf" href="#"><div class="icon"><i class="fa-solid fa-shield"></i></div><h3>Protect PDF</h3><p>Add password to your PDF.</p></a>
+    <a class="card pdf" data-cat="pdf" href="#"><div class="icon"><i class="fa-solid fa-rotate"></i></div><h3>Rotate PDF</h3><p>Rotate PDF pages easily.</p></a>
+
+    <!-- Image tools -->
+    <a class="card image" data-cat="image" href="#"><div class="icon"><i class="fa-solid fa-image"></i></div><h3>Image to JPG</h3><p>Convert any image to JPG format.</p></a>
+    <a class="card image" data-cat="image" href="#"><div class="icon"><i class="fa-solid fa-file-image"></i></div><h3>PNG to JPG</h3><p>Convert PNG files to JPG.</p></a>
+    <a class="card image" data-cat="image" href="#"><div class="icon"><i class="fa-solid fa-compress"></i></div><h3>Compress Image</h3><p>Reduce image file size.</p></a>
+    <a class="card image" data-cat="image" href="#"><div class="icon"><i class="fa-solid fa-ruler-combined"></i></div><h3>Resize Image</h3><p>Resize images online quickly.</p></a>
+    <a class="card image" data-cat="image" href="#"><div class="icon"><i class="fa-solid fa-paintbrush"></i></div><h3>Image Editor</h3><p>Edit images directly in browser.</p></a>
+
+    <!-- Text & URL tools -->
+    <a class="card text" data-cat="text" href="#"><div class="icon"><i class="fa-solid fa-font"></i></div><h3>Text Case Converter</h3><p>Convert text to upper, lower or title case.</p></a>
+    <a class="card text" data-cat="text" href="#"><div class="icon"><i class="fa-solid fa-align-left"></i></div><h3>Word Counter</h3><p>Count words and characters easily.</p></a>
+    <a class="card text" data-cat="text" href="#"><div class="icon"><i class="fa-solid fa-link"></i></div><h3>URL Encoder/Decoder</h3><p>Encode or decode URLs instantly.</p></a>
+    <a class="card text" data-cat="text" href="#"><div class="icon"><i class="fa-solid fa-paragraph"></i></div><h3>Remove Line Breaks</h3><p>Clean text formatting by removing breaks.</p></a>
+    <a class="card text" data-cat="text" href="#"><div class="icon"><i class="fa-solid fa-file-lines"></i></div><h3>JSON Formatter</h3><p>Format JSON for readability.</p></a>
+
+    <!-- Data tools -->
+    <a class="card data" data-cat="data" href="#"><div class="icon"><i class="fa-solid fa-database"></i></div><h3>CSV to JSON</h3><p>Convert CSV data to JSON format.</p></a>
+    <a class="card data" data-cat="data" href="#"><div class="icon"><i class="fa-solid fa-database"></i></div><h3>JSON to CSV</h3><p>Convert JSON to CSV format.</p></a>
+    <a class="card data" data-cat="data" href="#"><div class="icon"><i class="fa-solid fa-database"></i></div><h3>Excel to CSV</h3><p>Convert Excel sheets to CSV.</p></a>
+    <a class="card data" data-cat="data" href="#"><div class="icon"><i class="fa-solid fa-database"></i></div><h3>CSV to Excel</h3><p>Convert CSV files to Excel format.</p></a>
+    <a class="card data" data-cat="data" href="#"><div class="icon"><i class="fa-solid fa-database"></i></div><h3>Data Table Viewer</h3><p>View tabular data online.</p></a>
+
+    <!-- QR & Color tools -->
+    <a class="card qr" data-cat="qr" href="#"><div class="icon"><i class="fa-solid fa-eye-dropper"></i></div><h3>Color Picker</h3><p>Pick and copy any color code easily.</p></a>
+    <a class="card qr" data-cat="qr" href="#"><div class="icon"><i class="fa-solid fa-qrcode"></i></div><h3>QR Generator</h3><p>Generate QR codes for text or links.</p></a>
+    <a class="card qr" data-cat="qr" href="#"><div class="icon"><i class="fa-solid fa-camera"></i></div><h3>QR Scanner</h3><p>Scan QR codes directly with your browser.</p></a>
   </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how" style="padding:60px 20px;text-align:center;max-width:900px;margin:0 auto;">
+    <h2>How It Works</h2>
+    <p style="color:var(--muted);margin-bottom:30px;">Simple 3-step process to get started.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;">
+      <div style="background:#1e293b;padding:20px;border-radius:12px;">
+        <h3>1. Pick a Tool</h3>
+        <p>Select any tool you need from the list above.</p>
+      </div>
+      <div style="background:#1e293b;padding:20px;border-radius:12px;">
+        <h3>2. Upload / Paste Data</h3>
+        <p>Provide input like file, image, text or link.</p>
+      </div>
+      <div style="background:#1e293b;padding:20px;border-radius:12px;">
+        <h3>3. Get Instant Results</h3>
+        <p>Your file or output is ready immediately in browser.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer id="contact">
+    <p>© 2025 SmartTool Hub. All rights reserved.</p>
+    <p><a href="mailto:contact@smarttoolhub.com" style="color:var(--text)">Contact Us</a></p>
+    <p>
+      <a href="https://github.com/" target="_blank"><i class="fab fa-github"></i></a> &nbsp;
+      <a href="https://twitter.com/" target="_blank"><i class="fab fa-twitter"></i></a> &nbsp;
+      <a href="https://linkedin.com/" target="_blank"><i class="fab fa-linkedin"></i></a>
+    </p>
+  </footer>
+
+  <script>
+    const cards = document.querySelectorAll('.card');
+    const cats = document.querySelectorAll('.cat');
+    function selectCategory(cat){
+      cats.forEach(c=>c.classList.toggle('active',c.dataset.cat===cat));
+      filterTools();
+    }
+    function filterTools(){
+      const q=document.getElementById('searchInput').value.toLowerCase();
+      const active=document.querySelector('.cat.active').dataset.cat;
+      cards.forEach(c=>{
+        const matchCat=(active==="all"||c.classList.contains(active));
+        const matchQ=!q||c.innerText.toLowerCase().includes(q);
+        c.style.display=(matchCat&&matchQ)?'block':'none';
+      });
+    }
+  </script>
 </body>
 </html>
