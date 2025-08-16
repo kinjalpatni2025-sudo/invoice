@@ -13,7 +13,7 @@
   :root{
     --bg:#121826; --card:#1e293b; --muted:#94a3b8; --text:#fff;
     --pri1:#6366f1; --pri2:#0ea5e9; --warn:#ef4444;
-    --outline:rgba(255,255,255,0.10);
+    --outline:rgba(255,255,255,0.12);
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:Arial, sans-serif;background:var(--bg);color:var(--text)}
@@ -42,7 +42,7 @@
   .btn.primary{background:#fff;color:#0b1220;font-weight:700}
   .btn.danger{background:var(--warn);border-color:var(--warn)}
   .sep{width:1px;height:28px;background:var(--outline);margin:0 4px}
-  select,input[type="color"]{background:#0b1220;color:#fff;border:1px solid var(--outline);border-radius:8px;padding:6px}
+  select,input[type="color"],input[type="range"]{background:#0b1220;color:#fff;border:1px solid var(--outline);border-radius:8px;padding:6px}
   .stage-wrap{position:relative;margin:12px;border:1px solid var(--outline);border-radius:12px;background:#fff;overflow:hidden}
   canvas{display:block;width:100%}
   #annotLayer{position:absolute;left:0;top:0;pointer-events:none}
@@ -136,7 +136,7 @@
       <div id="annotLayer"></div>
     </div>
 
-    <div class="muted">Tip: Text/Shape/Image add કર્યા પછી click કરીને select કરો. Dragથી move, corner handleથી resize. Double-click text → edit. Controls થી color/size/bold/italic/underline બદલો. Undo/Redo available.</div>
+    <div class="muted">Tip: After adding text, shape, image or drawing, click to select. Drag to move, use corner handle to resize. Double-click text to edit. Change color/size/bold/italic/underline from the toolbar. Undo/Redo available.</div>
   </section>
 </div>
 
@@ -165,7 +165,7 @@ const ctxPDF = els.pdfCanvas.getContext('2d');
 const ctxDraw = els.drawCanvas.getContext('2d');
 
 let pdfDoc=null, pageCount=0, page=1, zoom=1.0, rotation=0;
-let bytesU8=null;        // original file (Uint8Array) — safe for cloning
+let masterBytes=null;    // <-- the safe master copy (never passed to pdf.js directly)
 let scaleBase=1.3;       // base scale for fit
 let mode='select';       // select | text | draw | high | rect | ellipse
 let brushSize=+els.sizeSel.value, strokeColor=els.colorSel.value;
@@ -179,11 +179,14 @@ function qs(s){return document.querySelector(s)}
 function hexToRgba(hex,a){const n=parseInt(hex.replace('#',''),16);return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`}
 function cloneU8(u8){return new Uint8Array(u8)} // avoid detached buffer
 
-/* ================== Load PDF ================== */
+/* ================== Load PDF (IMPORTANT: use a CLONE for pdf.js) ================== */
 els.file.addEventListener('change', async e=>{
   const f=e.target.files[0]; if(!f) return;
-  const ab=await f.arrayBuffer(); bytesU8=new Uint8Array(ab);
-  pdfDoc = await pdfjsLib.getDocument({data: bytesU8}).promise;
+  const ab=await f.arrayBuffer();
+  masterBytes=new Uint8Array(ab); // keep master untouched
+  // give pdf.js a clone; its worker may transfer & detach that clone
+  const dataForPdfjs = new Uint8Array(masterBytes); 
+  pdfDoc = await pdfjsLib.getDocument({data: dataForPdfjs}).promise;
   pageCount = pdfDoc.numPages; page=1; zoom=1; rotation=0;
   annotations = {}; history=[]; future=[];
   await renderThumbs(); await renderPage();
@@ -349,7 +352,6 @@ function createItemEl(item){
     d.style.background = item.kind==='rect' ? hexToRgba(item.fill, item.alpha) : 'transparent';
     d.style.border = `2px solid ${item.stroke}`;
     d.style.borderRadius = item.kind==='ellipse' ? '50%':'6px';
-    d.style.pointerEvents='auto';
     els.layer.appendChild(d);
     attachSelectable(d, 'shape');
     return d;
@@ -378,7 +380,7 @@ function attachSelectable(node, kind){
     e.stopPropagation();
     startResize(node,e);
   });
-  // tiny rotate handle only for shape/image to mimic iLovePDF vibe
+  // rotate handle (for shape/image)
   if(kind!=='text'){
     const r=document.createElement('div'); r.className='handle h-rot'; node.appendChild(r);
     r.addEventListener('pointerdown', e=>{
@@ -440,7 +442,7 @@ function startResize(node,e){
   window.addEventListener('pointermove',move);
   window.addEventListener('pointerup',up);
 }
-/* Rotate (visual only; applied on export as part of image) */
+/* Rotate (visual only; exported into flatten) */
 function startRotate(node,e){
   e.preventDefault();
   const center = elCenter(node);
@@ -527,7 +529,7 @@ function findItem(id){ const arr=annotations[page]?.items||[]; return arr.find(x
 
 /* ================== Export (flatten & download) ================== */
 els.download.addEventListener('click', async ()=>{
-  if(!pdfDoc || !bytesU8) return alert('Open a PDF first');
+  if(!pdfDoc || !masterBytes) return alert('Open a PDF first');
   try{
     els.download.disabled=true; els.download.textContent='Preparing...';
     const out=await exportPdf();
@@ -538,8 +540,8 @@ els.download.addEventListener('click', async ()=>{
 });
 
 async function exportPdf(){
-  // Always clone bytes to avoid "detached ArrayBuffer" on some browsers/hosts
-  const fresh = cloneU8(bytesU8);
+  // IMPORTANT: never reuse a buffer touched by pdf.js worker
+  const fresh = cloneU8(masterBytes);
   const src = await PDFLib.PDFDocument.load(fresh);
   const out = await PDFLib.PDFDocument.create();
   const pages = await out.copyPages(src, src.getPageIndices());
@@ -569,7 +571,6 @@ async function exportPdf(){
           t.fillRect(it.x,it.y,it.w,it.h);
           t.lineWidth=2; t.strokeStyle=it.stroke||'#111'; t.strokeRect(it.x,it.y,it.w,it.h);
         }else{
-          // ellipse
           t.beginPath();
           t.ellipse(it.x+it.w/2,it.y+it.h/2,it.w/2,it.h/2,0,0,Math.PI*2);
           t.fillStyle = hexToRgba(it.fill||'#ffd54d', it.alpha??0.7); t.fill();
@@ -582,7 +583,6 @@ async function exportPdf(){
         const weight = it.bold?'700':'400', style = it.italic?'italic':'normal', deco = it.underline? 'underline':'none';
         t.font = `${style} ${weight} ${it.size||16}px ${it.font||'Arial'}`;
         t.fillStyle = it.color||'#111';
-        // single-line baseline
         const text = (it.html||'').replace(/<[^>]+>/g,'');
         t.fillText(text, it.x+4, it.y+(it.size||16)+4);
         if(deco==='underline'){
@@ -615,8 +615,8 @@ let timer=null; window.addEventListener('resize',()=>{ if(!pdfDoc)return; clearT
 setMode('select');
 
 /* ================ small utils ================ */
+function px(v){ return Math.round(parseFloat(v||'0')); }
 function createHandle(el,cls){ const h=document.createElement('div'); h.className='handle '+cls; el.appendChild(h); return h; }
-
 </script>
 </body>
 </html>
