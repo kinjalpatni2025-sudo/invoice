@@ -1,450 +1,573 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Convert Image to PNG / JPG — Smarttool Hub</title>
-<meta name="description" content="Free online image converter: turn images into PNG or JPG entirely in your browser. Batch convert, set quality, resize, preview, and download as ZIP. No upload."/>
-<meta name="keywords" content="image to png, image to jpg, jpg converter, png converter, convert images, batch image converter, online image converter, client-side, no upload"/>
-<link rel="icon" href="https://img.icons8.com/fluency/48/toolbox.png">
+  <!-- ============== SEO & Meta ============== -->
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Image to PNG/JPG — Fast Online Converter | Smarttool Hub</title>
+  <meta name="description" content="Convert images to PNG or JPG in your browser. Upload multiple files, choose quality and background, preview, and download images or a ZIP — no server uploads."/>
+  <meta name="keywords" content="image to png, image to jpg, convert png, convert jpg, webp to jpg, jpg quality, bulk convert images, client-side converter"/>
+  <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/toolbox.png"/>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+  <!-- Icons (for buttons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 
-<style>
-  :root{
-    --bg:#0f1724; --card:#0b1220; --muted:#9aa8bf; --text:#e6eef8;
-    --pri1:#6366f1; --pri2:#0ea5e9; --outline:rgba(255,255,255,0.08);
-  }
-  *{box-sizing:border-box}
-  body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--text)}
-  header{position:sticky;top:0;z-index:999;background:linear-gradient(90deg,var(--pri1),var(--pri2));padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 6px 18px rgba(0,0,0,.45)}
-  .logo{display:flex;gap:12px;align-items:center}
-  .logo img{width:44px;height:44px;border-radius:8px}
-  header h1{margin:0;font-size:18px}
-  header .right a{background:#fff;color:#0b1220;padding:8px 10px;border-radius:8px;text-decoration:none;font-weight:700}
-
-  .wrap{max-width:1200px;margin:18px auto;padding:12px}
-  .grid{display:grid;grid-template-columns:300px 1fr 320px;gap:12px}
-  .panel{background:var(--card);border:1px solid var(--outline);border-radius:12px;padding:12px}
-  .left{overflow:auto;max-height:70vh}
-  .muted{color:var(--muted);font-size:13px}
-  .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-  .btn{background:transparent;border:1px solid var(--outline);color:var(--text);padding:8px 10px;border-radius:8px;cursor:pointer}
-  .btn.primary{background:#fff;color:#071124;font-weight:700}
-  .btn.small{padding:6px 8px;font-size:13px}
-
-  label.inputbtn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:1px dashed var(--outline);padding:8px 10px;border-radius:8px}
-  input[type=file]{display:none}
-  select,input[type="number"],input[type="text"],input[type="range"],input[type="color"]{
-    background:#0b1220;color:var(--text);border:1px solid var(--outline);padding:6px;border-radius:8px
-  }
-
-  /* Thumbnails list */
-  .item{display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center;padding:8px;border-radius:10px;background:#0e1626;border:1px solid var(--outline);margin-bottom:8px}
-  .item.dragging{opacity:.6}
-  .thumb{width:64px;height:64px;border-radius:8px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center}
-  .thumb img{max-width:100%;max-height:100%;display:block}
-  .item .name{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .item .size{font-size:12px;color:var(--muted)}
-  .item .actions{display:flex;gap:8px}
-  .dropzone{border:2px dashed var(--outline);border-radius:12px;padding:12px;text-align:center;margin-top:8px}
-  .dropzone.dragover{border-color:#9acbff;background:rgba(13,63,120,.25)}
-
-  /* Stage */
-  .stage{position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--outline);background:#0b1220;display:flex;align-items:center;justify-content:center;min-height:520px}
-  #preview{max-width:100%;max-height:520px;display:block}
-  #placeholder{color:#a9b6cb;text-align:center}
-
-  /* Converted list */
-  .list-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dashed var(--outline)}
-  .list-row:last-child{border-bottom:none}
-
-  @media (max-width:1024px){ .grid{grid-template-columns:1fr} .left{max-height:260px} .stage{min-height:420px} }
-</style>
+  <!-- ============== Styles ============== -->
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#9aa8bf; --text:#e6eef8;
+      --pri1:#6366f1; --pri2:#0ea5e9; --outline:rgba(255,255,255,.08);
+      --ok:#22c55e; --warn:#f59e0b; --danger:#ef4444;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}
+    /* Header */
+    header{position:sticky;top:0;z-index:1000;background:linear-gradient(90deg,var(--pri1),var(--pri2));
+      padding:12px 16px;box-shadow:0 6px 20px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:space-between}
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand img{width:44px;height:44px;border-radius:10px}
+    header h1{margin:0;font-size:18px}
+    header .sub{font-size:12px;color:#e6f7ffcc}
+    header .right a{background:#fff;color:#0b1220;padding:8px 10px;border-radius:10px;font-weight:700}
+    /* Layout */
+    .wrap{max-width:1200px;margin:18px auto;padding:12px}
+    .grid{display:grid;grid-template-columns:300px 1fr 320px;gap:12px}
+    .panel{background:var(--card);border:1px solid var(--outline);border-radius:14px;padding:12px;box-shadow:0 10px 28px rgba(0,0,0,.35)}
+    .left{overflow:auto;max-height:72vh}
+    .thumb{background:#fff;color:#111;border-radius:10px;overflow:hidden;border:1px solid #f1f5f9}
+    .thumb img{width:100%;height:auto;display:block}
+    .thumb .row{display:flex;align-items:center;justify-content:space-between;padding:8px}
+    .thumb .name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70%}
+    .thumb.selected{outline:2px solid var(--pri2)}
+    .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .btn{background:transparent;border:1px solid var(--outline);color:var(--text);padding:8px 10px;border-radius:10px;cursor:pointer}
+    .btn.primary{background:#fff;color:#071124;font-weight:700}
+    .btn.small{padding:6px 8px;font-size:13px}
+    label.inputbtn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:1px dashed var(--outline);padding:8px 10px;border-radius:10px}
+    input[type=file]{display:none}
+    select,input[type="number"],input[type="text"],input[type="color"],input[type="range"]{
+      background:#0b1220;color:#e6eef8;border:1px solid var(--outline);padding:6px;border-radius:10px
+    }
+    .muted{color:var(--muted);font-size:13px}
+    /* Stage */
+    .stage{position:relative;border:1px solid var(--outline);border-radius:12px;background:#0a0f1a;display:flex;align-items:center;justify-content:center;min-height:520px;overflow:hidden}
+    #preview{max-width:100%;height:auto;display:block}
+    /* Dropzone */
+    .drop{border:2px dashed var(--outline);border-radius:12px;padding:16px;text-align:center;transition:all .2s}
+    .drop.drag{border-color:var(--pri2);background:#0d1a2b}
+    /* Progress Bar */
+    .progress{width:100%;height:12px;background:#0d1626;border-radius:999px;overflow:hidden;border:1px solid var(--outline)}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,var(--pri1),var(--pri2));transition:width .2s}
+    /* Right panel */
+    .list{max-height:240px;overflow:auto;border:1px solid var(--outline);border-radius:10px;padding:8px}
+    .list .row{display:flex;justify-content:space-between;align-items:center;padding:6px 4px;border-bottom:1px dashed var(--outline)}
+    .list .row:last-child{border-bottom:none}
+    /* Responsive */
+    @media (max-width:1024px){
+      .grid{grid-template-columns:1fr}
+      .left{max-height:220px}
+      .stage{min-height:420px}
+    }
+    /* Tooltip-ish helper */
+    .help{border-bottom:1px dotted var(--muted);cursor:help}
+    /* Hide helper */
+    .hidden{display:none}
+  </style>
 </head>
 <body>
-<header>
-  <div class="logo">
-    <img src="https://img.icons8.com/fluency/48/toolbox.png" alt="logo">
-    <div>
-      <h1>Image → PNG / JPG</h1>
-      <div style="font-size:12px;color:#e6f7ffcc">Client-side converter • Batch • No uploads</div>
+  <!-- ============== Header ============== -->
+  <header>
+    <div class="brand">
+      <img src="https://img.icons8.com/fluency/48/toolbox.png" alt="Smarttool Hub logo">
+      <div>
+        <h1>Image → PNG / JPG</h1>
+        <div class="sub">Instant browser conversion • No uploads</div>
+      </div>
+    </div>
+    <div class="right">
+      <a href="../../index.html">← Back to Home</a>
+    </div>
+  </header>
+
+  <!-- ============== Main ============== -->
+  <div class="wrap">
+    <div class="grid">
+      <!-- Left: uploader & thumbnails -->
+      <aside class="panel left">
+        <div class="controls" style="justify-content:space-between;margin-bottom:10px">
+          <strong>Images</strong>
+          <div class="muted" id="countLbl">0</div>
+        </div>
+
+        <div class="controls" style="margin-bottom:10px">
+          <label class="inputbtn">
+            <i class="fa fa-file-arrow-up"></i> Choose images
+            <input id="fileInput" type="file" accept="image/*" multiple>
+          </label>
+          <button id="clearBtn" class="btn small">Clear</button>
+        </div>
+
+        <div id="dropzone" class="drop muted" style="margin-bottom:10px">
+          Drag & drop images here (PNG, JPG, JPEG, WebP, GIF, BMP…)
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0">
+          <label><input id="checkAll" type="checkbox"> Select all</label>
+          <button id="invertBtn" class="btn small">Invert</button>
+          <button id="rangeBtn" class="btn small">Select range</button>
+        </div>
+
+        <div id="thumbs" style="display:grid;grid-template-columns:1fr;gap:10px">
+          <div class="muted">Upload images to see thumbnails.</div>
+        </div>
+      </aside>
+
+      <!-- Center: preview & options -->
+      <main class="panel" style="display:flex;flex-direction:column;gap:12px">
+        <div class="controls" style="justify-content:space-between">
+          <div class="controls">
+            <span class="muted">Format</span>
+            <select id="formatSel" style="margin-left:6px">
+              <option value="png">PNG (lossless, supports transparency)</option>
+              <option value="jpeg">JPG (smaller file size)</option>
+            </select>
+
+            <span class="muted" style="margin-left:10px">Quality</span>
+            <input id="quality" type="range" min="30" max="100" value="90" style="width:120px;margin-left:6px">
+            <span id="qLbl" class="muted">90</span>
+
+            <span class="muted" style="margin-left:10px">Background</span>
+            <input id="bgColor" type="color" value="#ffffff" title="Used for JPG (since JPG has no transparency)">
+          </div>
+
+          <div class="controls">
+            <button id="convertBtn" class="btn primary"><i class="fa fa-wand-magic-sparkles"></i> Convert</button>
+            <button id="zipBtn" class="btn small"><i class="fa fa-download"></i> Download ZIP</button>
+          </div>
+        </div>
+
+        <div class="stage" id="stage">
+          <div id="stagePlaceholder" style="text-align:center;color:#a3b0c5">
+            <div style="font-size:18px;margin-bottom:4px">Preview</div>
+            <div class="muted">Click a thumbnail to preview and download that image.</div>
+          </div>
+          <img id="preview" class="hidden" alt="Preview">
+        </div>
+
+        <div style="display:flex;gap:12px;align-items:center">
+          <div class="progress" style="flex:1">
+            <div id="bar" class="bar"></div>
+          </div>
+          <div id="status" class="muted">Idle</div>
+        </div>
+      </main>
+
+      <!-- Right: filenames + single downloads -->
+      <aside class="panel">
+        <h3 style="margin:0 0 8px 0">Actions</h3>
+        <div class="controls" style="margin-bottom:8px">
+          <button id="downloadCurrent" class="btn small">Download current</button>
+        </div>
+
+        <div style="margin:8px 0">
+          <label class="muted">File name pattern</label>
+          <input id="namePattern" type="text" value="image-{i}" style="width:100%;margin-top:6px">
+          <div class="muted" style="font-size:12px;margin-top:6px">Use <code>{i}</code> for index, <code>{n}</code> for total.</div>
+        </div>
+
+        <div style="margin:8px 0">
+          <label class="muted">Manual range</label>
+          <input id="rangeInput" type="text" placeholder="e.g. 1-3,5,7-9" style="width:100%;margin-top:6px">
+          <button id="applyRange" class="btn small" style="margin-top:6px">Apply range</button>
+        </div>
+
+        <div>
+          <div class="muted">Converted images</div>
+          <div id="convertedList" class="list" style="margin-top:8px">
+            <div class="muted">Nothing converted yet.</div>
+          </div>
+        </div>
+      </aside>
     </div>
   </div>
-  <div class="right">
-    <a href="../../index.html">← Back to Home</a>
-  </div>
-</header>
 
-<div class="wrap">
-  <div class="grid">
-    <!-- LEFT: files & list -->
-    <aside class="panel left" id="leftPanel">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <strong>Images</strong>
-        <div class="muted" id="countLabel">0</div>
-      </div>
-      <div class="controls" style="margin-bottom:10px">
-        <label class="inputbtn">
-          <i class="fa fa-file-image"></i> Select images
-          <input id="fileInput" type="file" accept="image/*" multiple>
-        </label>
-        <button id="clearBtn" class="btn small">Clear</button>
-      </div>
-      <div id="dropzone" class="dropzone">Drag & drop images here</div>
-      <div class="muted" style="margin:8px 0">Tip: You can drag to reorder. Click an item to preview.</div>
-      <div id="list"></div>
-    </aside>
+  <!-- ============== Libraries ============== -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
-    <!-- CENTER: preview & options -->
-    <main class="panel" style="display:flex;flex-direction:column;gap:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
-        <div class="controls">
-          <div class="muted">Format</div>
-          <select id="formatSel" style="margin-left:6px">
-            <option value="png">PNG (lossless)</option>
-            <option value="jpeg">JPG (smaller)</option>
-          </select>
+  <!-- ============== App Script ============== -->
+  <script>
+  // ========= Elements =========
+  const fileInput = document.getElementById('fileInput');
+  const dropzone  = document.getElementById('dropzone');
+  const thumbs    = document.getElementById('thumbs');
+  const countLbl  = document.getElementById('countLbl');
+  const preview   = document.getElementById('preview');
+  const placeholder = document.getElementById('stagePlaceholder');
 
-          <div class="muted" style="margin-left:12px">Quality</div>
-          <input id="quality" type="range" min="30" max="100" value="92" style="width:120px;margin-left:6px">
-          <span id="qualityLabel" class="muted">92</span>
+  const formatSel = document.getElementById('formatSel');
+  const quality   = document.getElementById('quality');
+  const qLbl      = document.getElementById('qLbl');
+  const bgColor   = document.getElementById('bgColor');
 
-          <div class="muted" style="margin-left:12px">Scale</div>
-          <select id="scaleSel" style="margin-left:6px">
-            <option value="1">1× (original)</option>
-            <option value="0.5">0.5×</option>
-            <option value="1.5">1.5×</option>
-            <option value="2">2×</option>
-            <option value="3">3×</option>
-          </select>
+  const checkAll  = document.getElementById('checkAll');
+  const invertBtn = document.getElementById('invertBtn');
+  const rangeBtn  = document.getElementById('rangeBtn');
 
-          <div class="muted" style="margin-left:12px">Background</div>
-          <input id="bgColor" type="color" value="#ffffff" title="Fill color for JPG / also for PNG if you want solid bg">
-        </div>
+  const convertBtn = document.getElementById('convertBtn');
+  const zipBtn     = document.getElementById('zipBtn');
+  const downloadCurrent = document.getElementById('downloadCurrent');
 
-        <div class="controls">
-          <button id="convertBtn" class="btn primary"><i class="fa fa-wand-magic-sparkles"></i> Convert</button>
-          <button id="downloadZipBtn" class="btn small"><i class="fa fa-file-zipper"></i> Download ZIP</button>
-        </div>
-      </div>
+  const namePattern = document.getElementById('namePattern');
+  const rangeInput  = document.getElementById('rangeInput');
+  const applyRange  = document.getElementById('applyRange');
 
-      <div class="stage" id="stage">
-        <div id="placeholder">
-          <div style="font-size:18px;margin-bottom:8px">Preview</div>
-          <div class="muted">Select or drop images to start. Click an item in the list to preview.</div>
-        </div>
-        <img id="preview" class="hidden" alt="preview">
-      </div>
+  const convertedList = document.getElementById('convertedList');
+  const bar = document.getElementById('bar');
+  const status = document.getElementById('status');
+  const clearBtn = document.getElementById('clearBtn');
 
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-        <div class="muted">File name pattern:  
-          <input id="namePattern" type="text" value="{name}-{i}" style="margin-left:6px;width:240px">
-          <span class="muted" style="font-size:12px">Use <code>{i}</code> index, <code>{name}</code> original name (no ext).</span>
-        </div>
-        <div class="muted" id="status">Idle</div>
-      </div>
-    </main>
+  // ========= State =========
+  /**
+   * filesArr: [{file, name, url, w, h, selected, outBlob?}]
+   */
+  let filesArr = [];
+  let currentIndex = -1; // index in filesArr of last previewed item
 
-    <!-- RIGHT: per-file actions -->
-    <aside class="panel">
-      <h3 style="margin:0 0 8px 0">Downloads</h3>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-        <button id="downloadCurrentBtn" class="btn small">Download current</button>
-        <button id="downloadAllBtn" class="btn small">Download all</button>
-      </div>
-      <div id="convertedList" style="max-height:360px;overflow:auto"></div>
-      <hr style="border:none;border-top:1px solid var(--outline);margin:12px 0">
-      <div class="muted" style="font-size:12px">
-        Notes: JPG doesn’t support transparency; we fill transparent regions with the chosen Background color.  
-        HEIC/HEIF support depends on the browser.
-      </div>
-    </aside>
-  </div>
-</div>
-
-<!-- libs -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-
-<script>
-/* ============ State ============ */
-const els = {
-  file: qs('#fileInput'), drop: qs('#dropzone'), list: qs('#list'), count: qs('#countLabel'),
-  format: qs('#formatSel'), quality: qs('#quality'), qLabel: qs('#qualityLabel'),
-  scale: qs('#scaleSel'), bg: qs('#bgColor'),
-  preview: qs('#preview'), placeholder: qs('#placeholder'), stage: qs('#stage'),
-  status: qs('#status'), namePattern: qs('#namePattern'),
-  convert: qs('#convertBtn'), dlZip: qs('#downloadZipBtn'),
-  dlCurrent: qs('#downloadCurrentBtn'), dlAll: qs('#downloadAllBtn'),
-  clear: qs('#clearBtn'), convList: qs('#convertedList')
-};
-const items = []; // {id, file, name, type, size, dataURL, imgBitmap}
-let current = null; // id of current preview
-const converted = new Map(); // id -> {blob, name}
-
-/* ============ Helpers ============ */
-function qs(s){return document.querySelector(s)}
-function human(n){
-  const i = n===0?0:Math.floor(Math.log(n)/Math.log(1024));
-  const v = (n/Math.pow(1024,i)).toFixed( (i?1:0) );
-  return v+' '+['B','KB','MB','GB'][i];
-}
-function extOf(fmt){ return fmt==='jpeg' ? 'jpg' : 'png'; }
-function baseName(filename){ return filename.replace(/\.[^.]+$/,''); }
-function setStatus(t){ els.status.textContent=t; }
-function showPreview(url){
-  els.preview.src=url; els.preview.classList.remove('hidden'); els.placeholder.classList.add('hidden');
-}
-
-/* ============ Load files ============ */
-els.file.addEventListener('change', (e)=> handleFiles(e.target.files));
-els.drop.addEventListener('dragover', e=>{ e.preventDefault(); els.drop.classList.add('dragover'); });
-els.drop.addEventListener('dragleave', ()=> els.drop.classList.remove('dragover'));
-els.drop.addEventListener('drop', e=>{
-  e.preventDefault(); els.drop.classList.remove('dragover');
-  handleFiles(e.dataTransfer.files);
-});
-
-async function handleFiles(fileList){
-  const files = Array.from(fileList).filter(f=>/^image\//i.test(f.type));
-  if(!files.length) return;
-  setStatus('Loading '+files.length+' image(s)...');
-  for(const f of files){
-    const id = crypto.randomUUID();
-    const dataURL = await readAsDataURL(f);
-    // Try to keep EXIF orientation via createImageBitmap (if supported)
-    let imgBitmap=null;
-    try{ imgBitmap = await createImageBitmap(await f.arrayBuffer? new Blob([new Uint8Array(await f.arrayBuffer())], {type:f.type}):f, {imageOrientation:'from-image'}); }catch(_){}
-    const it = {id, file:f, name:f.name, type:f.type, size:f.size, dataURL, imgBitmap};
-    items.push(it);
-    addListItem(it);
-    if(!current){ current=id; showPreview(dataURL); }
+  // ========= Helpers =========
+  const extFromMime = mime => mime?.split('/')[1] || 'png';
+  function toDataURL(file){
+    return new Promise((resolve,reject)=>{
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
   }
-  els.count.textContent = items.length;
-  setStatus('Ready');
-}
-
-function readAsDataURL(file){
-  return new Promise((res,rej)=>{
-    const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file);
-  });
-}
-
-/* ============ List UI ============ */
-function addListItem(it){
-  const row=document.createElement('div'); row.className='item'; row.draggable=true; row.dataset.id=it.id;
-
-  const th=document.createElement('div'); th.className='thumb';
-  const img=new Image(); img.src=it.dataURL; th.appendChild(img);
-
-  const mid=document.createElement('div');
-  const nm=document.createElement('div'); nm.className='name'; nm.textContent=it.name;
-  const sz=document.createElement('div'); sz.className='size'; sz.textContent=human(it.size);
-  mid.appendChild(nm); mid.appendChild(sz);
-
-  const act=document.createElement('div'); act.className='actions';
-  const openBtn=document.createElement('button'); openBtn.className='btn small'; openBtn.textContent='Preview';
-  openBtn.onclick=()=>{ current=it.id; showPreview(it.dataURL); };
-
-  const rmBtn=document.createElement('button'); rmBtn.className='btn small'; rmBtn.innerHTML='<i class="fa fa-trash"></i>';
-  rmBtn.onclick=()=> removeItem(it.id);
-
-  act.appendChild(openBtn); act.appendChild(rmBtn);
-
-  row.appendChild(th); row.appendChild(mid); row.appendChild(act);
-  row.addEventListener('dragstart', onDragStart);
-  row.addEventListener('dragover', onDragOver);
-  row.addEventListener('drop', onDrop);
-  row.addEventListener('dragend', onDragEnd);
-
-  els.list.appendChild(row);
-}
-
-function removeItem(id){
-  const idx=items.findIndex(x=>x.id===id); if(idx<0) return;
-  items.splice(idx,1);
-  els.list.querySelector(`[data-id="${id}"]`)?.remove();
-  converted.delete(id);
-  if(current===id){
-    current = items[0]?.id || null;
-    if(current) showPreview(items[0].dataURL); else { els.preview.classList.add('hidden'); els.placeholder.classList.remove('hidden'); }
+  function parseRange(str, max){
+    const out = new Set();
+    str.split(',').map(s=>s.trim()).forEach(part=>{
+      if(!part) return;
+      if(part.includes('-')){
+        let [a,b] = part.split('-').map(x=>parseInt(x,10));
+        if(isNaN(a) || isNaN(b)) return;
+        a = Math.max(1,a); b = Math.min(max,b);
+        for(let i=a;i<=b;i++) out.add(i);
+      } else {
+        const n = parseInt(part,10);
+        if(!isNaN(n) && n>=1 && n<=max) out.add(n);
+      }
+    });
+    return out;
   }
-  els.count.textContent = items.length;
-  renderConvertedList();
-}
+  function setProgress(p){ bar.style.width = Math.max(0, Math.min(100, p)) + '%'; }
+  function setStatus(msg){ status.textContent = msg; }
+  function resetProgress(){ setProgress(0); setStatus('Idle'); }
 
-/* Drag reorder */
-let dragId=null;
-function onDragStart(e){ dragId=e.currentTarget.dataset.id; e.currentTarget.classList.add('dragging'); }
-function onDragOver(e){ e.preventDefault(); const over=e.currentTarget; if(!dragId || over.dataset.id===dragId) return; }
-function onDrop(e){
-  e.preventDefault();
-  const targetId=e.currentTarget.dataset.id;
-  if(!dragId || targetId===dragId) return;
-  const a=items.findIndex(x=>x.id===dragId);
-  const b=items.findIndex(x=>x.id===targetId);
-  if(a<0||b<0) return;
-  const [m]=items.splice(a,1); items.splice(b,0,m);
-  // rebuild list DOM
-  els.list.innerHTML=''; items.forEach(addListItem);
-}
-function onDragEnd(e){ e.currentTarget.classList.remove('dragging'); dragId=null; }
-
-/* ============ Options bindings ============ */
-els.quality.addEventListener('input', ()=> els.qLabel.textContent = els.quality.value);
-
-/* ============ Convert ============ */
-els.convert.addEventListener('click', async ()=>{
-  if(items.length===0) return alert('Please add images first.');
-  setStatus('Converting '+items.length+' image(s)...');
-  converted.clear(); els.convList.innerHTML='';
-  for(let i=0;i<items.length;i++){
-    const it = items[i];
-    const out = await convertOne(it, i+1, items.length);
-    converted.set(it.id, out);
-    setStatus(`Converted ${i+1}/${items.length}`);
-  }
-  setStatus('Done');
-  renderConvertedList();
-});
-
-async function convertOne(it, idx, total){
-  const fmt=els.format.value; const ext=extOf(fmt);
-  const scale=parseFloat(els.scale.value)||1;
-  const color=els.bg.value;
-
-  // prepare image
-  const img = await loadImageForCanvas(it);
-  const w=Math.max(1, Math.round(img.width*scale));
-  const h=Math.max(1, Math.round(img.height*scale));
-
-  const cvs=document.createElement('canvas'); cvs.width=w; cvs.height=h;
-  const ctx=cvs.getContext('2d');
-
-  // Fill background for JPG (no alpha). Also allow user to force solid bg for PNG if desired.
-  if(fmt==='jpeg' || (fmt==='png' && color && color.toLowerCase()!=='#00000000')){
-    ctx.fillStyle=color; ctx.fillRect(0,0,w,h);
-  }
-  ctx.drawImage(img,0,0,w,h);
-
-  let blob;
-  if(fmt==='png'){
-    blob = await new Promise(res=> cvs.toBlob(res,'image/png'));
-  }else{
-    const q=Math.max(0.01, +els.quality.value/100);
-    blob = await new Promise(res=> cvs.toBlob(res,'image/jpeg', q));
-  }
-
-  const namePat = els.namePattern.value || '{name}-{i}';
-  const safeBase = baseName(it.name).replace(/[^\w\-]+/g,'_') || 'image';
-  const filename = namePat.replace('{i}', idx).replace('{n}', total).replace('{name}', safeBase) + '.' + ext;
-
-  return { blob, filename, url: URL.createObjectURL(blob) };
-}
-
-// Prefer ImageBitmap (honors EXIF orientation in many browsers), fallback to HTMLImageElement.
-async function loadImageForCanvas(it){
-  if(it.imgBitmap){ return it.imgBitmap; }
-  return new Promise((res,rej)=>{
-    const img=new Image();
-    img.onload=()=>res(img);
-    img.onerror=rej;
-    img.src=it.dataURL;
-  });
-}
-
-/* ============ Preview current as converted (quick view) ============ */
-els.list.addEventListener('click', (e)=>{
-  const row=e.target.closest('.item'); if(!row) return;
-  const id=row.dataset.id;
-  const it=items.find(x=>x.id===id); if(!it) return;
-  current=id; showPreview(it.dataURL);
-});
-
-/* ============ Download actions ============ */
-els.dlCurrent.addEventListener('click', async ()=>{
-  if(!current){ return alert('Select an image from the list first.'); }
-  // ensure converted cache
-  if(!converted.has(current)){
-    const idx = items.findIndex(x=>x.id===current);
-    const out = await convertOne(items[idx], idx+1, items.length);
-    converted.set(current, out); renderConvertedList();
-  }
-  const out = converted.get(current);
-  saveAs(out.blob, out.filename);
-});
-
-els.dlAll.addEventListener('click', async ()=>{
-  if(items.length===0) return alert('No images.');
-  // convert all if needed then download one by one
-  for(let i=0;i<items.length;i++){
-    const it = items[i];
-    if(!converted.has(it.id)){
-      const out = await convertOne(it, i+1, items.length);
-      converted.set(it.id, out);
+  // ========= UI Rendering =========
+  function renderThumbs(){
+    thumbs.innerHTML = '';
+    if(filesArr.length===0){
+      thumbs.innerHTML = '<div class="muted">Upload images to see thumbnails.</div>';
+      countLbl.textContent = '0';
+      return;
     }
-    const out = converted.get(it.id);
-    saveAs(out.blob, out.filename);
-  }
-});
+    countLbl.textContent = String(filesArr.length);
 
-els.dlZip.addEventListener('click', async ()=>{
-  if(items.length===0) return alert('No images to zip.');
-  setStatus('Preparing ZIP...');
-  const zip=new JSZip();
-  // ensure all converted
-  for(let i=0;i<items.length;i++){
-    const it = items[i];
-    if(!converted.has(it.id)){
-      const out = await convertOne(it, i+1, items.length);
-      converted.set(it.id, out);
+    filesArr.forEach((it, idx)=>{
+      const card = document.createElement('div');
+      card.className = 'thumb';
+      const img = document.createElement('img');
+      img.src = it.url;
+      img.alt = it.name;
+
+      const row = document.createElement('div');
+      row.className = 'row';
+      const name = document.createElement('div');
+      name.className = 'name';
+      name.title = it.name;
+      name.textContent = it.name;
+
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = !!it.selected;
+      cb.addEventListener('change', e=>{
+        filesArr[idx].selected = e.target.checked;
+      });
+
+      row.appendChild(name);
+      row.appendChild(cb);
+      card.appendChild(img);
+      card.appendChild(row);
+
+      // clicking card (not checkbox) to preview
+      card.addEventListener('click', e=>{
+        if(e.target===cb) return;
+        previewIndex(idx);
+        // mark selected thumb
+        thumbs.querySelectorAll('.thumb').forEach(t=>t.classList.remove('selected'));
+        card.classList.add('selected');
+      });
+
+      thumbs.appendChild(card);
+    });
+  }
+
+  async function previewIndex(idx){
+    const it = filesArr[idx];
+    if(!it) return;
+    currentIndex = idx;
+    preview.src = it.url;
+    preview.classList.remove('hidden');
+    placeholder.classList.add('hidden');
+  }
+
+  function renderConvertedList(){
+    convertedList.innerHTML = '';
+    const done = filesArr.filter(f=>f.outBlob);
+    if(done.length===0){
+      convertedList.innerHTML = '<div class="muted">Nothing converted yet.</div>';
+      return;
     }
+    done.forEach((it, i)=>{
+      const row = document.createElement('div');
+      row.className='row';
+      const left = document.createElement('div');
+      left.textContent = it.outName || (it.name + '.out');
+      const right = document.createElement('div');
+      const b = document.createElement('button');
+      b.className='btn small';
+      b.textContent='Download';
+      b.addEventListener('click', ()=> saveBlob(it.outBlob, it.outName || 'image-'+i));
+      right.appendChild(b);
+      row.appendChild(left);
+      row.appendChild(right);
+      convertedList.appendChild(row);
+    });
   }
-  for(let i=0;i<items.length;i++){
-    const it = items[i]; const out=converted.get(it.id);
-    zip.file(out.filename, out.blob);
-  }
-  const blob = await zip.generateAsync({type:'blob'});
-  saveAs(blob, 'images.zip');
-  setStatus('ZIP ready');
-});
 
-/* ============ Converted list UI ============ */
-function renderConvertedList(){
-  els.convList.innerHTML='';
-  const order = items.map(x=>x.id).filter(id=>converted.has(id));
-  if(order.length===0){ els.convList.innerHTML='<div class="muted">No converted files yet</div>'; return; }
-  order.forEach(id=>{
-    const it = items.find(x=>x.id===id), out = converted.get(id);
-    const row=document.createElement('div'); row.className='list-row';
-    const left=document.createElement('div'); left.textContent = out.filename;
-    const right=document.createElement('div');
-    const a=document.createElement('button'); a.className='btn small'; a.textContent='Download';
-    a.onclick=()=> saveAs(out.blob, out.filename);
-    right.appendChild(a);
-    row.appendChild(left); row.appendChild(right);
-    els.convList.appendChild(row);
+  function saveBlob(blob, name){
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+  }
+
+  // ========= File Intake =========
+  fileInput.addEventListener('change', async (e)=>{
+    await addFiles(e.target.files);
+    fileInput.value = ''; // allow re-adding same files
   });
-}
 
-/* ============ Clear ============ */
-els.clear.addEventListener('click', ()=>{
-  items.splice(0, items.length);
-  els.list.innerHTML=''; els.count.textContent='0';
-  converted.clear(); els.convList.innerHTML='';
-  current=null; els.preview.classList.add('hidden'); els.placeholder.classList.remove('hidden');
-  qs('#fileInput').value='';
-  setStatus('Cleared');
-});
+  dropzone.addEventListener('dragover', e=>{
+    e.preventDefault(); dropzone.classList.add('drag');
+  });
+  dropzone.addEventListener('dragleave', ()=> dropzone.classList.remove('drag'));
+  dropzone.addEventListener('drop', async e=>{
+    e.preventDefault(); dropzone.classList.remove('drag');
+    if(e.dataTransfer?.files) await addFiles(e.dataTransfer.files);
+  });
 
-/* ============ Small saveAs helper (FileSaver fallback) ============ */
-function saveAs(blob, name){
-  if(window.saveAs){ window.saveAs(blob, name); return; }
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
-}
-</script>
+  async function addFiles(fileList){
+    if(!fileList || fileList.length===0) return;
+    setStatus('Reading files...');
+    for(const f of fileList){
+      if(!f.type.startsWith('image/')) continue;
+      const url = await toDataURL(f);
+      const img = await loadImage(url); // to capture natural size
+      filesArr.push({
+        file: f,
+        name: f.name,
+        type: f.type,
+        url,
+        w: img.naturalWidth,
+        h: img.naturalHeight,
+        selected: true,
+        outBlob: null,
+        outName: null
+      });
+    }
+    renderThumbs();
+    if(currentIndex===-1 && filesArr.length>0) previewIndex(0);
+    setStatus('Ready');
+  }
+
+  function loadImage(src){
+    return new Promise((res,rej)=>{
+      const im = new Image();
+      im.onload = ()=> res(im);
+      im.onerror = rej;
+      im.src = src;
+    });
+  }
+
+  // ========= Selection Controls =========
+  checkAll.addEventListener('change', e=>{
+    const on = e.target.checked;
+    filesArr.forEach(f=>f.selected=on);
+    renderThumbs();
+  });
+  invertBtn.addEventListener('click', ()=>{
+    filesArr.forEach(f=>f.selected = !f.selected);
+    renderThumbs();
+  });
+  rangeBtn.addEventListener('click', ()=>{
+    if(filesArr.length===0) return;
+    const r = prompt('Enter range to select (e.g. 1-3,5):', '1-' + Math.min(3, filesArr.length));
+    if(!r) return;
+    const set = parseRange(r, filesArr.length);
+    filesArr.forEach((f,i)=> f.selected = set.has(i+1));
+    renderThumbs();
+  });
+
+  applyRange.addEventListener('click', ()=>{
+    const r = rangeInput.value.trim();
+    if(!r) return alert('Enter a range like 1-3,5');
+    const set = parseRange(r, filesArr.length);
+    filesArr.forEach((f,i)=> f.selected = set.has(i+1));
+    renderThumbs();
+  });
+
+  // ========= Options Handlers =========
+  quality.addEventListener('input', ()=> qLbl.textContent = quality.value);
+  formatSel.addEventListener('change', ()=>{
+    const isJpeg = formatSel.value==='jpeg';
+    // show/hide JPEG-related controls (quality & bg color are still useful for png? mostly jpeg)
+    // keep UI simple: just leave them visible; but we can change status hint
+    setStatus(isJpeg ? 'JPG selected (uses chosen quality & background)' : 'PNG selected (lossless, ignores background)');
+  });
+
+  // ========= Conversion =========
+  convertBtn.addEventListener('click', async ()=>{
+    if(filesArr.length===0) return alert('Add images first.');
+    const targets = filesArr.map((f,i)=>({f,i})).filter(x=>x.f.selected);
+    if(targets.length===0) return alert('Select at least one image.');
+
+    const fmt = formatSel.value; // 'png' | 'jpeg'
+    const q = Math.max(0.01, quality.value/100);
+    const bg = bgColor.value;
+
+    // determinate progress
+    setProgress(0);
+    setStatus('Converting...');
+    let done=0;
+
+    // process sequentially to avoid spikes
+    for(const t of targets){
+      try{
+        const out = await convertImageDataURL(t.f.url, fmt, q, bg);
+        const blob = dataURLToBlob(out);
+        const outName = makeName(namePattern.value || 'image-{i}', t.i+1, filesArr.length, fmt);
+        filesArr[t.i].outBlob = blob;
+        filesArr[t.i].outName = outName;
+        // update preview if current
+        if(t.i===currentIndex){
+          preview.src = out;
+          preview.classList.remove('hidden'); placeholder.classList.add('hidden');
+        }
+      }catch(err){
+        console.error('Convert error:', err);
+      }
+      done++;
+      setProgress(Math.round((done/targets.length)*100));
+      setStatus(`Converted ${done}/${targets.length}`);
+      // allow UI to update
+      await tick();
+    }
+    renderConvertedList();
+    setStatus('Finished');
+  });
+
+  // Convert one image (dataURL) to desired format using canvas.
+  async function convertImageDataURL(dataURL, fmt, q, bg){
+    const img = await loadImage(dataURL);
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const ct = c.getContext('2d');
+
+    // For JPG: fill background (since JPG has no alpha). For PNG: keep transparency.
+    if(fmt==='jpeg'){
+      ct.fillStyle = bg || '#ffffff';
+      ct.fillRect(0,0,c.width,c.height);
+    } else {
+      // ensure transparency preserved (canvas is transparent by default)
+      ct.clearRect(0,0,c.width,c.height);
+    }
+    ct.drawImage(img,0,0);
+
+    if(fmt==='png') return c.toDataURL('image/png');
+    // jpeg
+    return c.toDataURL('image/jpeg', q);
+  }
+
+  function dataURLToBlob(dataURL){
+    const [meta, b64] = dataURL.split(',');
+    const mime = (meta.match(/:(.*?);/)||[])[1] || 'image/png';
+    const bin = atob(b64); const len = bin.length;
+    const u8 = new Uint8Array(len);
+    for(let i=0;i<len;i++) u8[i] = bin.charCodeAt(i);
+    return new Blob([u8], {type: mime});
+  }
+
+  function makeName(pattern, i, n, fmt){
+    // preserve extension from selection
+    const ext = fmt==='jpeg' ? 'jpg' : 'png';
+    return pattern.replace('{i}', i).replace('{n}', n) + '.' + ext;
+  }
+
+  function tick(){ return new Promise(r=>setTimeout(r, 0)); }
+
+  // ========= Downloads =========
+  downloadCurrent.addEventListener('click', async ()=>{
+    if(currentIndex<0){ alert('Open a preview first.'); return; }
+    const it = filesArr[currentIndex];
+    // If already converted with current settings, use that
+    const fmt = formatSel.value;
+    const wantExt = (fmt==='jpeg')?'jpg':'png';
+    const has = it.outBlob && (it.outName?.toLowerCase().endsWith('.'+wantExt));
+    if(has){
+      saveBlob(it.outBlob, it.outName);
+      return;
+    }
+    // quick-convert and download
+    const out = await convertImageDataURL(it.url, fmt, Math.max(0.01, quality.value/100), bgColor.value);
+    const blob = dataURLToBlob(out);
+    const name = makeName(namePattern.value || 'image-{i}', currentIndex+1, filesArr.length, fmt);
+    saveBlob(blob, name);
+  });
+
+  zipBtn.addEventListener('click', async ()=>{
+    const done = filesArr.filter(f=>f.outBlob);
+    if(done.length===0){
+      const go = confirm('No converted images found. Convert all selected now?');
+      if(!go) return;
+      convertBtn.click();
+      return;
+    }
+    setStatus('Preparing ZIP...');
+    const zip = new JSZip();
+    done.forEach(it=> zip.file(it.outName || 'image', it.outBlob));
+    const blob = await zip.generateAsync({type:'blob'});
+    saveAs(blob, 'images.zip');
+    setStatus('ZIP ready');
+  });
+
+  // ========= Clear / Reset =========
+  clearBtn.addEventListener('click', ()=>{
+    filesArr = []; currentIndex=-1;
+    preview.classList.add('hidden'); placeholder.classList.remove('hidden');
+    convertedList.innerHTML = '<div class="muted">Nothing converted yet.</div>';
+    fileInput.value='';
+    renderThumbs();
+    resetProgress();
+  });
+
+  // ========= Init =========
+  qLbl.textContent = quality.value;
+  setStatus('Idle');
+
+  </script>
 </body>
 </html>
