@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- SEO -->
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>JPG to PNG Converter — Free Online Tool | Smarttool Hub</title>
+  <meta name="description" content="Free online JPG to PNG converter. Upload multiple JPG images, convert instantly to PNG, preview, and download. 100% client-side, no uploads needed.">
+  <meta name="keywords" content="jpg to png, convert jpg to png, image converter, online converter, smarttool hub, image tools"/>
+  <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/toolbox.png"/>
+
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#9aa8bf; --text:#e6eef8;
+      --pri1:#6366f1; --pri2:#0ea5e9; --outline:rgba(255,255,255,.08);
+    }
+    body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    header{position:sticky;top:0;z-index:10;background:linear-gradient(90deg,var(--pri1),var(--pri2));
+      padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+    header h1{margin:0;font-size:18px}
+    header .right a{background:#fff;color:#111;padding:6px 10px;border-radius:8px;font-weight:700;text-decoration:none}
+    .wrap{max-width:1000px;margin:20px auto;padding:12px}
+    .panel{background:var(--card);border:1px solid var(--outline);border-radius:14px;padding:12px}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .btn{background:#fff;color:#111;border:none;padding:8px 12px;border-radius:10px;font-weight:600;cursor:pointer}
+    .btn.small{padding:6px 8px;font-size:13px}
+    input[type=file]{display:none}
+    label.inputbtn{border:1px dashed var(--outline);padding:8px 12px;border-radius:10px;cursor:pointer}
+    .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+    .thumb{background:#fff;border-radius:10px;overflow:hidden;border:1px solid #ddd;cursor:pointer}
+    .thumb img{width:100%;display:block}
+    .stage{margin-top:12px;border:1px solid var(--outline);border-radius:12px;min-height:380px;display:flex;align-items:center;justify-content:center;background:#0a0f1a}
+    #preview{max-width:100%;height:auto;display:none}
+    .progress{height:12px;background:#0d1626;border-radius:999px;overflow:hidden;border:1px solid var(--outline);margin-top:12px}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,var(--pri1),var(--pri2));transition:width .2s}
+    .muted{color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <h1>JPG → PNG Converter</h1>
+    <div class="right">
+      <a href="../../index.html">← Back to Home</a>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <div class="wrap">
+    <div class="panel">
+      <div class="controls">
+        <label class="inputbtn">
+          Select JPG images
+          <input id="fileInput" type="file" accept="image/jpeg" multiple>
+        </label>
+        <button id="clearBtn" class="btn small">Clear</button>
+        <button id="convertBtn" class="btn">Convert to PNG</button>
+        <button id="zipBtn" class="btn small">Download ZIP</button>
+      </div>
+
+      <div id="thumbs" class="thumbs">
+        <div class="muted">Upload JPG images to start.</div>
+      </div>
+
+      <div class="stage">
+        <img id="preview" alt="Preview">
+        <div id="placeholder" class="muted">Preview will appear here</div>
+      </div>
+
+      <div class="progress"><div id="bar" class="bar"></div></div>
+      <div id="status" class="muted">Idle</div>
+    </div>
+  </div>
+
+  <!-- JSZip for ZIP downloads -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <script>
+    const fileInput=document.getElementById('fileInput');
+    const thumbs=document.getElementById('thumbs');
+    const preview=document.getElementById('preview');
+    const placeholder=document.getElementById('placeholder');
+    const convertBtn=document.getElementById('convertBtn');
+    const zipBtn=document.getElementById('zipBtn');
+    const clearBtn=document.getElementById('clearBtn');
+    const bar=document.getElementById('bar');
+    const status=document.getElementById('status');
+
+    let filesArr=[]; // {file,url,outBlob,outName}
+
+    fileInput.addEventListener('change',async e=>{
+      for(const f of e.target.files){
+        if(!f.type.includes('jpeg')) continue;
+        const url=URL.createObjectURL(f);
+        filesArr.push({file:f,url,outBlob:null,outName:null});
+      }
+      renderThumbs();
+    });
+
+    function renderThumbs(){
+      thumbs.innerHTML='';
+      if(filesArr.length===0){
+        thumbs.innerHTML='<div class="muted">Upload JPG images to start.</div>';
+        return;
+      }
+      filesArr.forEach((it,i)=>{
+        const card=document.createElement('div');
+        card.className='thumb';
+        const img=document.createElement('img');
+        img.src=it.url;
+        card.appendChild(img);
+        card.addEventListener('click',()=>{
+          preview.src=it.url;
+          preview.style.display='block';
+          placeholder.style.display='none';
+        });
+        thumbs.appendChild(card);
+      });
+    }
+
+    convertBtn.addEventListener('click',async()=>{
+      if(filesArr.length===0) return alert("Upload JPG first!");
+      let done=0;
+      for(const [i,it] of filesArr.entries()){
+        const out=await convertJPGtoPNG(it.url);
+        const blob=dataURLtoBlob(out);
+        it.outBlob=blob;
+        it.outName=it.file.name.replace(/\.jpe?g$/i,'')+'.png';
+        done++;
+        bar.style.width=(done/filesArr.length*100)+'%';
+        status.textContent=`Converted ${done}/${filesArr.length}`;
+      }
+      status.textContent='Conversion complete';
+    });
+
+    function convertJPGtoPNG(url){
+      return new Promise((res,rej)=>{
+        const img=new Image();
+        img.onload=()=>{
+          const c=document.createElement('canvas');
+          c.width=img.naturalWidth;c.height=img.naturalHeight;
+          const ctx=c.getContext('2d');
+          ctx.drawImage(img,0,0);
+          res(c.toDataURL('image/png'));
+        };
+        img.onerror=rej;
+        img.src=url;
+      });
+    }
+
+    function dataURLtoBlob(dataURL){
+      const [meta, b64]=dataURL.split(',');
+      const mime=(meta.match(/:(.*?);/)||[])[1]||'image/png';
+      const bin=atob(b64);const len=bin.length;const u8=new Uint8Array(len);
+      for(let i=0;i<len;i++)u8[i]=bin.charCodeAt(i);
+      return new Blob([u8],{type:mime});
+    }
+
+    zipBtn.addEventListener('click',async()=>{
+      const ready=filesArr.filter(f=>f.outBlob);
+      if(ready.length===0){alert("Convert first!");return;}
+      const zip=new JSZip();
+      ready.forEach(f=>zip.file(f.outName,f.outBlob));
+      const blob=await zip.generateAsync({type:'blob'});
+      saveAs(blob,'converted-images.zip');
+    });
+
+    clearBtn.addEventListener('click',()=>{
+      filesArr=[];thumbs.innerHTML='<div class="muted">Upload JPG images to start.</div>';
+      preview.style.display='none';placeholder.style.display='block';
+      bar.style.width='0%';status.textContent='Idle';fileInput.value='';
+    });
+  </script>
+</body>
+</html>
