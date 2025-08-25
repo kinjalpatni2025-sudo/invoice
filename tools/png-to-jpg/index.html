@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- ========== SEO BASICS ========== -->
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>PNG to JPG Converter — Free Online Tool | Smarttool Hub</title>
+  <meta name="description" content="Convert PNG to JPG instantly in your browser. Upload multiple PNGs, pick quality and background color, preview, and download single files or a ZIP. 100% client-side.">
+  <meta name="keywords" content="png to jpg, convert png to jpg, image converter, online jpg converter, transparent png to jpg"/>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/toolbox.png"/>
+
+  <!-- ========== FAQ SCHEMA (SEO) ========== -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is this PNG to JPG converter free?",
+        "acceptedAnswer": {"@type": "Answer","text": "Yes. It’s completely free and runs in your browser—no sign-up, no uploads."}
+      },
+      {
+        "@type": "Question",
+        "name": "Are my images private?",
+        "acceptedAnswer": {"@type": "Answer","text": "All processing happens locally in your browser. Files are never uploaded to a server."}
+      },
+      {
+        "@type": "Question",
+        "name": "How do you handle transparency in PNGs?",
+        "acceptedAnswer": {"@type": "Answer","text": "JPG doesn't support transparency, so you can choose a background color to fill transparent areas."}
+      }
+    ]
+  }
+  </script>
+
+  <!-- ========== STYLES ========== -->
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#9aa8bf; --text:#e6eef8;
+      --pri1:#6366f1; --pri2:#0ea5e9; --outline:rgba(255,255,255,.08);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:inherit;text-decoration:none}
+
+    /* Header */
+    header{
+      position:sticky; top:0; z-index:50;
+      background:linear-gradient(90deg,var(--pri1),var(--pri2));
+      padding:12px 16px; display:flex; align-items:center; justify-content:space-between;
+      box-shadow:0 6px 20px rgba(0,0,0,.45);
+    }
+    header h1{margin:0;font-size:18px}
+    header .right a{background:#fff;color:#0b1220;padding:8px 10px;border-radius:10px;font-weight:700}
+
+    /* Shell */
+    .wrap{max-width:1100px;margin:18px auto;padding:12px}
+    .grid{display:grid;grid-template-columns:320px 1fr 320px;gap:12px}
+    .panel{background:var(--card);border:1px solid var(--outline);border-radius:14px;padding:12px;box-shadow:0 10px 28px rgba(0,0,0,.35)}
+    .muted{color:var(--muted);font-size:13px}
+
+    /* Buttons / inputs */
+    .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .btn{background:#fff;color:#0b1220;border:none;padding:8px 12px;border-radius:10px;font-weight:700;cursor:pointer}
+    .btn.ghost{background:transparent;border:1px solid var(--outline);color:var(--text)}
+    .btn.small{padding:6px 8px;font-size:13px}
+    label.inputbtn{display:inline-flex;align-items:center;gap:8px;border:1px dashed var(--outline);padding:8px 12px;border-radius:10px;cursor:pointer}
+    input[type=file]{display:none}
+    select,input[type="number"],input[type="range"],input[type="color"],input[type="text"]{
+      background:#0b1220;color:#e6eef8;border:1px solid var(--outline);padding:6px;border-radius:10px
+    }
+
+    /* Uploader / thumbs */
+    .drop{border:2px dashed var(--outline);border-radius:12px;padding:14px;text-align:center;margin:10px 0}
+    .drop.drag{border-color:var(--pri2);background:#0d1a2b}
+    .thumbs{display:grid;grid-template-columns:1fr;gap:10px;max-height:65vh;overflow:auto}
+    .thumb{background:#fff;color:#111;border-radius:10px;overflow:hidden;border:1px solid #e5e7eb;cursor:pointer}
+    .thumb img{width:100%;display:block}
+    .thumb .row{display:flex;justify-content:space-between;align-items:center;padding:8px}
+    .thumb .name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70%}
+    .thumb.selected{outline:2px solid var(--pri2)}
+
+    /* Stage */
+    .stage{position:relative;border:1px solid var(--outline);border-radius:12px;background:#0a0f1a;display:flex;align-items:center;justify-content:center;min-height:480px;overflow:hidden}
+    #preview{max-width:100%;height:auto;display:none}
+
+    /* Progress */
+    .progress{width:100%;height:12px;background:#0d1626;border-radius:999px;overflow:hidden;border:1px solid var(--outline)}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,var(--pri1),var(--pri2));transition:width .2s}
+
+    /* Right list */
+    .list{max-height:240px;overflow:auto;border:1px solid var(--outline);border-radius:10px;padding:8px}
+    .list .row{display:flex;justify-content:space-between;align-items:center;padding:6px 4px;border-bottom:1px dashed var(--outline)}
+    .list .row:last-child{border-bottom:none}
+
+    /* Responsive */
+    @media (max-width:1024px){
+      .grid{grid-template-columns:1fr}
+      .stage{min-height:380px}
+      .thumbs{max-height:240px}
+    }
+
+    /* SEO content */
+    section.seo h2{margin:.2rem 0 0.6rem}
+    section.seo{line-height:1.65}
+  </style>
+</head>
+<body>
+  <!-- ========== HEADER ========== -->
+  <header>
+    <h1>PNG → JPG Converter</h1>
+    <div class="right"><a href="../../index.html">← Back to Home</a></div>
+  </header>
+
+  <!-- ========== APP ========== -->
+  <div class="wrap">
+    <div class="grid">
+      <!-- Left: Files -->
+      <aside class="panel">
+        <div class="controls" style="justify-content:space-between;margin-bottom:8px">
+          <strong>Images</strong>
+          <span id="countLbl" class="muted">0</span>
+        </div>
+        <div class="controls">
+          <label class="inputbtn">
+            Select PNG images
+            <input id="fileInput" type="file" accept="image/png,image/*" multiple>
+          </label>
+          <button id="clearBtn" class="btn ghost small">Clear</button>
+        </div>
+        <div id="dropzone" class="drop muted">Drag & drop images here (PNG, WebP, etc.). PNG recommended.</div>
+
+        <div class="controls" style="margin:10px 0">
+          <label><input type="checkbox" id="checkAll"> Select all</label>
+          <button id="invertBtn" class="btn ghost small">Invert</button>
+          <button id="rangeBtn" class="btn ghost small">Select range</button>
+        </div>
+
+        <div id="thumbs" class="thumbs">
+          <div class="muted">Upload images to see thumbnails.</div>
+        </div>
+      </aside>
+
+      <!-- Center: Preview + Options -->
+      <main class="panel" style="display:flex;flex-direction:column;gap:12px">
+        <div class="controls" style="justify-content:space-between">
+          <div class="controls">
+            <span class="muted">Format:</span>
+            <strong style="margin-left:6px">JPG</strong>
+            <span class="muted" style="margin-left:12px">Quality</span>
+            <input id="quality" type="range" min="30" max="100" value="90" style="width:140px;margin-left:6px">
+            <span id="qLbl" class="muted">90</span>
+
+            <span class="muted" style="margin-left:12px">Background</span>
+            <input id="bgColor" type="color" value="#ffffff" title="Fill for transparent areas (JPG has no alpha)">
+          </div>
+          <div class="controls">
+            <button id="convertBtn" class="btn">Convert</button>
+            <button id="zipBtn" class="btn ghost small">Download ZIP</button>
+          </div>
+        </div>
+
+        <div class="stage">
+          <img id="preview" alt="Preview">
+          <div id="placeholder" class="muted">Preview will appear here</div>
+        </div>
+
+        <div style="display:flex;gap:12px;align-items:center">
+          <div class="progress" style="flex:1"><div id="bar" class="bar"></div></div>
+          <div id="status" class="muted">Idle</div>
+        </div>
+      </main>
+
+      <!-- Right: Actions -->
+      <aside class="panel">
+        <h3 style="margin:0 0 8px 0">Actions</h3>
+        <div class="controls" style="margin-bottom:8px">
+          <button id="downloadCurrent" class="btn ghost small">Download current</button>
+        </div>
+
+        <div style="margin:8px 0">
+          <label class="muted">File name pattern</label>
+          <input id="namePattern" type="text" value="image-{i}" style="width:100%;margin-top:6px">
+          <div class="muted" style="font-size:12px;margin-top:6px">Use <code>{i}</code> for index, <code>{n}</code> for total.</div>
+        </div>
+
+        <div style="margin:8px 0">
+          <label class="muted">Manual range</label>
+          <input id="rangeInput" type="text" placeholder="e.g. 1-3,5,7-9" style="width:100%;margin-top:6px">
+          <button id="applyRange" class="btn ghost small" style="margin-top:6px">Apply range</button>
+        </div>
+
+        <div>
+          <div class="muted">Converted images</div>
+          <div id="convertedList" class="list" style="margin-top:8px">
+            <div class="muted">Nothing converted yet.</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- SEO body content -->
+    <section class="panel seo" style="margin-top:16px">
+      <h2>Free Online PNG to JPG Converter</h2>
+      <p>Quickly transform PNG images into lightweight JPG files, right in your browser. Choose the quality level and background color to handle transparent PNGs cleanly—no installs and no uploads required.</p>
+
+      <h2>How to convert PNG to JPG?</h2>
+      <ol>
+        <li>Click <em>Select PNG images</em> or drag & drop files.</li>
+        <li>Pick <strong>Quality</strong> and a <strong>Background color</strong> for transparency.</li>
+        <li>Click <strong>Convert</strong> to process all selected images.</li>
+        <li>Download individual JPGs or <strong>Download ZIP</strong> for all.</li>
+      </ol>
+
+      <h2>Why use this tool?</h2>
+      <ul>
+        <li>⚡ Fast & private — 100% client-side.</li>
+        <li>🎯 Control quality and background fill.</li>
+        <li>📦 Bulk convert & ZIP download.</li>
+        <li>💻 Works on desktop & mobile.</li>
+      </ul>
+    </section>
+  </div>
+
+  <!-- ========== LIBS ========== -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+  <!-- ========== APP SCRIPT (Client-side only) ========== -->
+  <script>
+  // ---------- Elements ----------
+  const fileInput = document.getElementById('fileInput');
+  const dropzone  = document.getElementById('dropzone');
+  const thumbs    = document.getElementById('thumbs');
+  const countLbl  = document.getElementById('countLbl');
+  const preview   = document.getElementById('preview');
+  const placeholder = document.getElementById('placeholder');
+
+  const quality   = document.getElementById('quality');
+  const qLbl      = document.getElementById('qLbl');
+  const bgColor   = document.getElementById('bgColor');
+
+  const checkAll  = document.getElementById('checkAll');
+  const invertBtn = document.getElementById('invertBtn');
+  const rangeBtn  = document.getElementById('rangeBtn');
+
+  const convertBtn = document.getElementById('convertBtn');
+  const zipBtn     = document.getElementById('zipBtn');
+  const downloadCurrent = document.getElementById('downloadCurrent');
+
+  const namePattern = document.getElementById('namePattern');
+  const rangeInput  = document.getElementById('rangeInput');
+  const applyRange  = document.getElementById('applyRange');
+
+  const convertedList = document.getElementById('convertedList');
+  const bar = document.getElementById('bar');
+  const status = document.getElementById('status');
+  const clearBtn = document.getElementById('clearBtn');
+
+  // ---------- State ----------
+  /**
+   * filesArr: [{file, name, url, selected, outBlob?, outName?}]
+   */
+  let filesArr = [];
+  let currentIndex = -1;
+
+  // ---------- Helpers ----------
+  function toDataURL(file){
+    return new Promise((resolve,reject)=>{
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+  }
+  function loadImage(src){
+    return new Promise((res,rej)=>{
+      const im = new Image();
+      im.onload = ()=> res(im);
+      im.onerror = rej;
+      im.src = src;
+    });
+  }
+  function parseRange(str, max){
+    const out = new Set();
+    str.split(',').map(s=>s.trim()).forEach(part=>{
+      if(!part) return;
+      if(part.includes('-')){
+        let [a,b] = part.split('-').map(x=>parseInt(x,10));
+        if(isNaN(a)||isNaN(b)) return;
+        a = Math.max(1,a); b = Math.min(max,b);
+        for(let i=a;i<=b;i++) out.add(i);
+      }else{
+        const n = parseInt(part,10);
+        if(!isNaN(n) && n>=1 && n<=max) out.add(n);
+      }
+    });
+    return out;
+  }
+  function setProgress(p){ bar.style.width = Math.max(0, Math.min(100, p)) + '%'; }
+  function setStatus(msg){ status.textContent = msg; }
+  function resetProgress(){ setProgress(0); setStatus('Idle'); }
+
+  // ---------- Rendering ----------
+  function renderThumbs(){
+    thumbs.innerHTML = '';
+    countLbl.textContent = String(filesArr.length);
+    if(filesArr.length===0){
+      thumbs.innerHTML = '<div class="muted">Upload images to see thumbnails.</div>';
+      return;
+    }
+    filesArr.forEach((it, idx)=>{
+      const card = document.createElement('div');
+      card.className = 'thumb';
+      const img = document.createElement('img');
+      img.src = it.url;
+      img.alt = it.name;
+      const row = document.createElement('div');
+      row.className='row';
+      const name = document.createElement('div');
+      name.className='name';
+      name.textContent = it.name;
+      name.title = it.name;
+      const cb = document.createElement('input');
+      cb.type='checkbox'; cb.checked = !!it.selected;
+      cb.addEventListener('change', e=> filesArr[idx].selected = e.target.checked);
+      row.appendChild(name); row.appendChild(cb);
+      card.appendChild(img); card.appendChild(row);
+
+      card.addEventListener('click', e=>{
+        if(e.target===cb) return;
+        previewIndex(idx);
+        thumbs.querySelectorAll('.thumb').forEach(t=>t.classList.remove('selected'));
+        card.classList.add('selected');
+      });
+
+      thumbs.appendChild(card);
+    });
+  }
+
+  async function previewIndex(idx){
+    const it = filesArr[idx]; if(!it) return;
+    currentIndex = idx;
+    preview.src = it.url;
+    preview.style.display='block';
+    placeholder.style.display='none';
+  }
+
+  function renderConvertedList(){
+    convertedList.innerHTML='';
+    const done = filesArr.filter(f=>f.outBlob);
+    if(done.length===0){
+      convertedList.innerHTML = '<div class="muted">Nothing converted yet.</div>';
+      return;
+    }
+    done.forEach((it, i)=>{
+      const row = document.createElement('div'); row.className='row';
+      const left = document.createElement('div'); left.textContent = it.outName || ('image-'+(i+1)+'.jpg');
+      const right = document.createElement('div');
+      const b = document.createElement('button'); b.className='btn ghost small'; b.textContent='Download';
+      b.addEventListener('click', ()=> saveBlob(it.outBlob, it.outName || ('image-'+(i+1)+'.jpg')));
+      right.appendChild(b);
+      row.appendChild(left); row.appendChild(right);
+      convertedList.appendChild(row);
+    });
+  }
+
+  function saveBlob(blob, name){
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
+  }
+
+  // ---------- Intake ----------
+  fileInput.addEventListener('change', async (e)=>{
+    await addFiles(e.target.files);
+    fileInput.value = ''; // allow same files again
+  });
+
+  dropzone.addEventListener('dragover', e=>{ e.preventDefault(); dropzone.classList.add('drag'); });
+  dropzone.addEventListener('dragleave', ()=> dropzone.classList.remove('drag'));
+  dropzone.addEventListener('drop', async e=>{
+    e.preventDefault(); dropzone.classList.remove('drag');
+    if(e.dataTransfer?.files) await addFiles(e.dataTransfer.files);
+  });
+
+  async function addFiles(fileList){
+    if(!fileList || fileList.length===0) return;
+    setStatus('Reading files...');
+    for(const f of fileList){
+      if(!f.type.startsWith('image/')) continue; // accept images the browser can decode
+      const url = await toDataURL(f); // dataURL so canvas can read cross-origin safely
+      filesArr.push({file:f, name:f.name, url, selected:true, outBlob:null, outName:null});
+    }
+    renderThumbs();
+    if(currentIndex===-1 && filesArr.length>0) previewIndex(0);
+    setStatus('Ready');
+  }
+
+  // ---------- Selection tools ----------
+  checkAll.addEventListener('change', e=>{
+    const on = e.target.checked; filesArr.forEach(f=>f.selected=on); renderThumbs();
+  });
+  invertBtn.addEventListener('click', ()=>{ filesArr.forEach(f=>f.selected=!f.selected); renderThumbs(); });
+  rangeBtn.addEventListener('click', ()=>{
+    if(filesArr.length===0) return;
+    const r = prompt('Enter range to select (e.g. 1-3,5):', '1-' + Math.min(3, filesArr.length));
+    if(!r) return;
+    const set = parseRange(r, filesArr.length);
+    filesArr.forEach((f,i)=> f.selected = set.has(i+1));
+    renderThumbs();
+  });
+  applyRange.addEventListener('click', ()=>{
+    const r = (document.getElementById('rangeInput').value || '').trim();
+    if(!r) return alert('Enter a range like 1-3,5');
+    const set = parseRange(r, filesArr.length);
+    filesArr.forEach((f,i)=> f.selected = set.has(i+1));
+    renderThumbs();
+  });
+
+  // ---------- Options ----------
+  quality.addEventListener('input', ()=> qLbl.textContent = quality.value);
+  qLbl.textContent = quality.value;
+
+  // ---------- Conversion ----------
+  convertBtn.addEventListener('click', async ()=>{
+    if(filesArr.length===0) return alert('Add images first.');
+    const targets = filesArr.map((f,i)=>({f,i})).filter(x=>x.f.selected);
+    if(targets.length===0) return alert('Select at least one image.');
+
+    const q = Math.max(0.01, quality.value/100);
+    const bg = bgColor.value;
+
+    setProgress(0); setStatus('Converting...');
+    let done=0;
+
+    for(const t of targets){
+      try{
+        const out = await convertToJPG(t.f.url, q, bg);
+        const blob = dataURLToBlob(out);
+        const name = (namePattern.value || 'image-{i}').replace('{i}', t.i+1).replace('{n}', filesArr.length) + '.jpg';
+        filesArr[t.i].outBlob = blob;
+        filesArr[t.i].outName = name;
+
+        // If currently previewed, show converted result to user
+        if(t.i===currentIndex){ preview.src = out; preview.style.display='block'; placeholder.style.display='none'; }
+      }catch(err){ console.error('Convert error:', err); }
+      done++; setProgress(Math.round((done/targets.length)*100)); setStatus(`Converted ${done}/${targets.length}`);
+      await new Promise(r=>setTimeout(r,0)); // let UI breathe
+    }
+    renderConvertedList(); setStatus('Finished');
+  });
+
+  // Draw PNG to canvas, fill background, export JPG
+  async function convertToJPG(dataURL, q, bg){
+    const img = await loadImage(dataURL);
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const ctx = c.getContext('2d');
+
+    // Fill background first (handles transparency)
+    ctx.fillStyle = bg || '#ffffff';
+    ctx.fillRect(0,0,c.width,c.height);
+    ctx.drawImage(img,0,0);
+
+    return c.toDataURL('image/jpeg', q); // quality 0.01 - 1.0
+  }
+
+  function dataURLToBlob(dataURL){
+    const [meta, b64] = dataURL.split(',');
+    const mime = (meta.match(/:(.*?);/)||[])[1] || 'image/jpeg';
+    const bin = atob(b64); const len = bin.length; const u8 = new Uint8Array(len);
+    for(let i=0;i<len;i++) u8[i] = bin.charCodeAt(i);
+    return new Blob([u8], {type: mime});
+  }
+
+  // ---------- Single & ZIP Downloads ----------
+  downloadCurrent.addEventListener('click', async ()=>{
+    if(currentIndex<0){ alert('Open a preview first.'); return; }
+    const it = filesArr[currentIndex];
+    // If not converted yet with current options, quick-convert
+    if(!it.outBlob){
+      const out = await convertToJPG(it.url, Math.max(0.01, quality.value/100), bgColor.value);
+      it.outBlob = dataURLToBlob(out);
+      it.outName = (namePattern.value || 'image-{i}').replace('{i}', currentIndex+1).replace('{n}', filesArr.length) + '.jpg';
+    }
+    saveBlob(it.outBlob, it.outName);
+  });
+
+  zipBtn.addEventListener('click', async ()=>{
+    const ready = filesArr.filter(f=>f.outBlob);
+    if(ready.length===0){
+      const go = confirm('No converted images found. Convert all selected now?');
+      if(!go) return;
+      convertBtn.click();
+      return;
+    }
+    setStatus('Preparing ZIP...');
+    const zip = new JSZip();
+    ready.forEach(it=> zip.file(it.outName || 'image.jpg', it.outBlob));
+    const blob = await zip.generateAsync({type:'blob'});
+    saveAs(blob, 'images-jpg.zip');
+    setStatus('ZIP ready');
+  });
+
+  // ---------- Clear ----------
+  clearBtn.addEventListener('click', ()=>{
+    filesArr = []; currentIndex=-1;
+    preview.style.display='none'; placeholder.style.display='block';
+    convertedList.innerHTML = '<div class="muted">Nothing converted yet.</div>';
+    renderThumbs(); resetProgress(); fileInput.value='';
+  });
+
+  </script>
+</body>
+</html>
