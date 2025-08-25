@@ -4,9 +4,9 @@
   <!-- SEO -->
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Image Resize Tool — Free Online Resizer | Smarttool Hub</title>
-  <meta name="description" content="Resize images online for free. Upload, preview, and resize by width, height, or percentage. Download resized images individually or as a ZIP. 100% client-side.">
-  <meta name="keywords" content="image resize, resize image online, photo resizer, free image resize tool, compress resize tool"/>
+  <title>Crop Image Tool — Free Online Cropper | Smarttool Hub</title>
+  <meta name="description" content="Crop images online for free. Upload one or multiple images, select crop area, preview, and download cropped images instantly. Secure and 100% client-side.">
+  <meta name="keywords" content="crop image, crop multiple images, free image cropper, crop photos online, client-side crop tool"/>
 
   <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/toolbox.png"/>
 
@@ -18,18 +18,18 @@
     "mainEntity": [
       {
         "@type": "Question",
-        "name": "Is this image resizer free?",
-        "acceptedAnswer": {"@type": "Answer","text": "Yes, this tool is 100% free and runs in your browser."}
+        "name": "Is this crop tool free?",
+        "acceptedAnswer": {"@type": "Answer","text": "Yes, this crop tool is completely free and runs in your browser."}
       },
       {
         "@type": "Question",
-        "name": "Will my images be uploaded?",
-        "acceptedAnswer": {"@type": "Answer","text": "No, everything is processed locally in your browser. Your files remain private."}
+        "name": "Can I crop multiple images?",
+        "acceptedAnswer": {"@type": "Answer","text": "Yes, you can upload multiple images, crop them one by one, and download them individually or in a ZIP file."}
       },
       {
         "@type": "Question",
-        "name": "Can I resize multiple images at once?",
-        "acceptedAnswer": {"@type": "Answer","text": "Yes, you can upload multiple images and resize them all together."}
+        "name": "Are my images safe?",
+        "acceptedAnswer": {"@type": "Answer","text": "Yes. All cropping happens in your browser. Your files never leave your device."}
       }
     ]
   }
@@ -47,19 +47,20 @@
       padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
     header h1{margin:0;font-size:18px}
     header .right a{background:#fff;color:#0b1220;padding:6px 10px;border-radius:8px;font-weight:700;text-decoration:none}
-    .wrap{max-width:1000px;margin:20px auto;padding:12px}
+    .wrap{max-width:1100px;margin:20px auto;padding:12px}
     .panel{background:var(--card);border:1px solid var(--outline);border-radius:14px;padding:12px;margin-bottom:20px}
     .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
     .btn{background:#fff;color:#0b1220;border:none;padding:8px 12px;border-radius:10px;font-weight:700;cursor:pointer}
     .btn.small{padding:6px 8px;font-size:13px}
     label.inputbtn{border:1px dashed var(--outline);padding:8px 12px;border-radius:10px;cursor:pointer}
     input[type=file]{display:none}
-    input,select{background:#0b1220;color:#e6eef8;border:1px solid var(--outline);padding:6px;border-radius:8px}
-    .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
-    .thumb{background:#fff;border-radius:10px;overflow:hidden;border:1px solid #ddd;cursor:pointer}
+    .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:10px}
+    .thumb{background:#fff;border-radius:10px;overflow:hidden;border:2px solid transparent;cursor:pointer}
+    .thumb.active{border-color:#0ea5e9}
     .thumb img{width:100%;display:block}
-    .stage{margin-top:12px;border:1px solid var(--outline);border-radius:12px;min-height:380px;display:flex;align-items:center;justify-content:center;background:#0a0f1a}
-    #preview{max-width:100%;height:auto;display:none}
+    .stage{margin-top:12px;position:relative;border:1px solid var(--outline);border-radius:12px;min-height:400px;display:flex;align-items:center;justify-content:center;background:#0a0f1a;overflow:hidden}
+    #canvas{max-width:100%;display:none;cursor:crosshair}
+    .crop-rect{position:absolute;border:2px dashed #0ea5e9;background:rgba(14,165,233,0.2);display:none}
     .progress{height:12px;background:#0d1626;border-radius:999px;overflow:hidden;border:1px solid var(--outline);margin-top:12px}
     .bar{height:100%;width:0;background:linear-gradient(90deg,var(--pri1),var(--pri2));transition:width .2s}
     .muted{color:var(--muted);font-size:13px}
@@ -68,7 +69,7 @@
 <body>
   <!-- Header -->
   <header>
-    <h1>Image Resize Tool</h1>
+    <h1>Crop Image Tool</h1>
     <div class="right"><a href="../../index.html">← Back to Home</a></div>
   </header>
 
@@ -77,24 +78,20 @@
     <div class="panel">
       <div class="controls">
         <label class="inputbtn">Select Images<input id="fileInput" type="file" accept="image/*" multiple></label>
+        <button id="cropBtn" class="btn">Crop Selected</button>
+        <button id="downloadAllBtn" class="btn small">Download All Cropped (ZIP)</button>
         <button id="clearBtn" class="btn small">Clear</button>
-        <button id="resizeBtn" class="btn">Resize</button>
-        <button id="zipBtn" class="btn small">Download ZIP</button>
-      </div>
-
-      <!-- Resize Options -->
-      <div class="controls">
-        <label>Width: <input type="number" id="width" placeholder="px" style="width:80px"></label>
-        <label>Height: <input type="number" id="height" placeholder="px" style="width:80px"></label>
-        <label>Scale (%): <input type="number" id="scale" value="100" style="width:80px"></label>
-        <label><input type="checkbox" id="keepAspect" checked> Keep Aspect Ratio</label>
       </div>
 
       <!-- Thumbnails -->
-      <div id="thumbs" class="thumbs"><div class="muted">Upload images to start.</div></div>
+      <div id="thumbs" class="thumbs"><div class="muted">Upload images to crop.</div></div>
 
-      <!-- Preview -->
-      <div class="stage"><img id="preview" alt="Preview"><div id="placeholder" class="muted">Preview will appear here</div></div>
+      <!-- Stage -->
+      <div class="stage">
+        <canvas id="canvas"></canvas>
+        <div id="cropRect" class="crop-rect"></div>
+        <div id="placeholder" class="muted">Select an image thumbnail to crop</div>
+      </div>
 
       <!-- Progress -->
       <div class="progress"><div id="bar" class="bar"></div></div>
@@ -103,23 +100,23 @@
 
     <!-- SEO Content -->
     <section class="panel">
-      <h2>Resize Images Online for Free</h2>
-      <p>Use this free online image resize tool to quickly resize your pictures. Upload multiple images, choose custom width and height or scale percentage, and download the resized results. All resizing happens directly in your browser for maximum privacy.</p>
+      <h2>Crop Images Online — Single or Multiple</h2>
+      <p>This free crop image tool lets you cut images online. Upload one or more images, draw a rectangle to crop, and download results instantly. All processing is 100% client-side.</p>
 
-      <h2>How to resize images?</h2>
+      <h2>How to crop images?</h2>
       <ol>
-        <li>Click on “Select Images” or drag and drop them.</li>
-        <li>Enter new width, height, or scale percentage.</li>
-        <li>Click “Resize” to process.</li>
-        <li>Download your resized images individually or as a ZIP.</li>
+        <li>Upload one or multiple images.</li>
+        <li>Select a thumbnail and drag to draw crop area.</li>
+        <li>Click “Crop Selected” to download cropped image.</li>
+        <li>Download all cropped results together as a ZIP file.</li>
       </ol>
 
-      <h2>Why use this Image Resizer?</h2>
+      <h2>Why choose this Crop Tool?</h2>
       <ul>
-        <li>⚡ Fast — runs locally in your browser.</li>
-        <li>🔒 Secure — files never leave your device.</li>
-        <li>📂 Bulk resize — process multiple images together.</li>
-        <li>🎨 Flexible — resize by width, height, or scale percentage.</li>
+        <li>⚡ Works for single and multiple images</li>
+        <li>🔒 Safe — no file upload to servers</li>
+        <li>✂️ Simple drag-to-select crop</li>
+        <li>📂 Export cropped images individually or in bulk</li>
       </ul>
     </section>
   </div>
@@ -132,97 +129,103 @@
   <script>
     const fileInput=document.getElementById('fileInput');
     const thumbs=document.getElementById('thumbs');
-    const preview=document.getElementById('preview');
+    const canvas=document.getElementById('canvas');
+    const ctx=canvas.getContext('2d');
     const placeholder=document.getElementById('placeholder');
-    const resizeBtn=document.getElementById('resizeBtn');
-    const zipBtn=document.getElementById('zipBtn');
+    const cropRect=document.getElementById('cropRect');
+    const cropBtn=document.getElementById('cropBtn');
     const clearBtn=document.getElementById('clearBtn');
     const bar=document.getElementById('bar');
     const status=document.getElementById('status');
-    const widthInput=document.getElementById('width');
-    const heightInput=document.getElementById('height');
-    const scaleInput=document.getElementById('scale');
-    const keepAspect=document.getElementById('keepAspect');
-    let filesArr=[];
+    const downloadAllBtn=document.getElementById('downloadAllBtn');
+    let filesArr=[],currentIndex=-1,img=new Image();
+    let dragging=false,startX,startY,endX,endY,rect={};
 
-    fileInput.addEventListener('change',async e=>{
+    // Load images
+    fileInput.addEventListener('change',e=>{
       for(const f of e.target.files){
-        if(!f.type.startsWith('image/')) continue;
+        if(!f.type.startsWith('image/'))continue;
         const url=URL.createObjectURL(f);
-        filesArr.push({file:f,url,outBlob:null,outName:null});
+        filesArr.push({file:f,url, cropped:null});
       }
       renderThumbs();
     });
 
     function renderThumbs(){
       thumbs.innerHTML='';
-      if(filesArr.length===0){thumbs.innerHTML='<div class="muted">Upload images to start.</div>';return;}
+      if(filesArr.length===0){thumbs.innerHTML='<div class="muted">Upload images to crop.</div>';return;}
       filesArr.forEach((it,i)=>{
-        const card=document.createElement('div');card.className='thumb';
+        const card=document.createElement('div');card.className='thumb'+(i===currentIndex?' active':'');
         const img=document.createElement('img');img.src=it.url;card.appendChild(img);
-        card.addEventListener('click',()=>{preview.src=it.url;preview.style.display='block';placeholder.style.display='none';});
+        card.addEventListener('click',()=>loadImage(i));
         thumbs.appendChild(card);
       });
     }
 
-    resizeBtn.addEventListener('click',async()=>{
-      if(filesArr.length===0) return alert("Upload images first!");
-      let done=0;
-      for(const [i,it] of filesArr.entries()){
-        const out=await resizeImage(it.url);
-        const blob=dataURLtoBlob(out);
-        it.outBlob=blob;
-        it.outName=it.file.name.replace(/\.[^.]+$/,'')+'-resized.png';
-        done++;bar.style.width=(done/filesArr.length*100)+'%';
-        status.textContent=`Resized ${done}/${filesArr.length}`;
-      }
-      status.textContent='Resizing complete';
-    });
+    function loadImage(i){
+      currentIndex=i;renderThumbs();
+      img=new Image();
+      img.onload=()=>{
+        canvas.width=img.width;canvas.height=img.height;
+        ctx.drawImage(img,0,0);canvas.style.display='block';placeholder.style.display='none';
+        cropRect.style.display='none';
+      };
+      img.src=filesArr[i].url;
+    }
 
-    async function resizeImage(url){
-      return new Promise((res,rej)=>{
-        const img=new Image();
-        img.onload=()=>{
-          let w=img.naturalWidth,h=img.naturalHeight;
-          const scale=parseFloat(scaleInput.value)/100;
-          if(scaleInput.value && scaleInput.value!=100){
-            w=Math.round(w*scale);h=Math.round(h*scale);
-          }
-          if(widthInput.value) w=parseInt(widthInput.value);
-          if(heightInput.value) h=parseInt(heightInput.value);
-          if(keepAspect.checked && widthInput.value && !heightInput.value){
-            h=Math.round(w*img.naturalHeight/img.naturalWidth);
-          }
-          if(keepAspect.checked && heightInput.value && !widthInput.value){
-            w=Math.round(h*img.naturalWidth/img.naturalHeight);
-          }
-          const c=document.createElement('canvas');c.width=w;c.height=h;
-          c.getContext('2d').drawImage(img,0,0,w,h);
-          res(c.toDataURL('image/png'));
-        };
-        img.onerror=rej;img.src=url;
+    // Crop rectangle events
+    canvas.addEventListener('mousedown',e=>{
+      if(currentIndex===-1)return;
+      dragging=true;startX=e.offsetX;startY=e.offsetY;
+      cropRect.style.left=startX+'px';cropRect.style.top=startY+'px';
+      cropRect.style.width='0';cropRect.style.height='0';cropRect.style.display='block';
+    });
+    canvas.addEventListener('mousemove',e=>{
+      if(!dragging)return;
+      endX=e.offsetX;endY=e.offsetY;
+      const x=Math.min(startX,endX),y=Math.min(startY,endY);
+      const w=Math.abs(startX-endX),h=Math.abs(startY-endY);
+      cropRect.style.left=x+'px';cropRect.style.top=y+'px';cropRect.style.width=w+'px';cropRect.style.height=h+'px';
+      rect={x,y,w,h};
+    });
+    canvas.addEventListener('mouseup',()=>dragging=false);
+
+    // Crop current image
+    cropBtn.addEventListener('click',()=>{
+      if(currentIndex===-1||!rect.w||!rect.h){alert("Select an image and draw crop area first!");return;}
+      setProgress(10,"Cropping...");
+      const out=document.createElement('canvas');out.width=rect.w;out.height=rect.h;
+      out.getContext('2d').drawImage(canvas,rect.x,rect.y,rect.w,rect.h,0,0,rect.w,rect.h);
+      out.toBlob(b=>{
+        filesArr[currentIndex].cropped=b;
+        const a=document.createElement('a');
+        a.href=URL.createObjectURL(b);
+        a.download=filesArr[currentIndex].file.name.replace(/\.[^.]+$/,'')+'-cropped.png';
+        a.click();
+        setProgress(100,"Cropped "+filesArr[currentIndex].file.name);
+        setTimeout(()=>resetProgress(),1200);
       });
-    }
-
-    function dataURLtoBlob(dataURL){
-      const [meta,b64]=dataURL.split(',');
-      const mime=(meta.match(/:(.*?);/)||[])[1]||'image/png';
-      const bin=atob(b64);const len=bin.length;const u8=new Uint8Array(len);
-      for(let i=0;i<len;i++)u8[i]=bin.charCodeAt(i);
-      return new Blob([u8],{type:mime});
-    }
-
-    zipBtn.addEventListener('click',async()=>{
-      const ready=filesArr.filter(f=>f.outBlob);
-      if(ready.length===0){alert("Resize images first!");return;}
-      const zip=new JSZip();ready.forEach(f=>zip.file(f.outName,f.outBlob));
-      const blob=await zip.generateAsync({type:'blob'});saveAs(blob,'resized-images.zip');
     });
 
+    // Download all cropped images as ZIP
+    downloadAllBtn.addEventListener('click',async()=>{
+      const ready=filesArr.filter(f=>f.cropped);
+      if(ready.length===0){alert("Crop at least one image first!");return;}
+      setProgress(20,"Zipping...");
+      const zip=new JSZip();ready.forEach(f=>zip.file(f.file.name.replace(/\.[^.]+$/,'')+'-cropped.png',f.cropped));
+      const blob=await zip.generateAsync({type:'blob'});saveAs(blob,'cropped-images.zip');
+      setProgress(100,"ZIP Ready");setTimeout(()=>resetProgress(),1500);
+    });
+
+    // Clear
     clearBtn.addEventListener('click',()=>{
-      filesArr=[];thumbs.innerHTML='<div class="muted">Upload images to start.</div>';
-      preview.style.display='none';placeholder.style.display='block';bar.style.width='0%';status.textContent='Idle';fileInput.value='';
+      filesArr=[];currentIndex=-1;thumbs.innerHTML='<div class="muted">Upload images to crop.</div>';
+      canvas.style.display='none';placeholder.style.display='block';cropRect.style.display='none';
+      fileInput.value='';resetProgress();
     });
+
+    function setProgress(p,msg){bar.style.width=p+"%";status.textContent=msg;}
+    function resetProgress(){bar.style.width="0%";status.textContent="Idle";}
   </script>
 </body>
 </html>
