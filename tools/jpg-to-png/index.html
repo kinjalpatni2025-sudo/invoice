@@ -5,22 +5,54 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>JPG to PNG Converter — Free Online Tool | Smarttool Hub</title>
-  <meta name="description" content="Free online JPG to PNG converter. Upload multiple JPG images, convert instantly to PNG, preview, and download. 100% client-side, no uploads needed.">
-  <meta name="keywords" content="jpg to png, convert jpg to png, image converter, online converter, smarttool hub, image tools"/>
+  <meta name="description" content="Convert JPG to PNG instantly in your browser. Upload multiple JPG images, preview, and download as PNG or ZIP. 100% free and secure online image converter.">
+  <meta name="keywords" content="jpg to png, convert jpg to png, free jpg to png, online image converter, smarttool hub, image conversion tool"/>
   <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/toolbox.png"/>
 
+  <!-- FAQ Schema Markup -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is this JPG to PNG converter free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, this tool is 100% free and works entirely in your browser. No uploads or hidden costs."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Are my JPG images safe?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. All conversions happen locally in your browser. Your images are never uploaded to a server."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I convert multiple JPGs at once?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. You can upload multiple JPG images, convert them all, and download them as PNG in a single ZIP file."
+        }
+      }
+    ]
+  }
+  </script>
+
   <style>
-    :root{
-      --bg:#0f1724; --card:#0b1220; --muted:#9aa8bf; --text:#e6eef8;
-      --pri1:#6366f1; --pri2:#0ea5e9; --outline:rgba(255,255,255,.08);
-    }
+    :root{--bg:#0f1724;--card:#0b1220;--muted:#9aa8bf;--text:#e6eef8;
+      --pri1:#6366f1;--pri2:#0ea5e9;--outline:rgba(255,255,255,.08);}
     body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}
     header{position:sticky;top:0;z-index:10;background:linear-gradient(90deg,var(--pri1),var(--pri2));
       padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
-    header h1{margin:0;font-size:18px}
+    header h1{margin:0;font-size:20px}
     header .right a{background:#fff;color:#111;padding:6px 10px;border-radius:8px;font-weight:700;text-decoration:none}
     .wrap{max-width:1000px;margin:20px auto;padding:12px}
-    .panel{background:var(--card);border:1px solid var(--outline);border-radius:14px;padding:12px}
+    .panel{background:var(--card);border:1px solid var(--outline);border-radius:14px;padding:12px;margin-bottom:20px}
     .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
     .btn{background:#fff;color:#111;border:none;padding:8px 12px;border-radius:10px;font-weight:600;cursor:pointer}
     .btn.small{padding:6px 8px;font-size:13px}
@@ -34,18 +66,18 @@
     .progress{height:12px;background:#0d1626;border-radius:999px;overflow:hidden;border:1px solid var(--outline);margin-top:12px}
     .bar{height:100%;width:0;background:linear-gradient(90deg,var(--pri1),var(--pri2));transition:width .2s}
     .muted{color:var(--muted);font-size:13px}
+    section.seo{color:#e6eef8;line-height:1.6}
+    section.seo h2{color:#fff;margin-top:20px}
   </style>
 </head>
 <body>
   <!-- Header -->
   <header>
-    <h1>JPG → PNG Converter</h1>
-    <div class="right">
-      <a href="../../index.html">← Back to Home</a>
-    </div>
+    <h1>JPG to PNG Converter</h1>
+    <div class="right"><a href="../../index.html">← Back to Home</a></div>
   </header>
 
-  <!-- Main -->
+  <!-- Main Tool -->
   <div class="wrap">
     <div class="panel">
       <div class="controls">
@@ -57,19 +89,44 @@
         <button id="convertBtn" class="btn">Convert to PNG</button>
         <button id="zipBtn" class="btn small">Download ZIP</button>
       </div>
-
-      <div id="thumbs" class="thumbs">
-        <div class="muted">Upload JPG images to start.</div>
-      </div>
-
-      <div class="stage">
-        <img id="preview" alt="Preview">
-        <div id="placeholder" class="muted">Preview will appear here</div>
-      </div>
-
+      <div id="thumbs" class="thumbs"><div class="muted">Upload JPG images to start.</div></div>
+      <div class="stage"><img id="preview" alt="Preview"><div id="placeholder" class="muted">Preview will appear here</div></div>
       <div class="progress"><div id="bar" class="bar"></div></div>
       <div id="status" class="muted">Idle</div>
     </div>
+
+    <!-- SEO Content -->
+    <section class="seo panel">
+      <h2>Free Online JPG to PNG Converter</h2>
+      <p>Our free JPG to PNG converter helps you instantly transform JPG images into high-quality PNG files directly in your browser. No installation, no uploads, and no hidden costs. Everything runs locally for <strong>100% privacy and security</strong>.</p>
+
+      <h2>How to convert JPG to PNG?</h2>
+      <ol>
+        <li>Click on “Select JPG images” or drag & drop your files.</li>
+        <li>Preview your images before conversion.</li>
+        <li>Click “Convert to PNG” to process them.</li>
+        <li>Download converted PNG files individually or as a ZIP archive.</li>
+      </ol>
+
+      <h2>Why choose our JPG to PNG tool?</h2>
+      <ul>
+        <li>⚡ Fast: Runs in your browser, no waiting for uploads.</li>
+        <li>🔒 Secure: Your files never leave your device.</li>
+        <li>📂 Bulk conversion: Process multiple JPGs at once.</li>
+        <li>🎨 High quality: Preserve resolution during conversion.</li>
+        <li>💻 Works on any device: Mobile, tablet, or desktop.</li>
+      </ul>
+
+      <h2>Frequently Asked Questions</h2>
+      <h3>Is this JPG to PNG converter free?</h3>
+      <p>Yes, it is 100% free forever with no hidden costs.</p>
+
+      <h3>Will my JPG images be uploaded?</h3>
+      <p>No. All conversions are processed directly in your browser.</p>
+
+      <h3>Can I convert multiple JPGs at once?</h3>
+      <p>Yes. Upload multiple images and download them as a single ZIP file.</p>
+    </section>
   </div>
 
   <!-- JSZip for ZIP downloads -->
@@ -85,8 +142,7 @@
     const clearBtn=document.getElementById('clearBtn');
     const bar=document.getElementById('bar');
     const status=document.getElementById('status');
-
-    let filesArr=[]; // {file,url,outBlob,outName}
+    let filesArr=[];
 
     fileInput.addEventListener('change',async e=>{
       for(const f of e.target.files){
@@ -99,21 +155,11 @@
 
     function renderThumbs(){
       thumbs.innerHTML='';
-      if(filesArr.length===0){
-        thumbs.innerHTML='<div class="muted">Upload JPG images to start.</div>';
-        return;
-      }
+      if(filesArr.length===0){thumbs.innerHTML='<div class="muted">Upload JPG images to start.</div>';return;}
       filesArr.forEach((it,i)=>{
-        const card=document.createElement('div');
-        card.className='thumb';
-        const img=document.createElement('img');
-        img.src=it.url;
-        card.appendChild(img);
-        card.addEventListener('click',()=>{
-          preview.src=it.url;
-          preview.style.display='block';
-          placeholder.style.display='none';
-        });
+        const card=document.createElement('div');card.className='thumb';
+        const img=document.createElement('img');img.src=it.url;card.appendChild(img);
+        card.addEventListener('click',()=>{preview.src=it.url;preview.style.display='block';placeholder.style.display='none';});
         thumbs.appendChild(card);
       });
     }
@@ -124,10 +170,8 @@
       for(const [i,it] of filesArr.entries()){
         const out=await convertJPGtoPNG(it.url);
         const blob=dataURLtoBlob(out);
-        it.outBlob=blob;
-        it.outName=it.file.name.replace(/\.jpe?g$/i,'')+'.png';
-        done++;
-        bar.style.width=(done/filesArr.length*100)+'%';
+        it.outBlob=blob;it.outName=it.file.name.replace(/\.jpe?g$/i,'')+'.png';
+        done++;bar.style.width=(done/filesArr.length*100)+'%';
         status.textContent=`Converted ${done}/${filesArr.length}`;
       }
       status.textContent='Conversion complete';
@@ -136,20 +180,14 @@
     function convertJPGtoPNG(url){
       return new Promise((res,rej)=>{
         const img=new Image();
-        img.onload=()=>{
-          const c=document.createElement('canvas');
-          c.width=img.naturalWidth;c.height=img.naturalHeight;
-          const ctx=c.getContext('2d');
-          ctx.drawImage(img,0,0);
-          res(c.toDataURL('image/png'));
-        };
-        img.onerror=rej;
-        img.src=url;
+        img.onload=()=>{const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;
+          c.getContext('2d').drawImage(img,0,0);res(c.toDataURL('image/png'));};
+        img.onerror=rej;img.src=url;
       });
     }
 
     function dataURLtoBlob(dataURL){
-      const [meta, b64]=dataURL.split(',');
+      const [meta,b64]=dataURL.split(',');
       const mime=(meta.match(/:(.*?);/)||[])[1]||'image/png';
       const bin=atob(b64);const len=bin.length;const u8=new Uint8Array(len);
       for(let i=0;i<len;i++)u8[i]=bin.charCodeAt(i);
@@ -159,16 +197,13 @@
     zipBtn.addEventListener('click',async()=>{
       const ready=filesArr.filter(f=>f.outBlob);
       if(ready.length===0){alert("Convert first!");return;}
-      const zip=new JSZip();
-      ready.forEach(f=>zip.file(f.outName,f.outBlob));
-      const blob=await zip.generateAsync({type:'blob'});
-      saveAs(blob,'converted-images.zip');
+      const zip=new JSZip();ready.forEach(f=>zip.file(f.outName,f.outBlob));
+      const blob=await zip.generateAsync({type:'blob'});saveAs(blob,'converted-images.zip');
     });
 
     clearBtn.addEventListener('click',()=>{
       filesArr=[];thumbs.innerHTML='<div class="muted">Upload JPG images to start.</div>';
-      preview.style.display='none';placeholder.style.display='block';
-      bar.style.width='0%';status.textContent='Idle';fileInput.value='';
+      preview.style.display='none';placeholder.style.display='block';bar.style.width='0%';status.textContent='Idle';fileInput.value='';
     });
   </script>
 </body>
