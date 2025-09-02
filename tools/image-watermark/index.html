@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- ================= SEO ================= -->
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Image Watermark — Add Text Watermark Online (Free, No Upload)</title>
+  <meta name="description" content="Add text watermarks to images online. Choose font size, color, and position (top-left, top-right, bottom-left, bottom-right, center). Live preview and PNG/JPG download. 100% client-side.">
+  <meta name="keywords" content="image watermark, add watermark online, text watermark, watermark photo, watermark png jpg, client side image editor" />
+  <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/toolbox.png"/>
+
+  <!-- Optional: FAQ schema for richer SEO -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"FAQPage",
+    "mainEntity":[
+      {"@type":"Question","name":"Is this watermark tool free?",
+       "acceptedAnswer":{"@type":"Answer","text":"Yes, the tool is free and runs entirely in your browser."}},
+      {"@type":"Question","name":"Do you upload my images?",
+       "acceptedAnswer":{"@type":"Answer","text":"No. All processing is 100% client-side; your files never leave your device."}},
+      {"@type":"Question","name":"Can I export PNG or JPG?",
+       "acceptedAnswer":{"@type":"Answer","text":"Yes. You can choose PNG or JPG and set JPEG quality."}}
+    ]
+  }
+  </script>
+
+  <!-- ================= Styles (inline; you can extract later) ================= -->
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#9aa8bf; --text:#e6eef8;
+      --pri1:#6366f1; --pri2:#0ea5e9; --outline:rgba(255,255,255,.08);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:inherit;text-decoration:none}
+    /* Header */
+    header{
+      position:sticky; top:0; z-index:20;
+      background:linear-gradient(90deg,var(--pri1),var(--pri2));
+      padding:12px 16px; display:flex; align-items:center; justify-content:space-between;
+      box-shadow:0 6px 20px rgba(0,0,0,.45)
+    }
+    header h1{margin:0;font-size:18px}
+    header .right a{background:#fff;color:#0b1220;padding:6px 10px;border-radius:10px;font-weight:700}
+    /* Layout */
+    .wrap{max-width:1100px;margin:18px auto;padding:12px}
+    .grid{display:grid;grid-template-columns:320px 1fr;gap:12px}
+    @media (max-width:960px){ .grid{grid-template-columns:1fr} }
+    .panel{background:var(--card);border:1px solid var(--outline);border-radius:14px;padding:12px;box-shadow:0 10px 28px rgba(0,0,0,.35)}
+    .muted{color:var(--muted);font-size:13px}
+    .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .btn{background:#fff;color:#0b1220;border:none;padding:8px 12px;border-radius:10px;font-weight:700;cursor:pointer}
+    .btn.ghost{background:transparent;border:1px solid var(--outline);color:var(--text)}
+    .btn.small{padding:6px 8px;font-size:13px}
+    input,select{background:#0b1220;color:#e6eef8;border:1px solid var(--outline);padding:8px;border-radius:10px}
+    input[type="color"]{padding:0;border-radius:6px;height:36px;width:46px}
+    label>span{font-size:12px;color:var(--muted);display:block;margin-bottom:4px}
+    /* Dropzone */
+    .drop{border:2px dashed var(--outline);border-radius:12px;padding:14px;text-align:center;margin:10px 0}
+    .drop.drag{border-color:var(--pri2);background:#0d1a2b}
+    /* Stage */
+    .stage{position:relative;border:1px solid var(--outline);border-radius:12px;background:#0a0f1a;display:flex;align-items:center;justify-content:center;min-height:420px;overflow:hidden}
+    canvas{max-width:100%;height:auto;display:none}
+    /* Progress */
+    .progress{width:100%;height:12px;background:#0d1626;border-radius:999px;overflow:hidden;border:1px solid var(--outline)}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,var(--pri1),var(--pri2));transition:width .2s}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .grow{flex:1}
+    /* SEO text */
+    section.seo h2{margin:.2rem 0 .6rem}
+    section.seo{line-height:1.65}
+  </style>
+</head>
+<body>
+  <!-- ================= Header ================= -->
+  <header>
+    <h1>Image Watermark</h1>
+    <div class="right"><a href="../../index.html" aria-label="Back to Home">← Back to Home</a></div>
+  </header>
+
+  <!-- ================= App ================= -->
+  <div class="wrap">
+    <div class="grid">
+      <!-- Left: Inputs -->
+      <aside class="panel">
+        <div class="controls" style="justify-content:space-between">
+          <strong>Upload & Settings</strong>
+          <span id="fileInfo" class="muted">No image</span>
+        </div>
+
+        <div class="controls">
+          <label class="btn">
+            Select Image
+            <input id="fileInput" type="file" accept="image/png, image/jpeg, image/jpg" style="display:none">
+          </label>
+          <button id="clearBtn" class="btn ghost small">Clear</button>
+        </div>
+
+        <div id="dropzone" class="drop muted" aria-label="Drag and drop image here">
+          Drag & drop PNG/JPG here
+        </div>
+
+        <div class="row">
+          <label class="grow">
+            <span>Watermark text</span>
+            <input id="wmText" type="text" placeholder="e.g., © Smarttool Hub">
+          </label>
+        </div>
+
+        <div class="row">
+          <label>
+            <span>Font size (px)</span>
+            <input id="fontSize" type="number" value="36" min="8" max="512" style="width:110px">
+          </label>
+          <label>
+            <span>Color</span>
+            <input id="fontColor" type="color" value="#ffffff" aria-label="Watermark color">
+          </label>
+          <label>
+            <span>Opacity</span>
+            <input id="opacity" type="range" value="80" min="0" max="100" aria-label="Watermark opacity">
+          </label>
+        </div>
+
+        <div class="row">
+          <label>
+            <span>Position</span>
+            <select id="position" style="width:180px">
+              <option value="bottom-right">Bottom Right</option>
+              <option value="bottom-left">Bottom Left</option>
+              <option value="top-right">Top Right</option>
+              <option value="top-left">Top Left</option>
+              <option value="center">Center</option>
+            </select>
+          </label>
+          <label>
+            <span>Margin (px)</span>
+            <input id="margin" type="number" value="16" min="0" max="200" style="width:110px">
+          </label>
+          <label>
+            <span>Font family</span>
+            <select id="fontFamily" style="width:180px">
+              <option value="Inter,system-ui,Arial,sans-serif">Inter / System</option>
+              <option value="Arial, Helvetica, sans-serif">Arial</option>
+              <option value="'Times New Roman', Times, serif">Times New Roman</option>
+              <option value="'Courier New', Courier, monospace">Courier New</option>
+            </select>
+          </label>
+        </div>
+
+        <hr style="border-color:var(--outline);border-style:solid;border-width:0 0 1px 0;opacity:.4;margin:10px 0">
+
+        <div class="row">
+          <label>
+            <span>Export format</span>
+            <select id="format" style="width:160px">
+              <option value="png">PNG (lossless)</option>
+              <option value="jpeg">JPG (smaller)</option>
+            </select>
+          </label>
+          <label id="jpegQWrap" style="display:none">
+            <span>JPEG quality</span>
+            <input id="jpegQ" type="range" value="0.9" min="0.1" max="1" step="0.05" style="width:160px">
+          </label>
+          <label class="grow">
+            <span>File name</span>
+            <input id="fileName" type="text" placeholder="image-watermarked">
+          </label>
+        </div>
+
+        <div class="controls" style="margin-top:8px">
+          <button id="downloadBtn" class="btn">Download</button>
+          <button id="resetViewBtn" class="btn ghost small">Fit to screen</button>
+        </div>
+      </aside>
+
+      <!-- Right: Preview -->
+      <main class="panel">
+        <div class="stage" aria-live="polite">
+          <!-- Canvas is the live preview surface -->
+          <canvas id="canvas" aria-label="Watermark preview canvas"></canvas>
+          <div id="placeholder" class="muted" style="position:absolute">Upload an image to preview</div>
+        </div>
+
+        <div style="display:flex;gap:12px;align-items:center;margin-top:12px">
+          <div class="progress" style="flex:1"><div id="bar" class="bar"></div></div>
+          <div id="status" class="muted">Idle</div>
+        </div>
+
+        <p class="muted" style="margin-top:8px">
+          Tip: If your text is hard to see, try a larger font, white color, center position, or reduce opacity slightly for a subtle watermark.
+        </p>
+      </main>
+    </div>
+
+    <!-- SEO content -->
+    <section class="panel seo" style="margin-top:16px">
+      <h2>Add Text Watermarks to Images Online</h2>
+      <p>Create professional watermarked photos in seconds. Choose watermark text, font size, color, and position (top-left, top-right, bottom-left, bottom-right, or centered). Everything runs securely in your browser — no uploads, no sign-up.</p>
+      <h2>How it works</h2>
+      <ol>
+        <li>Upload a PNG/JPG image.</li>
+        <li>Type your watermark text and choose style & position.</li>
+        <li>Preview updates live; adjust until it looks perfect.</li>
+        <li>Download the final image as PNG or JPG.</li>
+      </ol>
+    </section>
+  </div>
+
+  <!-- ================= Script (inline; you can extract later) ================= -->
+  <script>
+  // --------- Elements
+  const fileInput = document.getElementById('fileInput');
+  const dropzone  = document.getElementById('dropzone');
+  const fileInfo  = document.getElementById('fileInfo');
+
+  const wmText    = document.getElementById('wmText');
+  const fontSize  = document.getElementById('fontSize');
+  const fontColor = document.getElementById('fontColor');
+  const opacity   = document.getElementById('opacity');
+  const position  = document.getElementById('position');
+  const marginEl  = document.getElementById('margin');
+  const fontFamily= document.getElementById('fontFamily');
+
+  const format    = document.getElementById('format');
+  const jpegQWrap = document.getElementById('jpegQWrap');
+  const jpegQ     = document.getElementById('jpegQ');
+  const fileName  = document.getElementById('fileName');
+
+  const canvas    = document.getElementById('canvas');
+  const ctx       = canvas.getContext('2d');
+  const placeholder = document.getElementById('placeholder');
+
+  const downloadBtn = document.getElementById('downloadBtn');
+  const resetViewBtn = document.getElementById('resetViewBtn');
+  const clearBtn   = document.getElementById('clearBtn');
+
+  const bar   = document.getElementById('bar');
+  const status= document.getElementById('status');
+
+  // --------- State
+  let img = new Image();   // holds the uploaded image (as dataURL to avoid CORS issues)
+  let imgURL = null;
+
+  // --------- Helpers
+  function setProgress(p){ bar.style.width = Math.max(0,Math.min(100,p)) + '%'; }
+  function setStatus(msg){ status.textContent = msg; }
+  function resetProgress(){ setProgress(0); setStatus('Idle'); }
+
+  function readFileToDataURL(file){
+    return new Promise((resolve,reject)=>{
+      const r = new FileReader();
+      r.onload = ()=> resolve(r.result);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+  }
+
+  function downloadBlob(blob, name){
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
+  }
+
+  // --------- Load image (input & DnD)
+  fileInput.addEventListener('change', async (e)=>{
+    const f = e.target.files?.[0];
+    if(!f) return;
+    await loadFromFile(f);
+    fileInput.value = '';
+  });
+
+  dropzone.addEventListener('dragover', e=>{ e.preventDefault(); dropzone.classList.add('drag'); });
+  dropzone.addEventListener('dragleave', ()=> dropzone.classList.remove('drag'));
+  dropzone.addEventListener('drop', async e=>{
+    e.preventDefault(); dropzone.classList.remove('drag');
+    const f = e.dataTransfer?.files?.[0];
+    if(f) await loadFromFile(f);
+  });
+
+  async function loadFromFile(file){
+    if(!file.type.match(/image\/(png|jpeg|jpg)/i) && !file.name.match(/\.(png|jpe?g)$/i)){
+      alert('Please select a PNG or JPG image.');
+      return;
+    }
+    setProgress(10); setStatus('Reading image...');
+    const dataURL = await readFileToDataURL(file);
+    imgURL = dataURL;
+    await new Promise((res,rej)=>{
+      img = new Image();
+      img.onload = res;
+      img.onerror = rej;
+      img.alt = 'Uploaded image';
+      img.src = dataURL;
+    });
+    // Fit canvas to image (use natural size; CSS will scale responsively)
+    canvas.width  = img.naturalWidth || img.width;
+    canvas.height = img.naturalHeight || img.height;
+    canvas.style.display = 'block';
+    placeholder.style.display = 'none';
+    fileInfo.textContent = `${file.name} (${canvas.width}×${canvas.height})`;
+    setProgress(50); setStatus('Rendering preview...');
+    render();
+    setProgress(100); setStatus('Ready');
+    setTimeout(()=>resetProgress(), 600);
+    // Suggest default filename (without extension)
+    const base = (file.name || 'image').replace(/\.[^.]+$/,'');
+    fileName.value = base + '-watermarked';
+  }
+
+  // --------- Render watermark onto canvas (live preview)
+  function render(){
+    if(!imgURL) return;
+    // Clear and draw original image
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    const text = wmText.value || '';
+    if(!text) return;
+
+    const size = Math.max(8, parseInt(fontSize.value || 36, 10));
+    const color = fontColor.value || '#ffffff';
+    const alpha = Math.max(0, Math.min(1, (parseInt(opacity.value||80,10)/100)));
+    const pos   = position.value;
+    const margin = Math.max(0, parseInt(marginEl.value||16,10));
+    const family = fontFamily.value || "Inter,system-ui,Arial,sans-serif";
+
+    // Style text
+    ctx.save();
+    ctx.font = `${size}px ${family}`;
+    ctx.fillStyle = color;
+    ctx.globalAlpha = alpha;
+    ctx.shadowColor = 'rgba(0,0,0,0.35)'; // subtle contrast
+    ctx.shadowBlur = 2;
+    ctx.shadowOffsetX = 1;
+    ctx.shadowOffsetY = 1;
+
+    // Decide align/baseline + coordinates
+    let x, y;
+    if(pos.includes('left')) ctx.textAlign = 'left';
+    if(pos.includes('right')) ctx.textAlign = 'right';
+    if(pos === 'center'){ ctx.textAlign='center'; ctx.textBaseline='middle'; x = canvas.width/2; y = canvas.height/2; }
+    if(pos.startsWith('top'))   ctx.textBaseline = 'top';
+    if(pos.startsWith('bottom'))ctx.textBaseline = 'bottom';
+
+    if(pos === 'top-left'){ x = margin; y = margin; }
+    if(pos === 'top-right'){ x = canvas.width - margin; y = margin; }
+    if(pos === 'bottom-left'){ x = margin; y = canvas.height - margin; }
+    if(pos === 'bottom-right'){ x = canvas.width - margin; y = canvas.height - margin; }
+
+    // Draw text
+    if(text){
+      // Optional: draw twice with tiny offset for crisper edges
+      ctx.fillText(text, x, y);
+    }
+    ctx.restore();
+  }
+
+  // --------- Export (PNG/JPG)
+  async function exportImage(){
+    if(!imgURL){ alert('Please upload an image first.'); return; }
+
+    setProgress(10); setStatus('Preparing export...');
+    const fmt = format.value; // 'png' or 'jpeg'
+    const quality = Number(jpegQ.value || 0.9);
+
+    // If exporting JPG, flatten onto white background to avoid black where transparent
+    let outCanvas = document.createElement('canvas');
+    outCanvas.width = canvas.width;
+    outCanvas.height = canvas.height;
+    const octx = outCanvas.getContext('2d');
+
+    if(fmt === 'jpeg'){
+      octx.fillStyle = '#ffffff';
+      octx.fillRect(0,0,outCanvas.width,outCanvas.height);
+    }
+    // Redraw the same as preview to avoid sampling artifacts
+    // (draw original + same watermark settings)
+    octx.drawImage(img, 0, 0, outCanvas.width, outCanvas.height);
+
+    const text = wmText.value || '';
+    if(text){
+      const size = Math.max(8, parseInt(fontSize.value || 36, 10));
+      const color = fontColor.value || '#ffffff';
+      const alpha = Math.max(0, Math.min(1, (parseInt(opacity.value||80,10)/100)));
+      const pos   = position.value;
+      const margin = Math.max(0, parseInt(marginEl.value||16,10));
+      const family = fontFamily.value || "Inter,system-ui,Arial,sans-serif";
+
+      octx.save();
+      octx.font = `${size}px ${family}`;
+      octx.fillStyle = color;
+      octx.globalAlpha = alpha;
+      octx.shadowColor = 'rgba(0,0,0,0.35)';
+      octx.shadowBlur = 2;
+      octx.shadowOffsetX = 1;
+      octx.shadowOffsetY = 1;
+
+      let x, y;
+      if(pos.includes('left')) octx.textAlign = 'left';
+      if(pos.includes('right')) octx.textAlign = 'right';
+      if(pos === 'center'){ octx.textAlign='center'; octx.textBaseline='middle'; x = outCanvas.width/2; y = outCanvas.height/2; }
+      if(pos.startsWith('top'))   octx.textBaseline = 'top';
+      if(pos.startsWith('bottom'))octx.textBaseline = 'bottom';
+      if(pos === 'top-left'){ x = margin; y = margin; }
+      if(pos === 'top-right'){ x = outCanvas.width - margin; y = margin; }
+      if(pos === 'bottom-left'){ x = margin; y = outCanvas.height - margin; }
+      if(pos === 'bottom-right'){ x = outCanvas.width - margin; y = outCanvas.height - margin; }
+
+      octx.fillText(text, x, y);
+      octx.restore();
+    }
+
+    setProgress(60); setStatus('Encoding...');
+    const blob = await new Promise(res=>{
+      if(fmt === 'png') outCanvas.toBlob(res, 'image/png');
+      else outCanvas.toBlob(res, 'image/jpeg', quality);
+    });
+
+    const base = (fileName.value || 'image-watermarked')
+      .replace(/[\\/:*?"<>|]+/g,'')
+      .trim() || 'image-watermarked';
+    const ext = fmt === 'png' ? 'png' : 'jpg';
+    downloadBlob(blob, `${base}.${ext}`);
+    setProgress(100); setStatus('Download ready');
+    setTimeout(()=>resetProgress(), 800);
+  }
+
+  // --------- Events
+  [wmText, fontSize, fontColor, opacity, position, marginEl, fontFamily].forEach(el=>{
+    el.addEventListener('input', ()=>{ setProgress(15); setStatus('Updating preview...'); render(); setProgress(100); setTimeout(()=>resetProgress(),300); });
+  });
+
+  format.addEventListener('change', ()=>{
+    jpegQWrap.style.display = format.value === 'jpeg' ? 'block' : 'none';
+  });
+
+  downloadBtn.addEventListener('click', exportImage);
+  resetViewBtn.addEventListener('click', ()=>{ // visually handled by CSS; canvas is responsive
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+  clearBtn.addEventListener('click', ()=>{
+    imgURL = null; canvas.style.display='none'; placeholder.style.display='block';
+    ctx.clearRect(0,0,canvas.width,canvas.height); fileInfo.textContent = 'No image';
+    wmText.value = ''; fileName.value = ''; resetProgress();
+  });
+
+  // Keyboard shortcut: Ctrl/Cmd + S to download
+  window.addEventListener('keydown', (e)=>{
+    if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==='s'){ e.preventDefault(); exportImage(); }
+  });
+
+  </script>
+</body>
+</html>
