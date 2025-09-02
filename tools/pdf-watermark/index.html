@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>PDF Watermark Tool — Add Text Watermark Online</title>
+  <meta name="description" content="Add text watermarks to your PDF online. Upload PDF, set text, font, position, and opacity. Preview and download instantly. 100% client-side and free."/>
+  <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/toolbox.png"/>
+  <style>
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#0f1724;color:#e6eef8}
+    header{background:linear-gradient(90deg,#6366f1,#0ea5e9);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+    header h1{margin:0;font-size:18px}
+    header a{background:#fff;color:#0b1220;padding:6px 10px;border-radius:8px;font-weight:bold;text-decoration:none}
+    .wrap{max-width:1200px;margin:20px auto;padding:12px}
+    .grid{display:grid;grid-template-columns:300px 1fr;gap:14px}
+    @media(max-width:900px){.grid{grid-template-columns:1fr}}
+    .panel{background:#0b1220;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.08)}
+    label{display:block;margin-top:6px;font-size:13px;color:#9aa8bf}
+    input,select{width:100%;padding:6px;margin-top:2px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:#0f1724;color:#fff}
+    input[type=color]{padding:0;height:36px;width:60px}
+    .btn{background:#6366f1;color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;margin-top:10px}
+    canvas{max-width:100%;margin-bottom:10px;background:#fff;border:1px solid #ddd}
+    .progress{width:100%;height:12px;background:#1b253a;border-radius:8px;overflow:hidden;margin-top:10px}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,#6366f1,#0ea5e9);transition:width .2s}
+    .muted{color:#9aa8bf;font-size:13px}
+  </style>
+</head>
+<body>
+<header>
+  <h1>PDF Watermark Tool</h1>
+  <a href="../../index.html">← Back to Home</a>
+</header>
+<div class="wrap">
+  <div class="grid">
+    <!-- Left Controls -->
+    <aside class="panel">
+      <h3>Upload PDF</h3>
+      <input type="file" id="pdfInput" accept="application/pdf"/>
+      <h3>Watermark Settings</h3>
+      <label>Text<input id="wmText" type="text" value="© Smarttool Hub"></label>
+      <label>Font Size<input id="fontSize" type="number" value="36"></label>
+      <label>Color<input id="fontColor" type="color" value="#000000"></label>
+      <label>Opacity<input id="opacity" type="range" min="10" max="100" value="30"></label>
+      <label>Position
+        <select id="position">
+          <option value="center">Center</option>
+          <option value="top-left">Top Left</option>
+          <option value="top-right">Top Right</option>
+          <option value="bottom-left">Bottom Left</option>
+          <option value="bottom-right">Bottom Right</option>
+        </select>
+      </label>
+      <button id="applyBtn" class="btn">Apply Watermark</button>
+      <button id="downloadBtn" class="btn">Download PDF</button>
+      <div class="progress"><div id="bar" class="bar"></div></div>
+      <div id="status" class="muted">Idle</div>
+    </aside>
+
+    <!-- Preview -->
+    <main class="panel">
+      <div id="preview"></div>
+    </main>
+  </div>
+</div>
+
+<!-- PDF.js for rendering preview -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<!-- pdf-lib for watermarking -->
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
+
+<script>
+const pdfInput=document.getElementById('pdfInput'),
+wmText=document.getElementById('wmText'),
+fontSize=document.getElementById('fontSize'),
+fontColor=document.getElementById('fontColor'),
+opacity=document.getElementById('opacity'),
+position=document.getElementById('position'),
+applyBtn=document.getElementById('applyBtn'),
+downloadBtn=document.getElementById('downloadBtn'),
+preview=document.getElementById('preview'),
+bar=document.getElementById('bar'),status=document.getElementById('status');
+
+let pdfBytes=null,newPdfBytes=null;
+
+function setProgress(p){bar.style.width=p+'%';}
+function setStatus(s){status.textContent=s;}
+
+// Render preview with PDF.js
+async function renderPreview(bytes){
+  preview.innerHTML='';
+  const loadingTask=pdfjsLib.getDocument({data:bytes});
+  const pdf=await loadingTask.promise;
+  const page=await pdf.getPage(1);
+  const viewport=page.getViewport({scale:1.2});
+  const canvas=document.createElement('canvas');
+  const ctx=canvas.getContext('2d');
+  canvas.width=viewport.width;canvas.height=viewport.height;
+  await page.render({canvasContext:ctx,viewport}).promise;
+  preview.appendChild(canvas);
+}
+
+// Apply watermark using pdf-lib
+async function applyWatermark(){
+  if(!pdfBytes)return alert("Upload PDF first");
+  setProgress(30);setStatus("Applying watermark...");
+  const pdfDoc=await PDFLib.PDFDocument.load(pdfBytes);
+  const pages=pdfDoc.getPages();
+  const rgb=hexToRgb(fontColor.value);
+  for(const page of pages){
+    const {width,height}=page.getSize();
+    let x=width/2,y=height/2;
+    const m=40;
+    if(position.value=="top-left"){x=m;y=height-m;}
+    if(position.value=="top-right"){x=width-m;y=height-m;}
+    if(position.value=="bottom-left"){x=m;y=m;}
+    if(position.value=="bottom-right"){x=width-m;y=m;}
+    page.drawText(wmText.value,{
+      x,y,
+      size:parseInt(fontSize.value),
+      color:PDFLib.rgb(rgb.r/255,rgb.g/255,rgb.b/255),
+      opacity:parseInt(opacity.value)/100,
+      font:await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica),
+    });
+  }
+  newPdfBytes=await pdfDoc.save();
+  await renderPreview(newPdfBytes);
+  setProgress(100);setStatus("Watermark applied");
+}
+
+function hexToRgb(hex){
+  const bigint=parseInt(hex.slice(1),16);
+  return {r:(bigint>>16)&255,g:(bigint>>8)&255,b:bigint&255};
+}
+
+pdfInput.addEventListener('change',async e=>{
+  const f=e.target.files[0];if(!f)return;
+  pdfBytes=await f.arrayBuffer();
+  await renderPreview(pdfBytes);
+});
+
+applyBtn.addEventListener('click',applyWatermark);
+
+downloadBtn.addEventListener('click',()=>{
+  if(!newPdfBytes)return alert("Apply watermark first");
+  const blob=new Blob([newPdfBytes],{type:"application/pdf"});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download="watermarked.pdf";
+  a.click();
+});
+</script>
+</body>
+</html>
