@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>PDF Watermark Tool — Add Text Watermark Online</title>
-  <meta name="description" content="Add text watermarks to your PDF online. Upload PDF, set text, font, position, and opacity. Preview and download instantly. 100% client-side and free."/>
+  <title>PDF Watermark Tool — Add Text or Logo Watermarks Online</title>
+  <meta name="description" content="Add text or logo watermarks to your PDF online. Upload PDF, set watermark options, preview, and download instantly. 100% client-side and free."/>
   <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/toolbox.png"/>
   <style>
     body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#0f1724;color:#e6eef8}
@@ -32,11 +32,12 @@
 </header>
 <div class="wrap">
   <div class="grid">
-    <!-- Left Controls -->
+    <!-- Controls -->
     <aside class="panel">
       <h3>Upload PDF</h3>
       <input type="file" id="pdfInput" accept="application/pdf"/>
-      <h3>Watermark Settings</h3>
+
+      <h3>Text Watermark</h3>
       <label>Text<input id="wmText" type="text" value="© Smarttool Hub"></label>
       <label>Font Size<input id="fontSize" type="number" value="36"></label>
       <label>Color<input id="fontColor" type="color" value="#000000"></label>
@@ -50,6 +51,21 @@
           <option value="bottom-right">Bottom Right</option>
         </select>
       </label>
+
+      <h3>Logo Watermark</h3>
+      <input type="file" id="logoInput" accept="image/png,image/jpeg"/>
+      <label>Size (% of page width)<input id="logoSize" type="number" value="20"></label>
+      <label>Opacity<input id="logoOpacity" type="range" min="10" max="100" value="60"></label>
+      <label>Position
+        <select id="logoPos">
+          <option value="center">Center</option>
+          <option value="top-left">Top Left</option>
+          <option value="top-right">Top Right</option>
+          <option value="bottom-left">Bottom Left</option>
+          <option value="bottom-right">Bottom Right</option>
+        </select>
+      </label>
+
       <button id="applyBtn" class="btn">Apply Watermark</button>
       <button id="downloadBtn" class="btn">Download PDF</button>
       <div class="progress"><div id="bar" class="bar"></div></div>
@@ -63,29 +79,26 @@
   </div>
 </div>
 
-<!-- PDF.js for rendering preview -->
+<!-- PDF.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-<!-- pdf-lib for watermarking -->
+<!-- pdf-lib -->
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
 
 <script>
 const pdfInput=document.getElementById('pdfInput'),
-wmText=document.getElementById('wmText'),
-fontSize=document.getElementById('fontSize'),
-fontColor=document.getElementById('fontColor'),
-opacity=document.getElementById('opacity'),
-position=document.getElementById('position'),
-applyBtn=document.getElementById('applyBtn'),
-downloadBtn=document.getElementById('downloadBtn'),
-preview=document.getElementById('preview'),
+wmText=document.getElementById('wmText'),fontSize=document.getElementById('fontSize'),
+fontColor=document.getElementById('fontColor'),opacity=document.getElementById('opacity'),
+position=document.getElementById('position'),logoInput=document.getElementById('logoInput'),
+logoSize=document.getElementById('logoSize'),logoOpacity=document.getElementById('logoOpacity'),
+logoPos=document.getElementById('logoPos'),applyBtn=document.getElementById('applyBtn'),
+downloadBtn=document.getElementById('downloadBtn'),preview=document.getElementById('preview'),
 bar=document.getElementById('bar'),status=document.getElementById('status');
 
-let pdfBytes=null,newPdfBytes=null;
+let pdfBytes=null,newPdfBytes=null,logoBytes=null;
 
 function setProgress(p){bar.style.width=p+'%';}
 function setStatus(s){status.textContent=s;}
 
-// Render preview with PDF.js
 async function renderPreview(bytes){
   preview.innerHTML='';
   const loadingTask=pdfjsLib.getDocument({data:bytes});
@@ -99,29 +112,51 @@ async function renderPreview(bytes){
   preview.appendChild(canvas);
 }
 
-// Apply watermark using pdf-lib
 async function applyWatermark(){
   if(!pdfBytes)return alert("Upload PDF first");
   setProgress(30);setStatus("Applying watermark...");
   const pdfDoc=await PDFLib.PDFDocument.load(pdfBytes);
   const pages=pdfDoc.getPages();
   const rgb=hexToRgb(fontColor.value);
+
+  let embeddedLogo=null;
+  if(logoBytes){
+    embeddedLogo=await pdfDoc.embedPng(logoBytes).catch(async()=>await pdfDoc.embedJpg(logoBytes));
+  }
+
   for(const page of pages){
     const {width,height}=page.getSize();
-    let x=width/2,y=height/2;
-    const m=40;
-    if(position.value=="top-left"){x=m;y=height-m;}
-    if(position.value=="top-right"){x=width-m;y=height-m;}
-    if(position.value=="bottom-left"){x=m;y=m;}
-    if(position.value=="bottom-right"){x=width-m;y=m;}
-    page.drawText(wmText.value,{
-      x,y,
-      size:parseInt(fontSize.value),
-      color:PDFLib.rgb(rgb.r/255,rgb.g/255,rgb.b/255),
-      opacity:parseInt(opacity.value)/100,
-      font:await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica),
-    });
+
+    // === Text watermark ===
+    if(wmText.value){
+      let x=width/2,y=height/2;
+      const m=40;
+      if(position.value=="top-left"){x=m;y=height-m;}
+      if(position.value=="top-right"){x=width-m;y=height-m;}
+      if(position.value=="bottom-left"){x=m;y=m;}
+      if(position.value=="bottom-right"){x=width-m;y=m;}
+      page.drawText(wmText.value,{
+        x,y,
+        size:parseInt(fontSize.value),
+        color:PDFLib.rgb(rgb.r/255,rgb.g/255,rgb.b/255),
+        opacity:parseInt(opacity.value)/100,
+        font:await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica),
+      });
+    }
+
+    // === Logo watermark ===
+    if(embeddedLogo){
+      const scale=logoSize.value/100;
+      const w=width*scale,h=(embeddedLogo.height/embeddedLogo.width)*w;
+      let x=width/2-w/2,y=height/2-h/2;
+      if(logoPos.value=="top-left"){x=20;y=height-h-20;}
+      if(logoPos.value=="top-right"){x=width-w-20;y=height-h-20;}
+      if(logoPos.value=="bottom-left"){x=20;y=20;}
+      if(logoPos.value=="bottom-right"){x=width-w-20;y=20;}
+      page.drawImage(embeddedLogo,{x,y,width:w,height:h,opacity:parseInt(logoOpacity.value)/100});
+    }
   }
+
   newPdfBytes=await pdfDoc.save();
   await renderPreview(newPdfBytes);
   setProgress(100);setStatus("Watermark applied");
@@ -136,6 +171,10 @@ pdfInput.addEventListener('change',async e=>{
   const f=e.target.files[0];if(!f)return;
   pdfBytes=await f.arrayBuffer();
   await renderPreview(pdfBytes);
+});
+logoInput.addEventListener('change',async e=>{
+  const f=e.target.files[0];if(!f)return;
+  logoBytes=await f.arrayBuffer();
 });
 
 applyBtn.addEventListener('click',applyWatermark);
