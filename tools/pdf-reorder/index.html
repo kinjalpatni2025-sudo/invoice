@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Reorder PDF Pages Online — Drag & Drop | Smarttool Hub</title>
+  <meta name="description" content="Reorder pages in a PDF using drag & drop. Upload a PDF, rearrange pages with live preview, and download the reordered PDF — 100% client-side." />
+  <meta name="keywords" content="reorder pdf, rearrange pdf pages, drag and drop pdf pages, online pdf editor, pdf tools" />
+  <link rel="icon" href="https://img.icons8.com/fluency/48/toolbox.png" />
+
+  <!-- Minimal styling to match your theme (dark, modern) -->
+  <style>
+    :root{
+      --bg:#0f1724; --panel:#0b1220; --muted:#9aa8bf; --text:#e6eef8;
+      --accent1:#6366f1; --accent2:#0ea5e9; --outline:rgba(255,255,255,.08);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+    header{position:sticky;top:0;background:linear-gradient(90deg,var(--accent1),var(--accent2));padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 8px 24px rgba(0,0,0,.45);z-index:50}
+    header h1{margin:0;font-size:18px}
+    header .home{background:#fff;color:#071124;padding:8px 10px;border-radius:8px;text-decoration:none;font-weight:700}
+    .container{max-width:1200px;margin:20px auto;padding:12px}
+    .grid{display:grid;grid-template-columns:320px 1fr;gap:12px}
+    @media(max-width:900px){ .grid{grid-template-columns:1fr} }
+    .panel{background:var(--panel);border:1px solid var(--outline);border-radius:12px;padding:12px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+    .muted{color:var(--muted);font-size:13px}
+    .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .btn{background:var(--accent1);color:white;padding:8px 12px;border-radius:10px;border:none;cursor:pointer}
+    .btn.ghost{background:transparent;border:1px solid var(--outline)}
+    input[type=file]{display:none}
+    label.u-btn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;border:1px dashed var(--outline);cursor:pointer}
+    .dropzone{border:2px dashed var(--outline);padding:14px;border-radius:10px;text-align:center;margin-top:8px;cursor:pointer}
+    .dropzone.drag{border-color:var(--accent2);background:rgba(14,165,233,.04)}
+    /* Thumbnails list */
+    .thumb-list{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start}
+    .thumb{
+      width:140px;background:#fff;color:#000;border-radius:8px;overflow:hidden;border:1px solid #e6eef8;cursor:grab;
+      display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:8px;
+    }
+    .thumb.dragging{opacity:.4}
+    .thumb img{width:100%;height:auto;display:block;border-radius:4px;background:#fff}
+    .thumb .label{font-size:13px;margin-top:8px;text-align:center;word-break:break-word}
+    .thumb .badge{position:relative;margin-top:6px;background:var(--accent2);color:#021; padding:4px 6px;border-radius:6px;font-size:12px;font-weight:700}
+    .preview-stage{min-height:360px;display:flex;align-items:center;justify-content:center}
+    canvas.page-canvas{max-width:100%;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+    .note{margin-top:10px;color:var(--muted);font-size:13px}
+    .progress{height:12px;background:#0d1626;border-radius:999px;overflow:hidden;border:1px solid var(--outline)}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent1),var(--accent2));transition:width .2s}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Reorder PDF Pages</h1>
+    <a class="home" href="../../index.html">← Back to Home</a>
+  </header>
+
+  <main class="container">
+    <div class="grid">
+      <!-- LEFT: Upload + Controls -->
+      <aside class="panel" aria-labelledby="controls-title">
+        <h2 id="controls-title" style="margin:0 0 8px 0">Upload & Controls</h2>
+
+        <!-- File input -->
+        <div class="controls" style="margin-bottom:8px">
+          <label class="u-btn" id="pickBtn" title="Choose a PDF file">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:block"><path d="M12 3v10" stroke="#fff" stroke-width="2" stroke-linecap="round"/><path d="M8 7l4-4 4 4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 21H4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+            Choose PDF
+            <input id="fileInput" type="file" accept="application/pdf">
+          </label>
+
+          <button class="btn ghost" id="resetBtn" title="Reset">Reset</button>
+        </div>
+
+        <div id="dropzone" class="dropzone muted">Or drag & drop PDF here</div>
+
+        <div style="margin-top:12px">
+          <div class="muted">Pages</div>
+          <div id="thumbs" class="thumb-list" style="margin-top:8px">
+            <div class="muted">Upload a PDF to see pages</div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <div class="controls">
+            <button class="btn" id="downloadBtn">Download Reordered PDF</button>
+            <button class="btn" id="previewBtn">Preview Page</button>
+          </div>
+          <div style="margin-top:10px" class="progress"><div id="bar" class="bar"></div></div>
+          <div id="status" class="note">Idle</div>
+        </div>
+      </aside>
+
+      <!-- RIGHT: Preview -->
+      <section class="panel">
+        <h2 style="margin:0 0 8px 0">Preview</h2>
+        <div id="previewStage" class="preview-stage">
+          <div class="muted">Upload a PDF to see a preview of selected page</div>
+        </div>
+        <div class="note">Tip: Drag thumbnails to reorder. Click a thumbnail to preview that page. After arranging pages click "Download Reordered PDF".</div>
+      </section>
+    </div>
+  </main>
+
+  <!-- pdf.js (for rendering) and pdf-lib (for rebuilding PDF) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
+
+  <script>
+  /* Reorder PDF — client-side
+     - Renders thumbnails with pdf.js
+     - Allows drag & drop reordering of thumbnails
+     - Uses pdf-lib to create a new PDF with pages in chosen order
+  */
+
+  // Elements
+  const fileInput = document.getElementById('fileInput');
+  const pickBtn = document.getElementById('pickBtn');
+  const dropzone = document.getElementById('dropzone');
+  const thumbs = document.getElementById('thumbs');
+  const previewStage = document.getElementById('previewStage');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const previewBtn = document.getElementById('previewBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const bar = document.getElementById('bar');
+  const status = document.getElementById('status');
+
+  // State
+  let originalPdfBytes = null;     // ArrayBuffer of uploaded PDF
+  let pdfJsDoc = null;             // pdf.js document (used for rendering)
+  let pdfLibDoc = null;            // pdf-lib document (used for copying pages)
+  let pagesMeta = [];              // Array of {pageIndex, thumbDataUrl, width, height}
+  let dragSrcIndex = null;         // for drag/drop
+
+  // Helpers
+  function setProgress(p){ bar.style.width = Math.max(0, Math.min(100, p)) + '%'; }
+  function setStatus(msg){ status.textContent = msg; }
+
+  // Read file input
+  pickBtn.addEventListener('click', (e) => {
+    // label click triggers file input; no extra handling required
+  });
+
+  fileInput.addEventListener('change', async (e) => {
+    if (e.target.files && e.target.files[0]) {
+      await handleFile(e.target.files[0]);
+      fileInput.value = '';
+    }
+  });
+
+  // Drag & drop support
+  dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+  dropzone.addEventListener('drop', async (e) => {
+    e.preventDefault(); dropzone.classList.remove('drag');
+    const f = e.dataTransfer?.files?.[0];
+    if (f) await handleFile(f);
+  });
+
+  // Reset
+  resetBtn.addEventListener('click', ()=> {
+    originalPdfBytes = null; pdfJsDoc = null; pdfLibDoc = null; pagesMeta = [];
+    thumbs.innerHTML = '<div class="muted">Upload a PDF to see pages</div>';
+    previewStage.innerHTML = '<div class="muted">Upload a PDF to see a preview of selected page</div>';
+    setProgress(0); setStatus('Idle');
+  });
+
+  // Handle uploaded PDF file
+  async function handleFile(file){
+    if (!file) return;
+    if (!file.type.includes('pdf') && !file.name.match(/\.pdf$/i)) {
+      alert('Please upload a PDF file.');
+      return;
+    }
+    setStatus('Reading file...');
+    setProgress(5);
+
+    originalPdfBytes = await file.arrayBuffer();
+
+    // Use pdf.js to render thumbnails
+    setStatus('Loading PDF for rendering...');
+    setProgress(15);
+    try {
+      pdfJsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+    } catch (e) { /* ignore if already set */ }
+
+    const loadingTask = pdfJsLib.getDocument({data: originalPdfBytes});
+    pdfJsDoc = await loadingTask.promise;
+
+    setStatus('Loading PDF for page operations (pdf-lib)...');
+    setProgress(35);
+    // Create pdf-lib doc for copying pages later
+    pdfLibDoc = await PDFLib.PDFDocument.load(originalPdfBytes);
+
+    // Render thumbnails for each page (sequential to avoid memory spikes)
+    const numPages = pdfJsDoc.numPages;
+    pagesMeta = [];
+    thumbs.innerHTML = '';
+    setStatus('Rendering thumbnails...');
+    for (let i=1; i<=numPages; i++){
+      setProgress(35 + Math.round((i/numPages)*50)); // progress 35 -> 85
+      const page = await pdfJsDoc.getPage(i);
+      // scale for thumbnail width ≈ 140 px
+      const viewport = page.getViewport({scale: 1});
+      const scale = Math.min(140 / viewport.width, 140 / viewport.height);
+      const thumbViewport = page.getViewport({scale});
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(thumbViewport.width);
+      canvas.height = Math.round(thumbViewport.height);
+      const ctx = canvas.getContext('2d');
+      await page.render({canvasContext: ctx, viewport: thumbViewport}).promise;
+      const dataUrl = canvas.toDataURL('image/png');
+
+      // save meta
+      pagesMeta.push({
+        pageIndex: i-1,            // zero-based index for pdf-lib copyPages
+        thumbDataUrl: dataUrl,
+        width: canvas.width,
+        height: canvas.height
+      });
+
+      // create thumb element
+      const thumbEl = makeThumbElement(i, dataUrl);
+      thumbs.appendChild(thumbEl);
+    }
+
+    setProgress(95);
+    setStatus('Thumbnails ready — drag to reorder pages');
+    setTimeout(()=>setProgress(100), 200);
+  }
+
+  // Create thumbnail DOM element (draggable)
+  function makeThumbElement(pageNumber, dataUrl){
+    const wrapper = document.createElement('div');
+    wrapper.className = 'thumb';
+    wrapper.draggable = true;
+    wrapper.dataset.pageNumber = pageNumber; // 1-based for display
+    // image
+    const img = document.createElement('img');
+    img.src = dataUrl;
+    img.alt = `Page ${pageNumber} preview`;
+    wrapper.appendChild(img);
+    // label row with page number and handle
+    const label = document.createElement('div');
+    label.className = 'label';
+    label.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;width:100%"><strong>Page ${pageNumber}</strong><span class="badge">${pageNumber}</span></div>`;
+    wrapper.appendChild(label);
+
+    // Drag events
+    wrapper.addEventListener('dragstart', (e) => {
+      wrapper.classList.add('dragging');
+      dragSrcIndex = Array.prototype.indexOf.call(thumbs.children, wrapper);
+      // dataTransfer used for accessibility; we store index in it
+      e.dataTransfer.setData('text/plain', String(dragSrcIndex));
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    wrapper.addEventListener('dragend', () => {
+      wrapper.classList.remove('dragging');
+      dragSrcIndex = null;
+    });
+
+    // Allow drop: highlight on dragover
+    wrapper.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    });
+
+    // Drop handler: insert dragged element before target
+    wrapper.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const srcIndex = Number(e.dataTransfer.getData('text/plain'));
+      const targetIndex = Array.prototype.indexOf.call(thumbs.children, wrapper);
+      if (isNaN(srcIndex)) return;
+      // reorder DOM elements and pagesMeta array accordingly
+      reorderPages(srcIndex, targetIndex);
+    });
+
+    // click to preview page in larger canvas
+    wrapper.addEventListener('click', async () => {
+      const childIndex = Array.prototype.indexOf.call(thumbs.children, wrapper);
+      await showPreviewAtIndex(childIndex);
+    });
+
+    return wrapper;
+  }
+
+  // Reorder pagesMeta and DOM thumbnails when user drops
+  function reorderPages(srcIndex, targetIndex){
+    // normalize indices: if dropping after itself, do nothing
+    if (srcIndex === targetIndex) return;
+    const nodes = Array.from(thumbs.children);
+    const node = nodes[srcIndex];
+    // remove src node
+    thumbs.removeChild(node);
+    // insert before targetIndex (if src < target and dropping after last, adjust)
+    const newChildren = Array.from(thumbs.children);
+    if (srcIndex < targetIndex) {
+      // when removing earlier element, targetIndex decreases by 1 relative to new children
+      thumbs.insertBefore(node, newChildren[targetIndex] ? newChildren[targetIndex].nextSibling : null);
+    } else {
+      thumbs.insertBefore(node, newChildren[targetIndex] || null);
+    }
+
+    // reorder pagesMeta array to reflect DOM
+    const meta = pagesMeta.splice(srcIndex,1)[0];
+    pagesMeta.splice(targetIndex,0,meta);
+
+    // update badges & labels to show new order numbers
+    updateThumbnailLabels();
+    setStatus('Page order updated');
+  }
+
+  // Update thumbnails labels (page numbers) to reflect their order
+  function updateThumbnailLabels(){
+    const nodes = Array.from(thumbs.children);
+    nodes.forEach((n, idx) => {
+      const badge = n.querySelector('.badge');
+      if (badge) badge.textContent = String(idx+1);
+      const strong = n.querySelector('strong');
+      if (strong) strong.textContent = `Page ${idx+1}`;
+      n.dataset.pageNumber = String(idx+1);
+    });
+  }
+
+  // Show preview of a selected thumbnail index (render a larger canvas of that page)
+  async function showPreviewAtIndex(idx){
+    if (!pdfJsDoc) return;
+    setStatus('Rendering preview...');
+    setProgress(20);
+    previewStage.innerHTML = '';
+    const pageNum = pagesMeta[idx].pageIndex + 1; // pdf.js uses 1-based
+    const page = await pdfJsDoc.getPage(pageNum);
+    const viewport = page.getViewport({scale:1.2});
+    const canvas = document.createElement('canvas');
+    canvas.className = 'page-canvas';
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    const ctx = canvas.getContext('2d');
+    await page.render({canvasContext: ctx, viewport}).promise;
+    previewStage.appendChild(canvas);
+    setProgress(100);
+    setTimeout(()=>setProgress(0),200);
+    setStatus(`Preview: Page ${idx+1}`);
+  }
+
+  // Download reordered PDF using pdf-lib
+  downloadBtn.addEventListener('click', async ()=>{
+    if (!originalPdfBytes || !pdfLibDoc) return alert('Upload and render a PDF first.');
+    setStatus('Building reordered PDF...');
+    setProgress(10);
+
+    try {
+      // create a new PDFDocument
+      const newPdfDoc = await PDFLib.PDFDocument.create();
+      // copy pages from original pdf-lib doc according to pagesMeta order
+      // pdf-lib's copyPages source doc expects a PDFDocument object (we have pdfLibDoc)
+      const srcDoc = await PDFLib.PDFDocument.load(originalPdfBytes);
+      // Build array of page indices in the new order (pagesMeta holds original pageIndex)
+      const indices = pagesMeta.map(m => m.pageIndex);
+      // copy pages in the requested order
+      const copiedPages = await newPdfDoc.copyPages(srcDoc, indices);
+      // add pages to newPdfDoc in order
+      copiedPages.forEach(p => newPdfDoc.addPage(p));
+      setProgress(60); setStatus('Saving PDF...');
+      const newBytes = await newPdfDoc.save();
+      // download
+      const blob = new Blob([newBytes], {type: 'application/pdf'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'reordered.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setProgress(100);
+      setStatus('Download ready');
+      setTimeout(()=>setProgress(0), 500);
+    } catch (err) {
+      console.error(err);
+      alert('Error building PDF: ' + (err && err.message ? err.message : err));
+      setStatus('Error');
+      setProgress(0);
+    }
+  });
+
+  // Preview currently selected thumbnail (or first) when the dedicated preview button is clicked
+  previewBtn.addEventListener('click', async ()=>{
+    const firstIdx = 0;
+    if (thumbs.children.length === 0) return;
+    await showPreviewAtIndex(firstIdx);
+  });
+
+  // Accessibility: allow keyboard reordering: move focused thumbnail left/right using arrow keys
+  thumbs.addEventListener('keydown', (e) => {
+    const focused = document.activeElement;
+    if (!focused || !focused.classList.contains('thumb')) return;
+    const idx = Array.prototype.indexOf.call(thumbs.children, focused);
+    if (e.key === 'ArrowLeft' && idx > 0) {
+      reorderPages(idx, idx-1);
+      thumbs.children[idx-1].focus();
+    }
+    if (e.key === 'ArrowRight' && idx < thumbs.children.length-1) {
+      reorderPages(idx, idx+1);
+      thumbs.children[idx+1].focus();
+    }
+  });
+
+  // Initial status
+  setProgress(0); setStatus('Idle');
+
+  </script>
+</body>
+</html>
