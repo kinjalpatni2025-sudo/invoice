@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- ================= SEO ================= -->
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Flip or Rotate Image — Free Online Tool | Smarttool Hub</title>
+  <meta name="description" content="Flip and rotate images online in your browser. Upload multiple images, preview changes, and download individually or as a ZIP. 100% private, client-side.">
+  <meta name="keywords" content="flip image, rotate image, mirror photo, rotate 90 degrees, rotate 180, flip horizontally, flip vertically, online image editor"/>
+  <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/toolbox.png"/>
+
+  <!-- FAQ Schema for SEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is the flip/rotate tool free?",
+        "acceptedAnswer": {"@type": "Answer","text": "Yes. It is completely free and runs fully in your browser."}
+      },
+      {
+        "@type": "Question",
+        "name": "Are my images uploaded to a server?",
+        "acceptedAnswer": {"@type": "Answer","text": "No. All processing is 100% client-side. Your files never leave your device."}
+      },
+      {
+        "@type": "Question",
+        "name": "Can I process multiple images at once?",
+        "acceptedAnswer": {"@type": "Answer","text": "Yes. Upload multiple images, apply flips/rotations, then download individually or as a ZIP."}
+      }
+    ]
+  }
+  </script>
+
+  <!-- ================= Styles ================= -->
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#9aa8bf; --text:#e6eef8;
+      --pri1:#6366f1; --pri2:#0ea5e9; --outline:rgba(255,255,255,.08);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:inherit;text-decoration:none}
+
+    header{
+      position:sticky; top:0; z-index:20;
+      background:linear-gradient(90deg,var(--pri1),var(--pri2));
+      padding:12px 16px; display:flex; align-items:center; justify-content:space-between;
+      box-shadow:0 6px 20px rgba(0,0,0,.45);
+    }
+    header h1{margin:0;font-size:18px}
+    header .right a{background:#fff;color:#0b1220;padding:6px 10px;border-radius:10px;font-weight:700}
+
+    .wrap{max-width:1100px;margin:18px auto;padding:12px}
+    .grid{display:grid;grid-template-columns:320px 1fr 320px;gap:12px}
+    .panel{background:var(--card);border:1px solid var(--outline);border-radius:14px;padding:12px;box-shadow:0 10px 28px rgba(0,0,0,.35)}
+    .muted{color:var(--muted);font-size:13px}
+    .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .btn{background:#fff;color:#0b1220;border:none;padding:8px 12px;border-radius:10px;font-weight:700;cursor:pointer}
+    .btn.ghost{background:transparent;border:1px solid var(--outline);color:var(--text)}
+    .btn.small{padding:6px 8px;font-size:13px}
+    label.inputbtn{display:inline-flex;align-items:center;gap:8px;border:1px dashed var(--outline);padding:8px 12px;border-radius:10px;cursor:pointer}
+    input[type=file]{display:none}
+    input,select{background:#0b1220;color:#e6eef8;border:1px solid var(--outline);padding:6px;border-radius:10px}
+
+    .drop{border:2px dashed var(--outline);border-radius:12px;padding:14px;text-align:center;margin:10px 0}
+    .drop.drag{border-color:var(--pri2);background:#0d1a2b}
+
+    .thumbs{display:grid;grid-template-columns:1fr;gap:10px;max-height:65vh;overflow:auto}
+    .thumb{background:#fff;color:#111;border-radius:10px;overflow:hidden;border:1px solid #e5e7eb;cursor:pointer}
+    .thumb img{width:100%;display:block}
+    .thumb .row{display:flex;justify-content:space-between;align-items:center;padding:8px}
+    .thumb .name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70%}
+    .thumb.selected{outline:2px solid var(--pri2)}
+
+    .stage{position:relative;border:1px solid var(--outline);border-radius:12px;background:#0a0f1a;display:flex;align-items:center;justify-content:center;min-height:460px;overflow:hidden}
+    #preview{max-width:100%;height:auto;display:none}
+
+    /* Progress */
+    .progress{width:100%;height:12px;background:#0d1626;border-radius:999px;overflow:hidden;border:1px solid var(--outline)}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,var(--pri1),var(--pri2));transition:width .2s}
+
+    .list{max-height:240px;overflow:auto;border:1px solid var(--outline);border-radius:10px;padding:8px}
+    .list .row{display:flex;justify-content:space-between;align-items:center;padding:6px 4px;border-bottom:1px dashed var(--outline)}
+    .list .row:last-child{border-bottom:none}
+
+    @media (max-width:1024px){
+      .grid{grid-template-columns:1fr}
+      .stage{min-height:360px}
+      .thumbs{max-height:240px}
+    }
+
+    /* SEO text */
+    section.seo h2{margin:.2rem 0 0.6rem}
+    section.seo{line-height:1.65}
+  </style>
+</head>
+<body>
+  <!-- ================= Header ================= -->
+  <header>
+    <h1>Flip or Rotate Image</h1>
+    <div class="right"><a href="../../index.html">← Back to Home</a></div>
+  </header>
+
+  <!-- ================= App ================= -->
+  <div class="wrap">
+    <div class="grid">
+      <!-- Left: Files -->
+      <aside class="panel">
+        <div class="controls" style="justify-content:space-between;margin-bottom:8px">
+          <strong>Images</strong>
+          <span id="countLbl" class="muted">0</span>
+        </div>
+
+        <div class="controls">
+          <label class="inputbtn">
+            Select images
+            <input id="fileInput" type="file" accept="image/*" multiple>
+          </label>
+          <button id="clearBtn" class="btn ghost small">Clear</button>
+        </div>
+
+        <div id="dropzone" class="drop muted">Drag & drop images here.</div>
+
+        <div class="controls" style="margin:10px 0">
+          <label><input type="checkbox" id="checkAll"> Select all</label>
+          <button id="invertBtn" class="btn ghost small">Invert</button>
+        </div>
+
+        <div id="thumbs" class="thumbs">
+          <div class="muted">Upload images to see thumbnails.</div>
+        </div>
+      </aside>
+
+      <!-- Center: Preview + Controls -->
+      <main class="panel" style="display:flex;flex-direction:column;gap:12px">
+        <!-- Transform controls -->
+        <div class="controls" style="justify-content:space-between">
+          <div class="controls">
+            <span class="muted">Angle (°)</span>
+            <input id="angle" type="number" value="0" step="1" style="width:90px">
+            <button id="rotLeft" class="btn ghost small">↶ -90°</button>
+            <button id="rotRight" class="btn ghost small">↷ +90°</button>
+            <button id="rot180" class="btn ghost small">180°</button>
+            <label class="controls" style="gap:6px;margin-left:10px">
+              <input type="checkbox" id="flipH"> Flip H
+            </label>
+            <label class="controls" style="gap:6px">
+              <input type="checkbox" id="flipV"> Flip V
+            </label>
+            <button id="resetBtn" class="btn ghost small">Reset</button>
+          </div>
+          <div class="controls">
+            <button id="applyCurrent" class="btn">Apply to current</button>
+            <button id="applySelected" class="btn ghost small">Apply to selected</button>
+          </div>
+        </div>
+
+        <!-- Stage -->
+        <div class="stage">
+          <img id="preview" alt="Preview">
+          <div id="placeholder" class="muted">Preview will appear here</div>
+        </div>
+
+        <!-- Progress -->
+        <div style="display:flex;gap:12px;align-items:center">
+          <div class="progress" style="flex:1"><div id="bar" class="bar"></div></div>
+          <div id="status" class="muted">Idle</div>
+        </div>
+      </main>
+
+      <!-- Right: Output / Downloads -->
+      <aside class="panel">
+        <h3 style="margin:0 0 8px 0">Download</h3>
+        <div class="controls">
+          <button id="downloadCurrent" class="btn ghost small">Download current</button>
+          <button id="zipBtn" class="btn small">Download all (ZIP)</button>
+        </div>
+
+        <div style="margin-top:10px">
+          <label class="muted">File name pattern</label>
+          <input id="namePattern" type="text" value="image-{i}" style="width:100%;margin-top:6px">
+          <div class="muted" style="font-size:12px;margin-top:6px">Use <code>{i}</code> for index, <code>{n}</code> for total.</div>
+        </div>
+
+        <div style="margin-top:12px">
+          <div class="muted">Processed images</div>
+          <div id="convertedList" class="list" style="margin-top:8px">
+            <div class="muted">Nothing processed yet.</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- SEO copy -->
+    <section class="panel seo" style="margin-top:16px">
+      <h2>Flip or Rotate Images Online</h2>
+      <p>Instantly rotate images by any angle or flip horizontally/vertically. Upload multiple photos, apply transformations, and download individually or as a ZIP—no installs and no uploads to servers.</p>
+
+      <h2>How to flip or rotate images?</h2>
+      <ol>
+        <li>Upload images via the button or drag & drop.</li>
+        <li>Select a thumbnail to preview.</li>
+        <li>Set angle (or use -90°, +90°, 180°) and toggle Flip H/Flip V.</li>
+        <li>Apply to current or selected images, then download.</li>
+      </ol>
+
+      <h2>Why use this tool?</h2>
+      <ul>
+        <li>⚡ Fast, 100% client-side processing.</li>
+        <li>🧭 Arbitrary angle rotation with auto canvas sizing.</li>
+        <li>🔁 Flip horizontal/vertical.</li>
+        <li>📦 Bulk process & ZIP download.</li>
+      </ul>
+    </section>
+  </div>
+
+  <!-- ================= Libs ================= -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+  <!-- ================= App Script ================= -->
+  <script>
+  // ------- Elements -------
+  const fileInput = document.getElementById('fileInput');
+  const dropzone  = document.getElementById('dropzone');
+  const thumbs    = document.getElementById('thumbs');
+  const countLbl  = document.getElementById('countLbl');
+  const preview   = document.getElementById('preview');
+  const placeholder = document.getElementById('placeholder');
+
+  const angleInput = document.getElementById('angle');
+  const rotLeft  = document.getElementById('rotLeft');
+  const rotRight = document.getElementById('rotRight');
+  const rot180   = document.getElementById('rot180');
+  const flipH    = document.getElementById('flipH');
+  const flipV    = document.getElementById('flipV');
+  const resetBtn = document.getElementById('resetBtn');
+
+  const applyCurrent  = document.getElementById('applyCurrent');
+  const applySelected = document.getElementById('applySelected');
+
+  const downloadCurrent = document.getElementById('downloadCurrent');
+  const zipBtn          = document.getElementById('zipBtn');
+
+  const namePattern = document.getElementById('namePattern');
+  const convertedList = document.getElementById('convertedList');
+
+  const checkAll  = document.getElementById('checkAll');
+  const invertBtn = document.getElementById('invertBtn');
+  const clearBtn  = document.getElementById('clearBtn');
+
+  const bar = document.getElementById('bar');
+  const status = document.getElementById('status');
+
+  // ------- State -------
+  /**
+   * filesArr: [{file, name, url(dataURL), selected, outBlob?, outName?}]
+   */
+  let filesArr = [];
+  let currentIndex = -1;
+
+  // ------- Helpers -------
+  function setProgress(p){ bar.style.width = Math.max(0, Math.min(100, p)) + '%'; }
+  function setStatus(msg){ status.textContent = msg; }
+  function resetProgress(){ setProgress(0); setStatus('Idle'); }
+
+  function toDataURL(file){
+    return new Promise((resolve,reject)=>{
+      const r = new FileReader();
+      r.onload = ()=> resolve(r.result);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+  }
+  function loadImage(src){
+    return new Promise((res,rej)=>{
+      const im = new Image();
+      im.onload = ()=> res(im);
+      im.onerror = rej;
+      im.src = src;
+    });
+  }
+  function saveBlob(blob, name){
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
+  }
+  function dataURLToBlob(dataURL){
+    const [meta, b64] = dataURL.split(',');
+    const mime = (meta.match(/:(.*?);/)||[])[1] || 'image/png';
+    const bin = atob(b64);
+    const len = bin.length;
+    const u8 = new Uint8Array(len);
+    for(let i=0;i<len;i++) u8[i] = bin.charCodeAt(i);
+    return new Blob([u8], {type: mime});
+  }
+
+  // ------- Intake -------
+  fileInput.addEventListener('change', async (e)=>{
+    await addFiles(e.target.files);
+    fileInput.value = '';
+  });
+
+  dropzone.addEventListener('dragover', e=>{ e.preventDefault(); dropzone.classList.add('drag'); });
+  dropzone.addEventListener('dragleave', ()=> dropzone.classList.remove('drag'));
+  dropzone.addEventListener('drop', async e=>{
+    e.preventDefault(); dropzone.classList.remove('drag');
+    if(e.dataTransfer?.files) await addFiles(e.dataTransfer.files);
+  });
+
+  async function addFiles(fileList){
+    if(!fileList || fileList.length===0) return;
+    setStatus('Reading files...');
+    for(const f of fileList){
+      if(!f.type.startsWith('image/')) continue;
+      const url = await toDataURL(f); // dataURL avoids canvas tainting on GitHub Pages
+      filesArr.push({file:f, name:f.name, url, selected:true, outBlob:null, outName:null});
+    }
+    renderThumbs();
+    if(currentIndex===-1 && filesArr.length>0) previewIndex(0);
+    setStatus('Ready');
+  }
+
+  // ------- Thumbs / Preview -------
+  function renderThumbs(){
+    thumbs.innerHTML = '';
+    countLbl.textContent = String(filesArr.length);
+    if(filesArr.length===0){
+      thumbs.innerHTML = '<div class="muted">Upload images to see thumbnails.</div>';
+      return;
+    }
+    filesArr.forEach((it, idx)=>{
+      const card = document.createElement('div');
+      card.className = 'thumb' + (idx===currentIndex ? ' selected' : '');
+      const img = document.createElement('img'); img.src = it.url; img.alt = it.name;
+      const row = document.createElement('div'); row.className='row';
+      const name = document.createElement('div'); name.className='name'; name.textContent = it.name; name.title = it.name;
+      const cb = document.createElement('input'); cb.type='checkbox'; cb.checked=!!it.selected;
+      cb.addEventListener('change', e=> filesArr[idx].selected = e.target.checked);
+      row.appendChild(name); row.appendChild(cb);
+      card.appendChild(img); card.appendChild(row);
+      card.addEventListener('click', e=>{
+        if(e.target===cb) return;
+        previewIndex(idx);
+      });
+      thumbs.appendChild(card);
+    });
+  }
+
+  async function previewIndex(idx){
+    const it = filesArr[idx]; if(!it) return;
+    currentIndex = idx;
+    preview.src = it.url;
+    preview.style.display='block';
+    placeholder.style.display='none';
+    renderThumbs();
+  }
+
+  // ------- Selection helpers -------
+  checkAll.addEventListener('change', e=>{
+    const on = e.target.checked; filesArr.forEach(f=>f.selected=on); renderThumbs();
+  });
+  invertBtn.addEventListener('click', ()=>{ filesArr.forEach(f=>f.selected=!f.selected); renderThumbs(); });
+
+  // ------- Transform logic (rotate + flip) -------
+  /**
+   * Returns a DataURL of transformed image.
+   * angleDeg: number (any)
+   * flipX / flipY: booleans
+   */
+  async function transformImage(dataURL, angleDeg=0, flipX=false, flipY=false){
+    const img = await loadImage(dataURL);
+    const rad = (angleDeg % 360) * Math.PI / 180;
+
+    // Original size
+    const w = img.naturalWidth || img.width;
+    const h = img.naturalHeight || img.height;
+
+    // Bounding box after rotation (for arbitrary angles)
+    const cos = Math.cos(rad), sin = Math.sin(rad);
+    const newW = Math.abs(w * cos) + Math.abs(h * sin);
+    const newH = Math.abs(w * sin) + Math.abs(h * cos);
+
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(newW));
+    c.height = Math.max(1, Math.round(newH));
+    const ctx = c.getContext('2d');
+
+    // Move origin to center
+    ctx.translate(c.width/2, c.height/2);
+
+    // Apply rotation
+    ctx.rotate(rad);
+
+    // Apply flips (scale -1 on axes)
+    ctx.scale(flipX ? -1 : 1, flipY ? -1 : 1);
+
+    // Draw image centered
+    ctx.drawImage(img, -w/2, -h/2);
+
+    return c.toDataURL('image/png');
+  }
+
+  // ------- Controls -------
+  rotLeft.addEventListener('click', ()=> angleInput.value = (parseInt(angleInput.value||0,10) - 90));
+  rotRight.addEventListener('click', ()=> angleInput.value = (parseInt(angleInput.value||0,10) + 90));
+  rot180.addEventListener('click', ()=> angleInput.value = (parseInt(angleInput.value||0,10) + 180));
+  resetBtn.addEventListener('click', ()=>{
+    angleInput.value = 0; flipH.checked = false; flipV.checked = false;
+  });
+
+  // Apply to current
+  applyCurrent.addEventListener('click', async ()=>{
+    if(currentIndex<0) return alert('Select an image first.');
+    setProgress(10); setStatus('Processing current...');
+    try{
+      const out = await transformImage(filesArr[currentIndex].url, Number(angleInput.value||0), flipH.checked, flipV.checked);
+      const blob = dataURLToBlob(out);
+      const name = (namePattern.value || 'image-{i}').replace('{i}', currentIndex+1).replace('{n}', filesArr.length) + '.png';
+      filesArr[currentIndex].outBlob = blob;
+      filesArr[currentIndex].outName = name;
+      preview.src = out;
+      renderConvertedList();
+      setProgress(100); setStatus('Done');
+    }catch(e){ console.error(e); setStatus('Error'); }
+    setTimeout(()=>resetProgress(), 800);
+  });
+
+  // Apply to selected
+  applySelected.addEventListener('click', async ()=>{
+    const targets = filesArr.map((f,i)=>({f,i})).filter(x=>x.f.selected);
+    if(targets.length===0) return alert('Select at least one image (checkbox).');
+
+    const angle = Number(angleInput.value||0);
+    const h = !!flipH.checked, v = !!flipV.checked;
+
+    setProgress(0); setStatus('Processing selected...');
+    let done = 0;
+    for(const t of targets){
+      try{
+        const out = await transformImage(t.f.url, angle, h, v);
+        const blob = dataURLToBlob(out);
+        const name = (namePattern.value || 'image-{i}').replace('{i}', t.i+1).replace('{n}', filesArr.length) + '.png';
+        filesArr[t.i].outBlob = blob;
+        filesArr[t.i].outName = name;
+        if(t.i===currentIndex){ preview.src = out; }
+      }catch(err){ console.error('Transform error: ', err); }
+      done++; setProgress(Math.round(done/targets.length*100)); setStatus(`Processed ${done}/${targets.length}`);
+      await new Promise(r=>setTimeout(r,0));
+    }
+    renderConvertedList(); setStatus('Finished');
+  });
+
+  // ------- Downloads -------
+  downloadCurrent.addEventListener('click', async ()=>{
+    if(currentIndex<0) return alert('Open a preview first.');
+    const it = filesArr[currentIndex];
+    if(!it.outBlob){
+      // quick apply with current settings if not processed yet
+      const out = await transformImage(it.url, Number(angleInput.value||0), flipH.checked, flipV.checked);
+      it.outBlob = dataURLToBlob(out);
+      it.outName = (namePattern.value || 'image-{i}').replace('{i}', currentIndex+1).replace('{n}', filesArr.length) + '.png';
+    }
+    saveBlob(it.outBlob, it.outName);
+  });
+
+  zipBtn.addEventListener('click', async ()=>{
+    const ready = filesArr.filter(f=>f.outBlob);
+    if(ready.length===0){ alert('No processed images yet. Use “Apply” first.'); return; }
+    setStatus('Preparing ZIP...'); setProgress(20);
+    const zip = new JSZip();
+    ready.forEach(it=> zip.file(it.outName || 'image.png', it.outBlob));
+    const blob = await zip.generateAsync({type:'blob'});
+    saveAs(blob, 'images-rotated-flipped.zip');
+    setProgress(100); setStatus('ZIP ready');
+    setTimeout(()=>resetProgress(), 1000);
+  });
+
+  function renderConvertedList(){
+    convertedList.innerHTML='';
+    const done = filesArr.filter(f=>f.outBlob);
+    if(done.length===0){
+      convertedList.innerHTML = '<div class="muted">Nothing processed yet.</div>';
+      return;
+    }
+    done.forEach((it, i)=>{
+      const row = document.createElement('div'); row.className='row';
+      const left = document.createElement('div'); left.textContent = it.outName || ('image-'+(i+1)+'.png');
+      const right = document.createElement('div');
+      const b = document.createElement('button'); b.className='btn ghost small'; b.textContent='Download';
+      b.addEventListener('click', ()=> saveBlob(it.outBlob, it.outName || ('image-'+(i+1)+'.png')));
+      right.appendChild(b);
+      row.appendChild(left); row.appendChild(right);
+      convertedList.appendChild(row);
+    });
+  }
+
+  // ------- Clear -------
+  clearBtn.addEventListener('click', ()=>{
+    filesArr = []; currentIndex=-1;
+    preview.style.display='none'; placeholder.style.display='block';
+    convertedList.innerHTML = '<div class="muted">Nothing processed yet.</div>';
+    renderThumbs(); resetProgress(); fileInput.value='';
+  });
+
+  </script>
+</body>
+</html>
